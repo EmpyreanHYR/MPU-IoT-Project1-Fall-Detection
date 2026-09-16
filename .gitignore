@@ -1,0 +1,28 @@
+# Local and sensitive files
+.DS_Store
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.sqlite3
+data/
+
+# Python and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+.venv-model/
+
+# WebUI deployment/backend files must remain private
+webui/cloud/
+webui/edge/
+webui/server.py
+webui/cloud_model.py
+webui/Dockerfile
+webui/compose.yaml
+
+# Generated experiment artifacts
+outputs/
+checkpoints/
+.pytest_cache/
