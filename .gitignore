@@ -8,6 +8,25 @@
 *.sqlite3
 data/
 
+# LaTeX/PDF build outputs
+*.pdf
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.bcf
+*.run.xml
+*.xdv
+_minted-*/
+.texpadtmp/
+
 # Python and virtual environments
 __pycache__/
 *.py[cod]

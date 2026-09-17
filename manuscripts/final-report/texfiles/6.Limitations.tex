@@ -1,0 +1,7 @@
+\section{Limitations}
+
+Le2i lacks reliable participant identities in the available archive, so scene grouping reduces within-scene leakage but does not establish person-independent generalization. CAUCAFall contains only ten subject groups. Pose tracks are generated rather than manually corrected, and overlap-based window labels omit ambiguous transition boundaries. The fixed decision threshold has not been calibrated to a deployment-specific cost function.
+
+The current comparison evaluates complete architectures. Until Table~\ref{tab:planned_ablation} is filled, the observed video-level improvement cannot be attributed to bidirectionality, attention, frame masking, quality pooling, or confidence input individually. Missing-observation robustness, external-dataset generalization, and statistical significance also remain to be evaluated.
+
+Finally, the Hailo pose path requires a compatible postprocessor before it can replace the verified software sender. Edge latency, end-to-end delay, bandwidth, temperature, and power have not yet been measured under a controlled live trial. The deployed alert thresholds support demonstration and must not be interpreted as clinical operating points.

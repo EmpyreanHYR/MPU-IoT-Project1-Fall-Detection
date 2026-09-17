@@ -1,0 +1,7 @@
+\begin{abstract}
+Camera-based fall detection requires temporal reasoning while remaining robust to incomplete pose observations and limiting the transmission of identifiable video. This project develops an edge--cloud system in which a Raspberry Pi extracts human keypoints near the camera and sends anonymous pose observations to a cloud service for temporal inference, alert management, event storage, and dashboard visualization. We further propose MaskedBiMamba, a skeleton classifier that combines bidirectional Mamba branches, temporal self-attention, training-time frame masking, and pose-quality-aware aggregation. Offline evaluation compares the model with TCN, Transformer, TCNTE, and unidirectional Mamba baselines using group-disjoint experiments on Le2i and CAUCAFall. MaskedBiMamba achieves the highest video-level F1 ($0.8355\pm0.0774$) and the lowest false-alarm rate ($144.4\pm59.7$~h$^{-1}$) among the five evaluated models, while UniMamba and the Transformer encoder remain stronger on some window-level metrics. The results indicate that quality-aware bidirectional temporal modeling is most useful at the video aggregation level. Component ablation, robustness under missing observations, and measured edge--cloud latency are reserved for the remaining system evaluation.
+\end{abstract}
+
+\begin{IEEEkeywords}
+fall detection, skeleton sequence, edge--cloud system, Transformer, Mamba, privacy-preserving AIoT.
+\end{IEEEkeywords}

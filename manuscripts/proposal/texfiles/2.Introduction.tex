@@ -1,0 +1,7 @@
+\section{Project Definition and Objectives}
+
+\textbf{Scenario and scope:} COMP6131 Project~1, Fall Detection, for one monitored occupant in an indoor assisted-living room. The project targets the Advanced/Highest technical level through temporal modeling, edge pose processing, cloud inference, and systematic robustness evaluation.
+
+The planned system consists of a Raspberry Pi~5 with AI HAT+~2 for live pose estimation, an MQTT/TLS data path, and an Ubuntu cloud VM providing temporal inference, FastAPI, PostgreSQL event storage, and a dashboard for fall alerts and system status. Code, configuration, tests, and run instructions will be maintained for reproducibility.
+
+The end-to-end demonstration follows the data path in Fig.~\ref{fig:architecture}, from camera capture and edge pose estimation to MQTT transfer, cloud inference, and a database-backed dashboard alert. It will show live system status, a persisted event, and alert acknowledgement.

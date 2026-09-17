@@ -1,0 +1,25 @@
+\section{Research Method and Evaluation}
+
+Three questions guide evaluation: (RQ1) How much does temporal pose modeling improve on geometry rules? (RQ2) What changes in F1, false alerts/hour, and delay result from quality-aware fusion and the alert state machine? (RQ3) What throughput, latency, and bandwidth does the edge--cloud split achieve?
+
+\begin{table}[H]
+\caption{Controlled comparison and purpose.}
+\label{tab:ablation}
+\centering
+\footnotesize
+\begin{tabularx}{\columnwidth}{@{}p{0.10\columnwidth}X@{}}
+\toprule
+ID & System variant \\
+\midrule
+B0 & Box/keypoint geometry rule \\
+B1 & TCNTE-style skeleton temporal baseline \\
+B2 & Skeleton and geometry branches, fixed fusion \\
+B3 & B2 plus learned pose-quality gate \\
+B4 & B3 plus multi-stage alert state machine \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+UP-Fall uses participant-grouped cross-validation. Cross-dataset evaluation on GMDCSA-24 will examine generalization beyond the primary benchmark. Fall metrics are precision, recall, F1, specificity, event recall, false alerts/hour, and detection delay. Robustness will be evaluated under controlled visual degradation, including reduced illumination, missing or occluded keypoints, and frame loss. Transformations and random seeds will be recorded.
+
+CPU and Hailo-10H comparisons will use the same input size and report throughput, edge latency, resource use, and temperature. Network and cloud measurements will cover payload size and end-to-end latency. Replayed fall events will exercise alerting, storage, dashboard updates, acknowledgement, and reconnection. The final evaluation will include continuous camera operation, cloud connectivity, persisted events, B0--B4 model comparisons, robustness results, and reproducible run instructions.

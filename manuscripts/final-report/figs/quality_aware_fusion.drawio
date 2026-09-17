@@ -1,0 +1,114 @@
+<mxfile host="app.diagrams.net" modified="2026-09-12T10:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="quality-aware-fusion" name="Page-1">
+    <mxGraphModel dx="1820" dy="680" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="Quality-Aware Pose–Geometry Temporal Fusion" style="text;html=1;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="490" y="20" width="850" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="poseLabel" value="POSE BRANCH" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#0072B2;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="75" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="geometryLabel" value="GEOMETRY BRANCH" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#D55E00;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="245" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="qualityLabel" value="QUALITY BRANCH" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#009E73;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="415" width="180" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="poseInput" value="Pose Sequence&#xa;32 × 51" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF4FB;strokeColor=#0072B2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="115" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="poseTCN" value="Residual TCN&#xa;3 blocks, d=1/2/4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6ECFA;strokeColor=#0072B2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="245" y="115" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="position" value="Sinusoidal&#xa;Position Encoding" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6ECFA;strokeColor=#0072B2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="450" y="115" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="transformer" value="Transformer Encoder&#xa;2 layers, 4 heads" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6ECFA;strokeColor=#0072B2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="655" y="115" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="posePool" value="Temporal Mean&#xa;Pooling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6ECFA;strokeColor=#0072B2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="860" y="115" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="poseProb" value="Pose Classifier&#xa;pₚ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFE3F6;strokeColor=#0072B2;strokeWidth=2;fontSize=13;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1065" y="115" width="170" height="56" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="geoInput" value="Geometry Sequence&#xa;32 × 12" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCEFE8;strokeColor=#D55E00;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="geoTCN" value="Geometry TCN&#xa;2 residual blocks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F9DFD2;strokeColor=#D55E00;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="245" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="geoPool" value="Temporal Mean&#xa;Pooling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F9DFD2;strokeColor=#D55E00;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="450" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="geoClassifier" value="Geometry Classifier&#xa;Linear → 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F9DFD2;strokeColor=#D55E00;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="655" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="geoProb" value="Geometry Probability&#xa;p_g" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6CDB9;strokeColor=#D55E00;strokeWidth=2;fontSize=13;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1065" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="qualityInput" value="Quality Sequence&#xa;32 × 7" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF7F2;strokeColor=#009E73;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="455" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="qualityMean" value="Temporal Mean&#xa;q̄" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D7F0E7;strokeColor=#009E73;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="245" y="455" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="concat" value="Concatenate&#xa;[q̄, pₚ, p_g]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D7F0E7;strokeColor=#009E73;strokeWidth=2;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1065" y="455" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="gate" value="Quality Gate MLP&#xa;11 → 32 → 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C5E8DB;strokeColor=#009E73;strokeWidth=2;fontSize=13;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="455" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="weights" value="Softmax Weights&#xa;wₚ, 1 − wₚ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C5E8DB;strokeColor=#009E73;strokeWidth=2;fontSize=13;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1475" y="455" width="170" height="56" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="fusion" value="Weighted Probability&#xa;Fusion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEE6F7;strokeColor=#7B61A8;strokeWidth=2;fontSize=13;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1475" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="output" value="Fall / Non-Fall&#xa;Prediction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D8C8EB;strokeColor=#7B61A8;strokeWidth=2;fontSize=13;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1680" y="285" width="170" height="56" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="poseInput" target="poseTCN"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="poseTCN" target="position"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="position" target="transformer"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="transformer" target="posePool"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="posePool" target="poseProb"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="geoInput" target="geoTCN"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="geoTCN" target="geoPool"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="geoPool" target="geoClassifier"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="geoClassifier" target="geoProb"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="qualityInput" target="qualityMean"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="qualityMean" target="concat"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#009E73;dashed=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" edge="1" parent="1" source="poseProb" target="concat">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1260" y="143"/>
+              <mxPoint x="1260" y="545"/>
+              <mxPoint x="1150" y="545"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#009E73;dashed=1;" edge="1" parent="1" source="geoProb" target="concat"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="concat" target="gate"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4D4D4D;" edge="1" parent="1" source="gate" target="weights"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#7B61A8;" edge="1" parent="1" source="poseProb" target="fusion"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#7B61A8;" edge="1" parent="1" source="geoProb" target="fusion"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#7B61A8;" edge="1" parent="1" source="weights" target="fusion"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#7B61A8;" edge="1" parent="1" source="fusion" target="output"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="legend" value="Solid arrows: prediction flow  |  Dashed arrows: gate context" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontColor=#555555;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="610" y="570" width="600" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,45 @@
+% !TEX program = pdflatex
+% !TEX encoding = UTF-8
+%
+% Compliance note (checked 2026-09-10): COMP6131 Project Proposal,
+% Fall Detection topic, initial submission, maximum two A4 pages.
+% The local COMP6131 2026/2027 guidelines are the controlling source.
+\documentclass[a4paper,conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+
+\setlist[itemize]{leftmargin=*,nosep}
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.05}
+
+\begin{document}
+
+\title{Edge--Cloud Visual Fall Detection with Pose-Quality-Aware Temporal Modeling}
+
+\author{
+\IEEEauthorblockN{Jiahao Zhao, Chengyi Xu, Yaorong Huang, Zhonglin Chang, and Jiayun Song}
+\IEEEauthorblockA{Internet of Things Essentials, Faculty of Applied Sciences\\
+Macao Polytechnic University, Macao SAR, China}
+}
+
+\maketitle
+\bstctlcite{IEEEexample:BSTcontrol}
+
+\input{texfiles/1.Abstract}
+\input{texfiles/2.Introduction}
+\input{texfiles/3.Methodology}
+\input{texfiles/4.Experiments_and_Analysis}
+\input{texfiles/5.Conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

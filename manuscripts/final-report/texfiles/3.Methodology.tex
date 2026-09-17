@@ -1,0 +1,48 @@
+\section{Temporal Detection Method}
+
+\subsection{Data and Pose Caching}
+
+The experiments use Le2i and CAUCAFall, summarized in Table~\ref{tab:datasets}. Le2i was introduced as a realistic single-camera fall-detection benchmark with changes in scene, viewpoint, clothing, illumination, shadow, and occlusion~\cite{charfi2012le2i}. The released annotated subset used by TCNTE is commonly reported as 191 videos (48 ADL and 143 fall videos), recorded at $320\times240$ pixels and 25 fps~\cite{yu2025tcnte}. The local archive contained 190 decodable videos, which were distributed over six recording-scene groups. Because reliable participant identifiers were absent from this copy, scenes rather than nominal subjects were used for leakage control.
+
+CAUCAFall was collected in an intentionally uncontrolled home environment. Ten participants each performed five fall types---forward, backward, left, right, and from sitting---and five ADLs---walking, hopping, picking up an object, sitting, and kneeling~\cite{guerrero2022caucafall}. Its 100 videos were recorded at $1080\times960$ pixels and 23 fps under natural, artificial, and night lighting, with variation in clothing, occlusion, background motion, fall angle, and camera distance. Subject folders are retained, enabling subject-disjoint folds. CAUCAFall additionally provides frame-level fall/no-fall and person-region labels, although this work uses the videos and temporal labels rather than training a frame detector.
+
+\begin{table*}[!t]
+    \centering
+    \small
+    \caption{Datasets used in this study. ``Reported'' describes the source publication or commonly used released subset; ``used'' is the number successfully processed by our pipeline.}
+    \label{tab:datasets}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{2.8cm}X}
+        \toprule
+        Dataset & Videos & Subjects/groups & ADL/fall types & Resolution and rate & Role in this study \\
+        \midrule
+        Le2i & 191 reported (48/143 ADL/fall); 190 used & 9 subjects reported; 6 scene groups used & 6 ADL / 3 fall types & $320\times240$, 25 fps & TCNTE reproduction and primary comparison \\
+        CAUCAFall & 100 reported and used (50/50 ADL/fall) & 10 subject groups & 5 ADL / 5 fall types & $1080\times960$, 23 fps & Primary comparison only \\
+        \bottomrule
+    \end{tabularx}
+\end{table*}
+
+The resulting 290 videos contain 967 Le2i and 258 CAUCAFall annotation segments. The positive label \emph{fall} denotes the dynamic transition; post-fall \emph{fallen} intervals are not merged into the positive class. A pretrained YOLOv8s-pose model with BoT-SORT tracking extracts one primary person track per video. Each cache stores timestamps, 17 COCO keypoints and their confidence values, a normalized person box, detector confidence, and the track identifier.
+
+Only the 12 non-face body joints are used by the temporal classifiers. For each frame, coordinates are independently min--max normalized over the retained joints. The TCNTE reproduction uses $(x,y)$ and therefore has 24 input features per frame. The primary protocol additionally uses pose confidence, yielding 36 features. Three observation-quality features are retained at each time step: mean keypoint confidence, the proportion of joints with confidence at least 0.2, and person-box confidence.
+
+\subsection{Window Construction and Data Splits}
+
+Each window spans 1.0~s, consecutive windows begin 0.2~s apart, and every window is linearly resampled to 30 time steps. A window is positive when at least 50\% of its duration overlaps a fall segment. Windows with nonzero but sub-threshold overlap are discarded to avoid ambiguous transition labels. For videos containing a fall, windows beginning after the last annotated fall transition are excluded from the reproduction protocol.
+
+Two protocols are reported separately. The paper-aligned TCNTE reproduction uses Le2i with three video-grouped folds and reserves 15\% of the non-test videos for validation. It contains 12,650 windows in total: 1,338 positive and 11,312 negative windows. The primary protocol combines Le2i and CAUCAFall in four group-disjoint folds. CAUCAFall is grouped by its 10 subject identifiers; because reliable Le2i subject identifiers are unavailable, its six recording scenes are used as groups. Dataset names prefix every group identifier to prevent accidental collisions.
+
+\subsection{Compared Temporal Models}
+
+All models receive the same window manifest within a protocol. The TCN contains three residual temporal blocks with channels $[8,16,32]$, kernel size 5, dilations $1,2,4$, and dropout 0.2. The Transformer encoder (TE) linearly projects each frame to 32 dimensions, adds learned positional encoding, and applies one four-head encoder layer with a feed-forward width of 32. TCNTE passes the TCN sequence to the same encoder before temporal mean pooling.
+
+The state-space baseline, UniMamba, projects each frame to 64 dimensions and uses two unidirectional Mamba layers with state size 16, convolution width 4, and expansion factor 2. The proposed MaskedBiMamba first masks 15\% of frames during training and applies temporal self-attention. Independent forward and reverse Mamba stacks encode the sequence, after which their outputs are concatenated and linearly fused. A learned scalar gate $a_t$ is computed from the three-dimensional quality vector $\mathbf q_t$ and used for temporal aggregation:
+\begin{equation}
+    \mathbf z = \frac{\sum_{t=1}^{T} a_t\mathbf h_t}{\sum_{t=1}^{T}a_t},
+    \qquad
+    a_t = \sigma\!\left(g(\mathbf q_t)\right).
+\end{equation}
+The pooled representation $\mathbf z$ is classified as fall or non-fall. This skeleton model is inspired by masked Mamba modeling but is not presented as an exact reproduction of the multimodal Fall-Mamba architecture.
+
+\subsection{Optimization and Model Selection}
+
+All models are trained for 100 epochs using Adam with learning rate $10^{-4}$, batch size 64, and weighted focal loss with $\gamma=3$. The TCNTE reproduction uses class weights $[1,30]$; the primary protocol estimates class weights from the training partition only. The checkpoint with the highest validation F1 is used for test evaluation. The reproduction uses seed 42; the primary comparison uses seeds 42, 3407, and 2026. CUDA mixed precision and deterministic seeds are enabled, while nondeterministic fused attention kernels are disabled.

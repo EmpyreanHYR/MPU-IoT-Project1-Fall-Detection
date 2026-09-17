@@ -1,0 +1,191 @@
+% !TEX program = pdflatex
+% !TEX encoding = UTF-8
+%
+% IEEE Conference Paper Template
+% Version: 2.0
+% Last Updated: 2026/01/26
+% GitHub: https://github.com/EmpyreanHYR/Self-made-LaTeX-Template-for-IEEE-Conferences
+%
+
+\documentclass[conference]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+
+% ==================== 引用和参考文献 ====================
+\usepackage[sort&compress,numbers]{natbib}  % BibTeX方式（需要.bib文件）
+% \usepackage{cite}  % 手动\bibitem方式
+% cite包默认自动排序和压缩引用，如 [2, 3] 和 [4-7]
+% 自定义cite格式以匹配IEEE样式
+\renewcommand{\citepunct}{, }           % 引用之间用逗号和空格分隔
+\renewcommand{\citedash}{--}            % 连续引用用双连字符
+
+% ==================== 数学相关宏包 ====================
+\usepackage{amsmath,amssymb,amsfonts}  % AMS数学宏包套件
+\usepackage{mathtools}                  % 数学工具增强
+\usepackage{bm}                         % 粗体数学符号
+% \usepackage{mathrsfs}                 % 花体字母（可选）
+
+% ==================== 算法相关宏包 ====================
+\usepackage{algorithmic}                % 传统算法环境
+\usepackage{algorithm}                  % 算法浮动体环境
+% \usepackage[ruled,vlined]{algorithm2e} % 现代算法宏包（与algorithmic二选一）
+
+% ==================== 图形和颜色 ====================
+\usepackage{graphicx}                   % 图形插入
+\usepackage{xcolor}                     % 颜色支持
+\usepackage{float}                      % 浮动体控制
+\usepackage{subfig}                     % 子图支持
+% \usepackage{subcaption}               % 子图替代方案（与subfig二选一）
+\usepackage{dblfloatfix}                % 修复双栏浮动体问题
+\setcounter{dbltopnumber}{2}            % 允许同页顶部放置两张跨栏表
+\renewcommand{\dbltopfraction}{0.95}    % 跨栏表可占页面顶部较大区域
+\renewcommand{\textfraction}{0.05}      % 避免宽表被推迟到独立页面
+\renewcommand{\figurename}{Figure}      % 图标题英文化
+
+% ==================== 表格相关宏包 ====================
+\usepackage{booktabs}                   % 专业三线表
+\usepackage{tabularx}                   % 可伸缩表格
+\usepackage{multirow}                   % 跨行单元格
+\usepackage{makecell}                   % 单元格内换行和格式化
+\usepackage{array}                      % 表格列格式增强
+% \usepackage{longtable}                % 跨页长表格
+
+% ==================== 文本和字体 ====================
+\usepackage{textcomp}                   % 文本符号补充
+\usepackage{soul}                       % 文本高亮和下划线
+\usepackage[normalem]{ulem}             % 各种下划线样式（normalem保护\emph）
+% \usepackage{xspace}                   % 智能空格处理
+
+% ==================== 代码展示 ====================
+\usepackage{listings}                   % 代码高亮显示
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red}
+}
+
+% ==================== 链接和引用 ====================
+\usepackage{url}                        % URL格式化
+\usepackage{hyperref}                   % 超链接支持（必须在大多数包之后）
+\hypersetup{
+    colorlinks=true,        % 启用颜色链接
+    allcolors=black,        % 所有链接颜色设为黑色
+    pdfstartview=Fit,       % PDF打开时适配页面
+    breaklinks=true,        % 允许链接换行
+    pdftitle={Privacy-Preserving Edge-Cloud Fall Detection with Quality-Aware Bidirectional Temporal Modeling},
+    pdfauthor={Course Project Team},
+    pdfsubject={IoT Course Project Report},
+    pdfkeywords={fall detection, skeleton sequence, temporal convolution, transformer, Mamba, missing observations}
+}
+\usepackage{cleveref}                   % 智能交叉引用（必须在hyperref之后）
+
+% cleveref 配置 - IEEE会议论文格式
+\crefname{figure}{Fig.}{Figs.}          % 图的引用格式
+\Crefname{figure}{Figure}{Figures}      % 句首图的引用格式
+\crefname{table}{Table}{Tables}         % 表的引用格式
+\Crefname{table}{Table}{Tables}         % 句首表的引用格式
+\crefname{equation}{Eq.}{Eqs.}          % 公式的引用格式
+\Crefname{equation}{Equation}{Equations}% 句首公式的引用格式
+\crefname{section}{Sec.}{Secs.}         % 节的引用格式
+\Crefname{section}{Section}{Sections}   % 句首节的引用格式
+\crefname{subsection}{Sec.}{Secs.}      % 子节的引用格式
+\Crefname{subsection}{Section}{Sections}% 句首子节的引用格式
+\crefname{algorithm}{Alg.}{Algs.}       % 算法的引用格式
+\Crefname{algorithm}{Algorithm}{Algorithms}% 句首算法的引用格式
+\crefname{listing}{Listing}{Listings}   % 代码清单的引用格式
+\Crefname{listing}{Listing}{Listings}   % 句首代码清单的引用格式
+\crefname{appendix}{Appendix}{Appendices}% 附录的引用格式
+\Crefname{appendix}{Appendix}{Appendices}% 句首附录的引用格式
+
+% cleveref 多引用格式配置
+\newcommand{\crefrangeconjunction}{--}  % 范围连接符：Fig. 1--3
+\newcommand{\crefpairconjunction}{ and }% 两个引用连接符：Fig. 1 and 2
+\newcommand{\crefmiddleconjunction}{, } % 多个引用中间连接符：Fig. 1, 2, and 3
+\newcommand{\creflastconjunction}{, and }% 多个引用最后连接符
+
+% ==================== 其他实用工具 ====================
+\usepackage{calc}                       % 计算功能
+\usepackage{orcidlink}                  % ORCID链接
+\usepackage{enumitem}                   % 列表环境定制
+% \usepackage{siunitx}                  % 国际单位制符号
+% \usepackage{tikz}                     % 绘图宏包
+
+% ==================== 自定义命令 ====================
+% BibTeX标志
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% 作者换行命令
+\makeatletter
+\newcommand{\linebreakand}{%
+  \end{@IEEEauthorhalign}
+  \hfill\mbox{}\par
+  \mbox{}\hfill\begin{@IEEEauthorhalign}
+}
+\makeatother
+
+% ========== 常用自定义命令示例 ==========
+% 取消下面的注释以启用这些命令
+
+% 缩写命令
+% \newcommand{\eg}{e.g.,\xspace}
+% \newcommand{\ie}{i.e.,\xspace}
+% \newcommand{\etc}{etc.\xspace}
+% \newcommand{\etal}{et al.\xspace}
+
+% 数学命令
+% \newcommand{\R}{\mathbb{R}}          % 实数集
+% \newcommand{\C}{\mathbb{C}}          % 复数集
+% \newcommand{\N}{\mathbb{N}}          % 自然数集
+% \newcommand{\norm}[1]{\left\|#1\right\|}  % 范数
+% \newcommand{\abs}[1]{\left|#1\right|}     % 绝对值
+
+% 文本强调
+% \newcommand{\important}[1]{\textbf{#1}}  % 重要内容
+% \newcommand{\term}[1]{\textit{#1}}       % 术语
+
+\begin{document}
+
+\title{Privacy-Preserving Edge--Cloud Fall Detection\\
+with Quality-Aware Bidirectional Temporal Modeling}
+
+\author{
+\IEEEauthorblockN{Jiahao Zhao, Chengyi Xu, Yaorong Huang, Zhonglin Chang, and Jiayun Song}
+\IEEEauthorblockA{Internet of Things Essentials, Faculty of Applied Sciences\\
+Macao Polytechnic University, Macao SAR, China}
+}
+
+
+
+
+\maketitle
+
+\input{texfiles/1.Abstract}
+
+\input{texfiles/2.Introduction}
+
+\input{texfiles/3.System_Overview}
+
+\input{texfiles/3.Methodology}
+
+\input{texfiles/4.Implementation}
+
+\input{texfiles/4.Experiments_and_Analysis}
+
+\input{texfiles/5.Discussion}
+
+\input{texfiles/6.Limitations}
+
+\input{texfiles/5.Conclusion}
+
+% \input{texfiles/6.References}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

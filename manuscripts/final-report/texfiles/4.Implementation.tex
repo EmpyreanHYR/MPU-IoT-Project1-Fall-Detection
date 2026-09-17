@@ -1,0 +1,17 @@
+\section{System Implementation}
+
+\subsection{Edge Pose Node}
+
+The edge node uses a Raspberry Pi~5, a USB camera, and a YOLO26n-pose model~\cite{jocher2026yolo26}. The sender selects the highest-confidence person, normalizes 17 COCO keypoints, computes confidence summaries, and limits publication to five pose packets per second. Old packets are dropped when the communication path is congested. An optional low-rate annotated preview is kept separate from the inference packet and is relayed only while an authenticated user is viewing it; it is not recorded by the application.
+
+The available AI HAT+~2 contains a Hailo-10H accelerator. The Hailo pose pipeline can process frames, but its currently installed pose postprocessor does not return valid landmark coordinates. The operational demonstration therefore uses the verified YOLO26n-pose software path. This implementation choice is reported explicitly because accelerator throughput must not be inferred from a path that has not produced usable pose packets.
+
+\subsection{Private Edge--Cloud Link}
+
+The Raspberry Pi exposes a token-protected relay only on a private Tailscale address. The cloud worker polls this relay, rejects stale or duplicate sequence numbers, and submits fresh pose packets to a loopback-only backend endpoint. Separate credentials protect the edge-to-relay and relay-to-backend hops. The public HTTPS gateway does not expose pose-ingestion routes, which reduces the externally reachable attack surface.
+
+\subsection{Cloud Backend and Dashboard}
+
+The cloud deployment runs on an OpenCloudOS~9 virtual machine. A Python~3.11 backend maintains the latest device state, invokes the configured temporal model or a clearly labeled geometry demonstration baseline, applies the alert state machine, and stores event transitions in SQLite. Nginx terminates HTTPS and protects the dashboard with authentication. Server-Sent Events deliver state changes to the browser without periodic full-page refreshes.
+
+The dashboard provides four functions relevant to the course system: live device and pose status, fall probability and alert state, persistent alert history with acknowledgement, and remote start/stop control for the Pi camera service. A model selector exposes the available cloud classifiers. The research results in this report are obtained from the offline evaluation protocol in Section~\ref{sec:experiments}; system-function tests and performance measurements are listed separately so that interface demonstrations are not confused with model accuracy.

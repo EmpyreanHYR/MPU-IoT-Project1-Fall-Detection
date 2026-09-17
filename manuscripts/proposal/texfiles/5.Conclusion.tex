@@ -1,0 +1,38 @@
+\section{Execution Plan and Ownership}
+
+\begin{table}[H]
+\caption{Four-week implementation plan.}
+\label{tab:schedule}
+\centering
+\footnotesize
+\begin{tabularx}{\columnwidth}{@{}p{0.08\columnwidth}X@{}}
+\toprule
+Wk. & Planned work and output \\
+\midrule
+1 & Define datasets, labels, and splits; run YOLO26n-pose with live input; deploy broker/API/database; show the first camera-to-cloud record. \\
+2 & Build skeleton caches; complete B0/B1; integrate temporal inference and the live dashboard. \\
+3 & Implement B2--B4; select validation settings; run cross-dataset, ablation, hard-negative, and degradation tests. \\
+4 & Run hardware/network benchmarks and system trials; reproduce from clean instructions; finish report, slides, and demonstration video. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\caption{Individual roles and primary outputs.}
+\label{tab:roles}
+\centering
+\footnotesize
+\begin{tabularx}{\columnwidth}{@{}p{0.24\columnwidth}X@{}}
+\toprule
+Owner & Primary outputs \\
+\midrule
+Jiahao Zhao & Camera, Pi/Hailo runtime, edge benchmarks \\
+Chengyi Xu & Dataset access, labels, splits, converters \\
+Yaorong Huang & Temporal models, quality gate, ablation \\
+Zhonglin Chang & MQTT, API, database, TLS, VM deployment \\
+Jiayun Song & Dashboard, system tests, metrics, demo integration \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two in-person meetings per week will produce at least eight meeting records covering attendance, decisions, assignments, progress, and next actions. Each owner will maintain the code, configuration, test outputs, and contribution record associated with the assigned module.

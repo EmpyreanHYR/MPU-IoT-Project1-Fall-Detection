@@ -1,0 +1,5 @@
+\section{Conclusion}
+
+This project combines a privacy-oriented edge--cloud prototype with skeleton-based temporal fall detection. The system connects camera input, Raspberry Pi pose extraction, private pose transfer, cloud inference, persistent event handling, and an authenticated dashboard. The proposed MaskedBiMamba model achieves the highest video F1 ($0.8355\pm0.0774$) and the lowest mean false-alarm rate ($144.4\pm59.7$~h$^{-1}$) in the matched five-model comparison, although UniMamba and the Transformer encoder remain stronger on some window-level metrics.
+
+The results suggest that quality-aware bidirectional temporal modeling is particularly useful when predictions are aggregated into video-level decisions. The remaining ablation, missing-observation, and edge--cloud performance experiments have been defined but left unfilled until measurement. Completing them will determine which model components are responsible for the observed behavior and whether the deployed system meets its real-time operating targets.
