@@ -1,0 +1,11 @@
+{
+  "tcnte": {
+    "url": "https://github.com/SomeOtherScenery/fall_detection.git",
+    "commit": "23b7d326cb9e39224bd36aa41b458227229a2663"
+  },
+  "fall_mamba": {
+    "url": "https://github.com/DHUspeech/fall-mamba.git",
+    "commit": "12885242b23a3b8fce59bfd652687beaca652d41"
+  }
+}
+

@@ -1,0 +1,59 @@
+experiment:
+  name: tcnte_reproduction
+  protocol: paper_aligned
+  models: [tcn, te, tcnte]
+  seeds: [42]
+
+data:
+  joints: body12
+  include_confidence: false
+  normalization: per_frame_minmax
+  preload_windows: true
+  window_seconds: 1.0
+  stride_seconds: 0.2
+  timesteps: 30
+  positive_label: fall
+  positive_overlap: 0.5
+  exclude_after_fall: true
+
+split:
+  # The TCNTE paper used balanced three-fold video splits for GMDCSA-24.
+  # Use this only for a labelled reproduction table, never as the main claim.
+  strategy: video
+  folds: 3
+  validation_fraction: 0.15
+
+model:
+  tcn_channels: [8, 16, 32]
+  tcn_kernel_size: 5
+  tcn_dropout: 0.2
+  transformer_heads: 4
+  transformer_layers: 1
+  transformer_ffn: 32
+  transformer_dropout: 0.1
+  position_encoding: learned
+
+training:
+  epochs: 100
+  batch_size: 64
+  workers: 0
+  optimizer: adam
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  loss: weighted_focal
+  focal_gamma: 3.0
+  class_weights: [1.0, 30.0]
+  selection_metric: f1
+  early_stopping: false
+  amp: true
+  deterministic: true
+
+evaluation:
+  threshold: 0.5
+  metrics: [accuracy, precision, recall, specificity, f1, auroc]
+  event_metrics: true
+
+notes:
+  - The paper table reports kernel size 5, while the released repository instantiates kernel size 3.
+  - This config follows the paper table; use an explicit override for repository-exact kernel size 3.
+  - The released script selects a checkpoint after repeatedly evaluating its test loader; this repository does not reproduce that leakage.

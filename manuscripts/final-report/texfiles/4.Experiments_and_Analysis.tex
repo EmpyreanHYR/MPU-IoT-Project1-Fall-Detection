@@ -3,7 +3,7 @@
 
 \subsection{Experimental Setting}
 
-The positive class is \emph{fall}. Window-level reporting includes accuracy, precision, recall, F1, and AUROC at a fixed threshold of 0.5. A video is predicted as positive when any window reaches this threshold. Event recall measures the fraction of annotated fall intervals overlapped by at least one contiguous predicted interval, while false alarms per hour quantify erroneous alarms over negative video time. Tables~\ref{tab:environment} and~\ref{tab:configuration} summarize the execution environment and evaluation protocols. Each model in the primary comparison is evaluated over four folds and three random seeds.
+The positive class is \emph{fall}. Window accuracy, precision, recall, and F1 use threshold 0.5; AUROC uses the continuous probabilities. A video is predicted as positive when any window reaches this threshold. For event metrics, overlapping positive target windows are merged into reference intervals; positive predicted windows are merged likewise and matched one-to-one by overlap. Event recall is the detected fraction of these window-derived reference events. False alarms are unmatched predicted intervals divided by the sum, over evaluated videos, of $(\max t_{\rm end}-\min t_{\rm start})/3600$. Thus, all reported false alarms/h refer to evaluated video time, including fall videos, not negative-only exposure or deployed alert counts. Delay is the mean matched interval-onset difference, can be negative, and excludes buffering, pose extraction, communication, and alert confirmation. Tables~\ref{tab:environment} and~\ref{tab:configuration} summarize the execution environment and evaluation protocols. The frozen CAUCAFall--GMDCSA-24 primary protocol evaluates every model over four subject-disjoint folds and three random seeds.
 
 \begin{table}[t]
     \centering
@@ -25,7 +25,7 @@ The positive class is \emph{fall}. Window-level reporting includes accuracy, pre
     \end{tabular}
 \end{table}
 
-\begin{table*}[!t]
+\begin{table*}[tp]
     \centering
     \small
     \caption{Training and evaluation configurations.}
@@ -34,10 +34,10 @@ The positive class is \emph{fall}. Window-level reporting includes accuracy, pre
         \toprule
         Item & TCNTE reproduction & Primary comparison \\
         \midrule
-        Dataset & Le2i & Le2i + CAUCAFall \\
+        Dataset & Le2i & CAUCAFall + GMDCSA-24 \\
         Input features & 12 joints $\times(x,y)$; 24 dimensions & 12 joints $\times(x,y,c)$; 36 dimensions \\
         Window / stride / resampling & 1.0 s / 0.2 s / 30 steps & 1.0 s / 0.2 s / 30 steps \\
-        Split and validation & 3 video-grouped folds; 15\% validation & 4 group-disjoint folds; 20\% validation \\
+        Split and validation & 3 video-grouped folds; 15\% validation & 4 subject-disjoint folds; group-disjoint validation \\
         Random seeds & 42 & 42, 3407, 2026 \\
         Epochs / batch size & 100 / 64 & 100 / 64 \\
         Optimizer / learning rate & Adam / $10^{-4}$ & Adam / $10^{-4}$ \\
@@ -52,7 +52,7 @@ The positive class is \emph{fall}. Window-level reporting includes accuracy, pre
 
 Table~\ref{tab:tcnte_reproduction} reports the Le2i reproduction. The Transformer encoder obtains the highest window F1 and AUROC, whereas TCNTE obtains the highest video F1 and the lowest false-alarm rate. Relative to the Transformer encoder, TCNTE increases video F1 from 0.8533 to 0.8768 and reduces false alarms from 158.1 to 118.4~h$^{-1}$. The difference between window- and video-level rankings motivates reporting both local classification and aggregated event behavior.
 
-\begin{table*}[!t]
+\begin{table*}[tp]
     \centering
     \small
     \caption{Three-fold TCNTE reproduction on Le2i. Values are mean $\pm$ standard deviation.}
@@ -69,34 +69,55 @@ Table~\ref{tab:tcnte_reproduction} reports the Le2i reproduction. The Transforme
     \end{tabular}}
 \end{table*}
 
-\subsection{Primary Model Comparison}
+\subsection{CAUCAFall--GMDCSA-24 Primary Experiment}
 
-Table~\ref{tab:primary_results} presents the group-disjoint comparison on Le2i and CAUCAFall. UniMamba produces the highest window accuracy and F1, and the Transformer encoder produces the highest window recall and AUROC. MaskedBiMamba achieves the highest video F1, $0.8355\pm0.0774$, and the lowest mean false-alarm rate, $144.4\pm59.7$~h$^{-1}$. Relative to TCNTE under the same protocol, this corresponds to a 0.0233 absolute increase in video F1 and a 6.7\% reduction in false alarms.
+The primary manifest contains 260 real videos, 716 annotated activity segments, and 7,869 fixed windows (1,371 fall and 6,498 non-fall). The four folds use 14 dataset-prefixed subject groups, and every split contains both source datasets without subject overlap. Pose extraction completed for all 450 videos in the project, including the 190 Le2i videos reserved for reproduction and external testing. The formal matrix comprises five models, four folds, and three seeds (60 runs), each trained for the frozen 100 epochs. All expected \texttt{metrics.json} files were present and no failed run was recorded.
 
-\begin{table*}[!t]
+Table~\ref{tab:primary_results} shows that the Transformer encoder (TE) obtains the highest window F1, AUROC, video F1, and event recall. MaskedBiMamba obtains the highest window accuracy and precision and the lowest false-alarm rate. Its video F1 is close to TE ($0.7632$ versus $0.7686$), but the fixed threshold still produces approximately 198 unmatched predicted intervals per evaluated video hour. The result therefore supports a precision--alarm-rate advantage rather than a universal accuracy advantage.
+
+% Reviewed replacement for tab:primary_results. No resizebox: keep 9 pt table text.
+\begin{table*}[tp]
     \centering
     \small
-    \caption{Primary comparison over four group-disjoint folds and three seeds. Values are mean $\pm$ standard deviation over 12 evaluations per model. Bold marks the best mean in each column.}
+    \caption{CAUCAFall--GMDCSA-24 subject-disjoint comparison. Values are mean $\pm$ sample standard deviation over four folds and three seeds (12 evaluations per model). Bold denotes the highest mean for classification and recall metrics and the lowest false-alarm rate. Signed onset offset is an offline interval-start difference, not end-to-end latency.}
     \label{tab:primary_results}
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{lccccccccc}
+    \textbf{A. Window-level classification}\par\smallskip
+    \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccc@{}}
         \toprule
-        Model & Status & Window Acc. & Window Prec. & Window Recall & Window F1 & Window AUROC & Video F1 & Event Recall & False alarms/h \\
+        Model & Accuracy & Precision & Recall & F1 & AUROC \\
         \midrule
-        TCN & $\checkmark$ 12/12 & $0.9084\pm0.0282$ & $0.6576\pm0.1385$ & $0.7353\pm0.0206$ & $0.6873\pm0.0845$ & $0.9147\pm0.0228$ & $0.8258\pm0.0812$ & $0.9816\pm0.0231$ & $159.9\pm66.1$ \\
-        TE & $\checkmark$ 12/12 & $0.9230\pm0.0232$ & $0.6793\pm0.1234$ & $\mathbf{0.8230\pm0.0420}$ & $0.7395\pm0.0860$ & $\mathbf{0.9429\pm0.0202}$ & $0.8153\pm0.0829$ & $0.9869\pm0.0189$ & $192.0\pm44.9$ \\
-        TCNTE & $\checkmark$ 12/12 & $0.9145\pm0.0358$ & $0.6907\pm0.1669$ & $0.7520\pm0.0436$ & $0.7084\pm0.1004$ & $0.9197\pm0.0274$ & $0.8122\pm0.0883$ & $0.9735\pm0.0230$ & $154.8\pm66.2$ \\
-        UniMamba & $\checkmark$ 12/12 & $\mathbf{0.9292\pm0.0158}$ & $0.6985\pm0.1563$ & $0.8100\pm0.0490$ & $\mathbf{0.7433\pm0.1002}$ & $0.9371\pm0.0224$ & $0.8223\pm0.0920$ & $\mathbf{0.9896\pm0.0123}$ & $150.7\pm37.3$ \\
-        MaskedBiMamba & $\checkmark$ 12/12 & $0.9254\pm0.0338$ & $\mathbf{0.7280\pm0.1877}$ & $0.7767\pm0.0785$ & $0.7350\pm0.1182$ & $0.9192\pm0.0318$ & $\mathbf{0.8355\pm0.0774}$ & $0.9794\pm0.0352$ & $\mathbf{144.4\pm59.7}$ \\
+        TCN & $0.8482\pm0.0283$ & $0.5617\pm0.1078$ & $0.6652\pm0.0743$ & $0.6028\pm0.0737$ & $0.8561\pm0.0460$ \\
+        TE & $0.8662\pm0.0285$ & $0.5985\pm0.1040$ & $\mathbf{0.7453\pm0.0793}$ & $\mathbf{0.6581\pm0.0766}$ & $\mathbf{0.8881\pm0.0374}$ \\
+        TCNTE & $0.8542\pm0.0273$ & $0.5743\pm0.0988$ & $0.7063\pm0.0992$ & $0.6254\pm0.0675$ & $0.8684\pm0.0431$ \\
+        UniMamba & $0.8574\pm0.0238$ & $0.5759\pm0.0914$ & $0.7155\pm0.0677$ & $0.6338\pm0.0684$ & $0.8697\pm0.0442$ \\
+        MaskedBiMamba & $\mathbf{0.8667\pm0.0278}$ & $\mathbf{0.6048\pm0.0856}$ & $0.6822\pm0.0712$ & $0.6395\pm0.0728$ & $0.8635\pm0.0502$ \\
         \bottomrule
-    \end{tabular}}
+    \end{tabular*}
+
+    \medskip
+    \textbf{B. Video- and event-level evaluation}\par\smallskip
+    \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc@{}}
+        \toprule
+        Model & Video F1 & Event recall & False alarms/eval. h & Signed onset offset (s) \\
+        \midrule
+        TCN & $0.7486\pm0.0223$ & $0.9450\pm0.0408$ & $220.0\pm45.1$ & $0.288\pm0.208$ \\
+        TE & $\mathbf{0.7686\pm0.0257}$ & $\mathbf{0.9767\pm0.0318}$ & $218.9\pm44.7$ & $0.196\pm0.156$ \\
+        TCNTE & $0.7591\pm0.0301$ & $0.9616\pm0.0431$ & $228.7\pm62.0$ & $0.240\pm0.230$ \\
+        UniMamba & $0.7592\pm0.0190$ & $0.9551\pm0.0352$ & $212.5\pm40.9$ & $0.225\pm0.187$ \\
+        MaskedBiMamba & $0.7632\pm0.0370$ & $0.9293\pm0.0616$ & $\mathbf{198.5\pm40.8}$ & $0.270\pm0.135$ \\
+        \bottomrule
+    \end{tabular*}
 \end{table*}
+
+\subsection{Earlier Le2i--CAUCAFall Benchmark}
+
+The earlier group-disjoint Le2i--CAUCAFall protocol produced 60 runs. MaskedBiMamba obtained video F1 $0.8355\pm0.0774$ and false alarms $144.4\pm59.7$ per evaluated hour. These results belong to a different protocol and do not establish subject-independent Le2i performance. The complete historical table is retained with the audit materials as \path{earlier_protocol_table.tex}; it is not pooled with the primary experiment.
 
 \subsection{Comparison with Published Results}
 
 Table~\ref{tab:literature_comparison} provides context from related studies. These values are not a unified ranking because the methods differ in inputs, datasets, partitions, and metric definitions. Charfi \emph{et al.} use engineered silhouette features and an SVM~\cite{charfi2012le2i}; published TCNTE uses skeleton windows under its original Le2i protocol~\cite{yu2025tcnte}; and Fall-Mamba uses RGB video and, where available, audio~\cite{zhang2025fallmamba}.
 
-\begin{table*}[!t]
+\begin{table*}[tp]
     \centering
     \small
     \caption{Contextual comparison with cited results. Different protocols and inputs prevent direct ranking.}
@@ -105,53 +126,100 @@ Table~\ref{tab:literature_comparison} provides context from related studies. The
         \toprule
         Method/source & Input & Dataset and protocol & Reported result & Relation to this work \\
         \midrule
-        Charfi et al.~\cite{charfi2012le2i} & Silhouette descriptors & Le2i; original SVM protocol & Recall 98.0\%; specificity 99.6\%; precision 94.2\% & Hand-crafted features and a different adaptation protocol \\
         Published TCNTE~\cite{yu2025tcnte} & 12-joint skeleton & Le2i; published 3-fold protocol & Window accuracy $97.01\pm0.31$\%; file accuracy $92.30\pm0.87$\% & Closest temporal architectural reference \\
         Fall-Mamba (video only)~\cite{zhang2025fallmamba} & RGB video & Trained on Le2i+URFD+Multicam; tested on Le2i & Accuracy 96.77\% & Uses appearance and a combined training pool \\
         Fall-Mamba with masking~\cite{zhang2025fallmamba} & RGB video + audio & Combined 70/30 split & Accuracy 99.63\% & Multimodal input and a different combined dataset \\
-        This work: TCNTE & Skeleton & Le2i; grouped folds with validation & Window accuracy $94.48\pm1.04$\%; video F1 $87.68\pm1.94$\% & Reproduction under explicit validation selection \\
-        This work: MaskedBiMamba & Skeleton + confidence & Le2i+CAUCAFall; grouped folds and three seeds & Window accuracy $92.54\pm3.38$\%; video F1 $83.55\pm7.74$\% & Primary repeated comparison \\
         \bottomrule
     \end{tabularx}
 \end{table*}
 
-\subsection{Planned Additional Experiments}
+\subsection{Mechanism Ablations and Robustness Tests}
 
-The following experiments are required to isolate model components and evaluate the deployed system. Their result cells are intentionally left blank until the corresponding measurements are completed.
+Ten modified MaskedBiMamba variants were retrained over all four folds and three seeds, for 120 additional runs. Table~\ref{tab:ablation} compares them with the full model from the primary matrix. Removing temporal attention or bidirectionality reduces both window and video F1 and increases false alarms. However, the full combination is not uniformly optimal: removing frame masking gives the highest window F1, removing quality pooling gives the highest video F1, and mask ratios 0.05, 0.20, and 0.30 reduce the mean false-alarm rate relative to 0.15; ratio 0.10 increases it to 206.0~h$^{-1}$. Confidence input improves video F1 and false-alarm rate relative to its removal, even though the variant without confidence has slightly higher window F1. These descriptive results indicate component trade-offs and do not establish statistical significance.
 
-\begin{table*}[!t]
+\begin{table*}[tp]
     \centering
     \small
-    \caption{Planned MaskedBiMamba ablation and missing-observation experiments. Blank cells denote measurements not yet available.}
-    \label{tab:planned_ablation}
-    \begin{tabular}{lcccccc}
+    \caption{MaskedBiMamba ablations on the primary protocol. Values are mean $\pm$ standard deviation over 12 evaluations. The full model uses frame-mask ratio 0.15. Rates use evaluated video hours; onset offset is an offline signed difference.}
+    \label{tab:ablation}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lccccc}
         \toprule
-        Variant & Window F1 & Video F1 & Event recall & False alarms/h & 20\% missing F1 & 40\% missing F1 \\
+        Variant & Window F1 & Video F1 & Event recall & False alarms/eval. h & Onset offset (s) \\
         \midrule
-        Full MaskedBiMamba & & & & & & \\
-        Without reverse Mamba branch & & & & & & \\
-        Without temporal self-attention & & & & & & \\
-        Without quality-weighted pooling & & & & & & \\
-        Without training-time frame masking & & & & & & \\
-        Without confidence input & & & & & & \\
+        Full MaskedBiMamba & $0.6395\pm0.0728$ & $0.7632\pm0.0370$ & $0.9293\pm0.0616$ & $198.5\pm40.8$ & $0.270\pm0.135$ \\
+        Without reverse branch & $0.6236\pm0.0578$ & $0.7518\pm0.0330$ & $0.9350\pm0.0510$ & $216.3\pm27.4$ & $0.280\pm0.172$ \\
+        Without temporal attention & $0.6230\pm0.0638$ & $0.7459\pm0.0179$ & $0.9483\pm0.0320$ & $235.0\pm46.5$ & $0.193\pm0.145$ \\
+        Without quality pooling & $0.6354\pm0.0780$ & $0.7729\pm0.0440$ & $0.9350\pm0.0627$ & $189.2\pm56.3$ & $0.267\pm0.145$ \\
+        Without frame masking & $0.6516\pm0.0591$ & $0.7706\pm0.0359$ & $0.9401\pm0.0518$ & $187.9\pm49.9$ & $0.251\pm0.196$ \\
+        Without confidence input & $0.6429\pm0.0513$ & $0.7536\pm0.0398$ & $0.9438\pm0.0472$ & $222.0\pm39.0$ & $0.224\pm0.174$ \\
+        Without confidence and quality & $0.6390\pm0.0594$ & $0.7575\pm0.0342$ & $0.9365\pm0.0511$ & $210.3\pm33.9$ & $0.245\pm0.160$ \\
+        Mask ratio 0.05 & $0.6423\pm0.0595$ & $0.7685\pm0.0512$ & $0.9347\pm0.0462$ & $189.4\pm38.4$ & $0.277\pm0.160$ \\
+        Mask ratio 0.10 & $0.6270\pm0.0585$ & $0.7609\pm0.0288$ & $0.9299\pm0.0503$ & $206.0\pm45.5$ & $0.258\pm0.179$ \\
+        Mask ratio 0.20 & $0.6346\pm0.0646$ & $0.7649\pm0.0379$ & $0.9287\pm0.0588$ & $188.0\pm43.1$ & $0.278\pm0.160$ \\
+        Mask ratio 0.30 & $0.6149\pm0.0627$ & $0.7651\pm0.0339$ & $0.9220\pm0.0539$ & $194.4\pm34.3$ & $0.286\pm0.191$ \\
         \bottomrule
-    \end{tabular}
+    \end{tabular}}
 \end{table*}
 
-\begin{table*}[!t]
+Table~\ref{tab:robustness} reports the most severe evaluated perturbation for each condition. MaskedBiMamba's clearest advantage is random frame loss: at 30\% frame drop it retains window F1 $0.6276$, whereas TCNTE falls to $0.4361$. The two models are similar under 30\% random joint loss, and both degrade sharply when all lower-body joints are absent. Confidence noise causes a smaller decline than structural keypoint loss.
+
+\begin{table*}[tp]
     \centering
     \small
-    \caption{Planned edge--cloud deployment measurements. Blank cells denote measurements not yet available.}
+    \caption{Primary-protocol robustness without refitting. Values are mean $\pm$ standard deviation over 12 checkpoints.}
+    \label{tab:robustness}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lcccc}
+        \toprule
+        Condition & MaskedBiMamba window F1 & TCNTE window F1 & MaskedBiMamba video F1 & TCNTE video F1 \\
+        \midrule
+        Clean & $0.6395\pm0.0728$ & $0.6255\pm0.0677$ & $0.7632\pm0.0370$ & $0.7591\pm0.0301$ \\
+        Confidence noise 0.30 & $0.6277\pm0.0681$ & $0.6166\pm0.0653$ & $0.7287\pm0.0438$ & $0.7431\pm0.0380$ \\
+        Frame drop 0.30 & $\mathbf{0.6276\pm0.0507}$ & $0.4361\pm0.0669$ & $\mathbf{0.7366\pm0.0200}$ & $0.6629\pm0.0164$ \\
+        Joint drop 0.30 & $0.3499\pm0.0390$ & $0.3563\pm0.0609$ & $0.6638\pm0.0132$ & $0.6618\pm0.0136$ \\
+        All lower-body joints missing & $0.3181\pm0.0633$ & $0.2908\pm0.0491$ & $0.6561\pm0.0264$ & $0.6503\pm0.0293$ \\
+        \bottomrule
+    \end{tabular}}
+\end{table*}
+
+\subsection{External Le2i Evaluation}
+
+The 24 primary MaskedBiMamba and TCNTE checkpoints were evaluated on all 12,650 Le2i windows without external-data fitting. As shown in Table~\ref{tab:external}, clean performance is nearly tied at the video level, while TCNTE has higher clean window F1. MaskedBiMamba is substantially more stable under random frame loss: at 30\% frame drop it retains video F1 $0.8243$ and window F1 $0.4507$, compared with $0.8126$ and $0.2782$ for TCNTE. Both models remain vulnerable to complete lower-body removal and random joint loss at the window level. Under the evaluated window labels, Le2i contains 130 positive and 60 negative videos: an all-positive predictor already obtains video F1 $2(130)/(2(130)+60)=0.8125$. Clean video specificity is only 0.1958 for MaskedBiMamba and 0.1736 for TCNTE. Thus, video F1 near 0.83 alone does not demonstrate strong cross-dataset discrimination.
+
+\begin{table*}[tp]
+    \centering
+    \small
+    \caption{External Le2i evaluation without refitting. Values are mean $\pm$ standard deviation over 12 checkpoints per model.}
+    \label{tab:external}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lcccc}
+        \toprule
+        Condition & MaskedBiMamba window F1 & TCNTE window F1 & MaskedBiMamba video F1 & TCNTE video F1 \\
+        \midrule
+        Clean & $0.4687\pm0.0540$ & $0.4950\pm0.0568$ & $0.8299\pm0.0101$ & $0.8307\pm0.0187$ \\
+        Confidence noise 0.30 & $0.4303\pm0.0621$ & $0.4369\pm0.0693$ & $0.8188\pm0.0097$ & $0.8241\pm0.0142$ \\
+        Frame drop 0.30 & $\mathbf{0.4507\pm0.0432}$ & $0.2782\pm0.0272$ & $\mathbf{0.8243\pm0.0086}$ & $0.8126\pm0.0016$ \\
+        Joint drop 0.30 & $0.2825\pm0.0956$ & $0.2823\pm0.0769$ & $0.8137\pm0.0031$ & $0.8123\pm0.0017$ \\
+        All lower-body joints missing & $0.2145\pm0.0307$ & $0.2066\pm0.0187$ & $0.8067\pm0.0250$ & $0.8047\pm0.0269$ \\
+        \bottomrule
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}[tp]
+    \centering
+    \small
+    \caption{Planned edge--cloud deployment measurements. A dash means not measured in a controlled deployment trial.}
     \label{tab:planned_system}
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lcccccccc}
         \toprule
         Edge path & Pose FPS & Edge p50 & Edge p95 & Payload & RTT p50 & Cloud inference & E2E p95 & Power / temp \\
         \midrule
-        Pi~5, YOLO26n-pose software path & & & & & & & & \\
-        Pi~5 + AI HAT+~2, Hailo pose path & & & & & & & & \\
+        Pi~5, YOLO26n-pose software path & -- & -- & -- & -- & -- & -- & -- & -- \\
+        Pi~5 + AI HAT+~2, Hailo pose path & -- & -- & -- & -- & -- & -- & -- & -- \\
         \bottomrule
     \end{tabular}}
 \end{table*}
 
-The system trial will additionally record successful alert persistence, dashboard update delay, acknowledgement, temporary network interruption, and recovery. These measurements should use the same packet schema and alert thresholds reported in the implementation section.
+The system trial will additionally record successful alert persistence, dashboard update delay, acknowledgement, temporary network interruption, and recovery. These measurements should use the same packet schema and alert thresholds reported in the implementation section. Repeated folds and seeds yield descriptive run-level sample standard deviations, not confidence intervals over independent participants. The clean TCNTE robustness rerun gives window F1 0.6255 versus 0.6254 in the original training evaluation; both archived results are retained without silently substituting one for the other.

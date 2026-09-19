@@ -2,7 +2,7 @@
 
 The system follows the complete IoT path from sensing to user output: camera input, edge pose extraction, private feature transfer, cloud inference, persistent event management, and dashboard notification. The edge--cloud partition is summarized in Table~\ref{tab:system_partition}. Continuous RGB video is used only for local pose estimation and an optional authenticated live preview; the temporal fall detector receives normalized keypoints, confidence values, timing information, and device telemetry.
 
-\begin{table*}[!t]
+\begin{table*}[tp]
     \centering
     \small
     \caption{Edge--cloud partition and information flow in the implemented prototype.}
@@ -12,7 +12,7 @@ The system follows the complete IoT path from sensing to user output: camera inp
         Stage & Component & Main operation & Data passed to the next stage \\
         \midrule
         Input & USB camera & Captures the monitored indoor scene & RGB frames remain on the edge device \\
-        Edge processing & Raspberry Pi~5 & Detects the primary person and extracts 17 COCO keypoints, confidence, and pose quality & Timestamped anonymous pose packet \\
+        Edge processing & Raspberry Pi~5 & Detects the primary person and extracts 17 COCO keypoints, confidence, and pose quality & Timestamped pose packet without direct identity fields \\
         Private transport & Tailscale relay and cloud puller & Authenticates packets, rejects stale sequence numbers, and forwards fresh observations & Keypoints, quality, sequence number, and telemetry \\
         Cloud processing & Temporal-model service & Buffers pose frames, performs fall inference, and updates the alert state machine & Fall probability and alert transition \\
         Cloud backend & Python API and SQLite & Stores alert transitions, acknowledgements, and recent device state & Persistent event record and live snapshot \\
@@ -21,6 +21,6 @@ The system follows the complete IoT path from sensing to user output: camera inp
     \end{tabularx}
 \end{table*}
 
-The design separates privacy-sensitive perception from temporal decision making. Raw camera frames are not stored by the backend, and normal inference packets contain no names or video URLs. The cloud is responsible for temporal context, event persistence, and multi-client access, while the edge remains responsible for camera acquisition and pose extraction. This division reduces upstream data volume and limits routine cloud processing to derived body-motion features.
+The design separates privacy-sensitive perception from temporal decision making. Raw camera frames are not stored by the application backend, and normal inference packets contain no names or video URLs. The cloud is responsible for temporal context, event persistence, and multi-client access, while the edge remains responsible for camera acquisition and pose extraction. This division reduces upstream data volume and limits routine cloud processing to derived body-motion features. Skeletons can still reveal behavior or identity-related information; this is data minimization, not a formal anonymity guarantee. The optional authenticated preview sends image pixels through the cloud in memory and is an explicit exception to pose-only transport.
 
-The alert logic converts model probabilities into \textsc{Normal}, \textsc{Suspected}, \textsc{Confirmed}, and \textsc{Cleared} states. Consecutive high-probability observations are required before confirmation, while low-probability observations clear an event. Alert acknowledgement is stored separately from model evidence so that a user action does not alter the original prediction history. Thresholds used by the current dashboard support system demonstration; deployment-specific calibration remains part of the planned evaluation.
+The alert logic converts model probabilities into \textsc{Normal}, \textsc{Suspected}, \textsc{Confirmed}, and \textsc{Cleared} states. The implementation enters suspicion at probability at least 0.65 and confirms after at least two consecutive observations at or above 0.65 when the current probability is at least 0.82. Two consecutive observations at or below 0.35 clear an active event. Intermediate probabilities reset both counters. These operational thresholds differ from the offline metric threshold of 0.5. Alert acknowledgement is stored separately from model evidence so that a user action does not alter the original prediction history. Thresholds used by the current dashboard support system demonstration; deployment-specific calibration remains part of the planned evaluation.

@@ -1,0 +1,29 @@
+experiment:
+  name: masked_bimamba_ablation
+  base_model: masked_bimamba
+  # Paired ablations use the fixed canonical seed across all four subject folds.
+  seeds: [42]
+
+variants:
+  # The full model is reused from the main comparison; do not retrain it here.
+  no_bidirectional:
+    bidirectional: false
+  no_temporal_attention:
+    temporal_attention: false
+  no_quality_pooling:
+    quality_weighted_pooling: false
+  no_frame_masking:
+    frame_mask_ratio: 0.0
+  no_confidence_input:
+    include_confidence: false
+  no_confidence_or_quality:
+    include_confidence: false
+    quality_weighted_pooling: false
+  mask_ratio_005:
+    frame_mask_ratio: 0.05
+  mask_ratio_010:
+    frame_mask_ratio: 0.10
+  mask_ratio_020:
+    frame_mask_ratio: 0.20
+  mask_ratio_030:
+    frame_mask_ratio: 0.30

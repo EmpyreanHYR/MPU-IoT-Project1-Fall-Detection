@@ -1,0 +1,19 @@
+numpy>=1.24,<3
+pandas>=2.0,<3
+PyYAML>=6.0,<7
+scikit-learn>=1.3,<2
+torch>=2.1,<3
+torchvision>=0.16,<1
+ultralytics>=8.3,<9
+opencv-python-headless>=4.8,<5
+av>=12,<16
+lap>=0.5.12,<1
+tqdm>=4.66,<5
+
+# Required only by MaskedBiMamba models. Install on the CUDA server after
+# selecting a PyTorch/CUDA-compatible build. These pins are validated with
+# PyTorch 2.1.2+cu121 on an RTX 3090; use --no-build-isolation for the CUDA
+# extensions. Transformers 5.x is incompatible with mamba-ssm 2.2.2.
+# transformers==4.44.2
+# causal-conv1d==1.4.0
+# mamba-ssm==2.2.2

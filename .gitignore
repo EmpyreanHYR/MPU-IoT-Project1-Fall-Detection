@@ -44,4 +44,18 @@ webui/compose.yaml
 # Generated experiment artifacts
 outputs/
 checkpoints/
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.engine
+*.npz
+*.npy
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.mp4
+*.avi
+*.mov
 .pytest_cache/

@@ -1,0 +1,67 @@
+experiment:
+  name: masked_bimamba_main
+  protocol: leakage_free_grouped
+  models: [tcn, te, tcnte, unimamba, masked_bimamba]
+  seeds: [42, 3407, 2026]
+
+data:
+  joints: body12
+  include_confidence: true
+  normalization: per_frame_minmax
+  preload_windows: true
+  window_seconds: 1.0
+  stride_seconds: 0.2
+  timesteps: 30
+  positive_label: fall
+  positive_overlap: 0.5
+  exclude_after_fall: true
+
+split:
+  strategy: subject
+  folds: 4
+  validation_fraction: 0.20
+
+model:
+  tcn_channels: [8, 16, 32]
+  tcn_kernel_size: 5
+  tcn_dropout: 0.2
+  transformer_heads: 4
+  transformer_layers: 1
+  transformer_ffn: 32
+  transformer_dropout: 0.1
+  position_encoding: learned
+  mamba_hidden_size: 64
+  mamba_layers: 2
+  mamba_state_size: 16
+  mamba_conv_size: 4
+  mamba_expand: 2
+  bidirectional: true
+  temporal_attention: true
+  quality_weighted_pooling: true
+  frame_mask_ratio: 0.15
+
+training:
+  epochs: 100
+  batch_size: 64
+  workers: 0
+  optimizer: adam
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  loss: weighted_focal
+  focal_gamma: 3.0
+  class_weights: auto
+  selection_metric: f1
+  early_stopping: false
+  gradient_clip_norm: 1.0
+  amp: true
+  deterministic: true
+
+evaluation:
+  threshold: 0.5
+  metrics: [accuracy, precision, recall, specificity, f1, auroc]
+  event_metrics: true
+  robustness:
+    random_joint_drop: [0.1, 0.2, 0.3]
+    frame_drop: [0.1, 0.2, 0.3]
+    confidence_noise: [0.1, 0.2, 0.3]
+    lower_body_missing: [1.0]
