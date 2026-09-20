@@ -12,5 +12,5 @@ with (ROOT/'results/verification/verified_summary.csv').open(encoding='utf-8-sig
 content={'aggregates':rows,'edge':json.loads((ROOT/'results/edge/summary.json').read_text())}
 (ROOT/'docs/assets/results-data.js').write_text('window.FALLGUARD_DATA = '+json.dumps(content,separators=(',',':'),allow_nan=False)+';\n')
 with (ROOT/'docs/assets/aggregate-results.csv').open('w',newline='') as stream:
-    writer=csv.DictWriter(stream,fieldnames=['suite','group','metric','mean','sd','n']);writer.writeheader();writer.writerows(rows)
+    writer=csv.DictWriter(stream,fieldnames=['suite','group','metric','mean','sd','n'],lineterminator='\n');writer.writeheader();writer.writerows(rows)
 print(f'Built {len(rows)} aggregate rows and public edge evidence.')
