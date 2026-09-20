@@ -27,3 +27,5 @@ body.deck{height:100vh;height:100dvh;display:grid;grid-template-rows:76px minmax
 @media print{body.deck{display:block;height:auto;overflow:visible}.deck main{overflow:visible}.deck .slide{display:block!important;height:auto;overflow:visible;scrollbar-gutter:auto;padding:25px 0}.deck .opening.current{display:block}.deck .chart svg{max-height:none}.deck .wide-figure img{max-height:400px}}
 
 @media(min-width:761px){.deck figure{margin-block:16px}.deck #edge>figure img,.deck #cloud>figure img{max-height:270px}.deck #model .formula-row{margin-top:15px}.deck #model details{margin-top:12px}}
+
+@media(min-width:1000px){.deck .model-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:34px;align-items:center}.deck #model .wide-figure img{max-height:none}.deck #model .formula-row{grid-template-columns:1fr;gap:18px}.deck #model .formula-row h3{margin-bottom:8px}.deck #model .formula{margin-block:8px}.deck #model .formula-row p{margin-bottom:0}}

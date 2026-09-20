@@ -76,7 +76,7 @@ function navigate(index){
   current=next;status();slides[current].scrollTop=0;
   history.replaceState(null,'','#'+slides[current].id);hideRuler();$('chartTooltip').hidden=true;
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches)
-    slides[current].animate([{opacity:0,transform:`translateY(${direction*40}px)`},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'cubic-bezier(.2,.65,.3,1)'});
+    slides[current].animate([{opacity:0,transform:`translateY(${direction*40}px)`},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'cubic-bezier(.2,.65,.3,1)'}).onfinish=hideRuler;
 }
 document.querySelectorAll('a[href^="#"]').forEach(a=>{if(a.classList.contains('skip'))return;a.addEventListener('click',e=>{const i=slides.findIndex(s=>'#'+s.id===a.getAttribute('href'));if(i>=0){e.preventDefault();navigate(i)}})});
 $('contentsToggle').onclick=()=>menu.showModal();$('closeContents').onclick=()=>menu.close();
