@@ -1,8 +1,8 @@
 # Experiment-result provenance for the final report
 
-Updated: 2026-09-18
+Updated: 2026-09-20
 
-This file records the local evidence used to update `IEEE-conference-main.tex` and its included section files. It is an audit aid, not part of the rendered paper.
+This file records the local evidence used to update `fall_detection_final_report.tex` and its included section files. It is an audit aid, not part of the rendered paper.
 
 ## Completed evidence sets
 
@@ -21,7 +21,7 @@ All reported summary values are arithmetic means and sample standard deviations 
 - The earlier Le2i--CAUCAFall table is retained for auditability and is not the primary GMDCSA-24 result.
 - Le2i is external test data for the primary checkpoints and is not used for their fitting.
 - Robustness conditions are applied to selected checkpoints without refitting.
-- Blank edge--cloud deployment cells remain unmeasured and are not inferred from offline model experiments.
+- Edge and cloud results use separate hardware protocols and sample sizes; they are not inferred from the model cross-validation runs.
 - Small differences between means are not described as statistically significant.
 
 ## Independent report review (2026-09-19)
@@ -40,9 +40,9 @@ Metric definitions were corrected against `code/src/fallbench/engine.py`:
 
 The four primary test sets reconstruct 7,869 distinct windows, 1,371 positives, 260 videos and 14 dataset-prefixed subject groups. Test windows, videos and inferred subject groups do not overlap across folds, and the same test definitions are used across all models/seeds. Original train/validation manifests and raw pose caches were not present locally, so this does not independently verify the entire training/validation separation or pose extraction.
 
-Current deployment catalog entries belong to September 16, not the September 18 primary protocol. Live adapters accumulate 30 received frames without timestamp resampling; Pi's 5 Hz publication ceiling implies at least 5.8 seconds between first and last frame. This differs from the one-second offline windows. The ONNX wrapper also substitutes mean joint confidence for detector-box confidence. See `model_audit.md` and `ui_audit.md` for exact code locators.
+The September 19 deployment review covered earlier online adapters. Its frame-buffer and quality-input findings describe that earlier implementation. The current offline runtime uses timestamped one-second windows and a separate three-feature quality input. Current measured hardware and cloud results are listed below.
 
-Figure 1 is drawn from the implementation and all 12 primary MaskedBiMamba configurations. Figure 2 is an actual local idle-state screenshot. The additional brief screenshot shows an explicitly labeled synthetic application test. Local API/SSE/storage/acknowledgement were exercised; remote cloud operation, camera inference, latency, power and accuracy were not remeasured.
+The final manuscript now has eight figures: the model architecture, local/cloud data flow, recorded event interface, three model-result panels, the edge comparison, and cloud delivery. The event-interface image shows actual Pi prediction records in a local review instance; it is not a live camera or cloud screenshot.
 
 The old full Le2i--CAUCAFall result table and the superseded report snapshot remain in the private review archive rather than the public repository, keeping the A4 report and public source tree focused on the reviewed final version.
 
