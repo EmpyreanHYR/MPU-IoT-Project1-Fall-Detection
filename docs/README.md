@@ -29,8 +29,10 @@ Inputs: `results/verification/verified_summary.csv` and `results/edge/summary.js
 
 ## GitHub Pages
 
-Publish branch `main`, directory `/docs`. Expected site:
+Publish branch `main`, directory `/docs`. Published site (inherits the account’s existing Pages domain):
 
-https://empyreanhyr.github.io/MPU-IoT-Project1-Fall-Detection/
+https://yaoronghuang.top/MPU-IoT-Project1-Fall-Detection/
 
 This is a static project presentation. The live Raspberry Pi services and cloud backend are separate deployments and are not exposed by GitHub Pages.
+
+The default `https://empyreanhyr.github.io/MPU-IoT-Project1-Fall-Detection/` address redirects to the published site. HTTPS is enforced.
