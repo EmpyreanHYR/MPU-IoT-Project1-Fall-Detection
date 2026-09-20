@@ -2,9 +2,9 @@
 
 Camera-based fall detection with quality-aware temporal modeling, independent Raspberry Pi inference, and deferred cloud record delivery.
 
-**[Open the English project presentation](https://yaoronghuang.top/MPU-IoT-Project1-Fall-Detection/)**
+**[Open the English project presentation](https://empyreanhyr.github.io/MPU-IoT-Project1-Fall-Detection/)**
 
-The presentation includes 12 talk sections, speaker notes, mouse-line highlighting, interactive model/ablation/robustness charts, and a searchable appendix containing all 1,853 exported aggregate rows. It also includes the Raspberry Pi and cloud recovery evidence. Download or clone the repository and open [`docs/index.html`](docs/index.html) to use it locally without a CDN or backend.
+The presentation includes 12 paged slides, English speaker notes, a [Chinese speaker guide](docs/speaker-notes-zh.html), mouse-line highlighting, interactive model/ablation/robustness charts, and a searchable appendix containing all 1,853 exported aggregate rows. It also includes the Raspberry Pi and cloud recovery evidence. Download or clone the repository and open [`docs/index.html`](docs/index.html) to use it locally without a CDN or backend.
 
 ## Repository layout
 

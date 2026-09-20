@@ -50,18 +50,98 @@ $('latencyTable').innerHTML=publicTable(['Rank','Capture-to-cloud receipt (s)'],
 let page=0,filtered=[];
 function updateExplorer(reset=true){if(reset)page=0;const suite=$('suiteFilter').value,q=$('dataSearch').value.trim().toLowerCase();filtered=rows.filter(r=>(suite==='all'||r.suite===suite)&&(!q||`${r.group} ${r.metric}`.toLowerCase().includes(q)));const size=$('pageSize').value==='all'?Math.max(1,filtered.length):Number($('pageSize').value);const pages=Math.max(1,Math.ceil(filtered.length/size));page=Math.min(Math.max(0,page),pages-1);const selected=filtered.slice(page*size,(page+1)*size),body=$('dataTable').querySelector('tbody');body.replaceChildren();for(const r of selected){const tr=document.createElement('tr');tr.tabIndex=0;const values=[suiteNames[r.suite],r.group,r.metric,value(r.mean,6),value(r.sd,6),r.n];for(let i=0;i<values.length;i++){const td=document.createElement('td');td.textContent=values[i];if(i>=3)td.className='numeric';tr.append(td)}body.append(tr)}if(!selected.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.textContent='No matching rows. Try another filter.';tr.append(td);body.append(tr)}$('pageInfo').textContent=`${filtered.length? page*size+1:0}–${Math.min((page+1)*size,filtered.length)} of ${filtered.length} rows · page ${page+1}/${pages}`;$('dataCaption').textContent=`${suite==='all'?'All experiment suites':suiteNames[suite]} · values rounded to six decimal places`; $('previousPage').disabled=page===0;$('nextPage').disabled=page>=pages-1;}
 for(const id of ['suiteFilter','pageSize'])$(id).addEventListener('change',()=>updateExplorer());$('dataSearch').addEventListener('input',()=>updateExplorer());$('previousPage').onclick=()=>{page--;updateExplorer(false)};$('nextPage').onclick=()=>{page++;updateExplorer(false)};updateExplorer();
-const slides=[...document.querySelectorAll('.slide')],navLinks=[...document.querySelectorAll('.chapter-nav a')];let current=0,stage=false;
-function status(){slides.forEach((s,i)=>s.classList.toggle('current',i===current));navLinks.forEach((a,i)=>{a.classList.toggle('active',i===current);if(i===current)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});$('chapterStatus').textContent=(current===12?'Appendix':`${String(current+1).padStart(2,'0')} / 12`)+` · ${slides[current].dataset.title}`;$('prevSlide').disabled=current===0;$('nextSlide').disabled=current===slides.length-1;}
-function navigate(index){current=Math.max(0,Math.min(slides.length-1,index));status();history.replaceState(null,'','#'+slides[current].id);if(stage)window.scrollTo({top:0,behavior:'instant'});else slides[current].scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}
-navLinks.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();navigate(i)}));document.querySelectorAll('a[href^="#"]').forEach(a=>{if(a.closest('.chapter-nav')||a.classList.contains('skip'))return;a.addEventListener('click',e=>{const i=slides.findIndex(s=>'#'+s.id===a.getAttribute('href'));if(i>=0){e.preventDefault();navigate(i)}})});
-function toggleStage(force){stage=typeof force==='boolean'?force:!stage;document.body.classList.toggle('stage',stage);$('presentToggle').setAttribute('aria-pressed',String(stage));$('presentToggle').textContent=stage?'Overview':'Present';status();if(stage)window.scrollTo({top:0,behavior:'instant'});else slides[current].scrollIntoView({block:'start'});}
-$('presentToggle').onclick=()=>toggleStage();$('prevSlide').onclick=()=>navigate(current-1);$('nextSlide').onclick=()=>navigate(current+1);
-$('notesToggle').onclick=()=>{const enabled=document.body.classList.toggle('show-notes');$('notesToggle').setAttribute('aria-pressed',String(enabled));};
+// The deck always shows one page; expanded material can scroll inside it.
+const slides=[...document.querySelectorAll('.slide')],navLinks=[...document.querySelectorAll('.chapter-nav a')];
+let current=0;
+document.body.classList.add('deck');
+const menu=$('contentsDialog');
+slides.forEach((slide,i)=>{
+  const button=document.createElement('button');
+  button.textContent=`${i===12?'A':String(i+1).padStart(2,'0')} · ${slide.dataset.title}`;
+  button.onclick=()=>{menu.close();navigate(i)};
+  $('contentsList').append(button);
+});
+function status(){
+  slides.forEach((s,i)=>s.classList.toggle('current',i===current));
+  navLinks.forEach((a,i)=>{a.classList.toggle('active',i===current);if(i===current)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});
+  [...$('contentsList').children].forEach((b,i)=>b.setAttribute('aria-current',String(i===current)));
+  $('chapterStatus').textContent=(current===12?'Appendix':`${String(current+1).padStart(2,'0')} / 12`)+` · ${slides[current].dataset.title}`;
+  $('prevSlide').disabled=current===0;$('nextSlide').disabled=current===slides.length-1;
+}
+function navigate(index){
+  const next=Math.max(0,Math.min(slides.length-1,index));
+  if(next===current)return;
+  const direction=next>current?1:-1,old=slides[current];
+  if(old.contains(document.activeElement))$('main').focus({preventScroll:true});
+  current=next;status();slides[current].scrollTop=0;
+  history.replaceState(null,'','#'+slides[current].id);hideRuler();$('chartTooltip').hidden=true;
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)
+    slides[current].animate([{opacity:0,transform:`translateY(${direction*40}px)`},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'cubic-bezier(.2,.65,.3,1)'});
+}
+document.querySelectorAll('a[href^="#"]').forEach(a=>{if(a.classList.contains('skip'))return;a.addEventListener('click',e=>{const i=slides.findIndex(s=>'#'+s.id===a.getAttribute('href'));if(i>=0){e.preventDefault();navigate(i)}})});
+$('contentsToggle').onclick=()=>menu.showModal();$('closeContents').onclick=()=>menu.close();
+menu.addEventListener('click',e=>{if(e.target===menu)menu.close()});
+$('prevSlide').onclick=()=>navigate(current-1);$('nextSlide').onclick=()=>navigate(current+1);
+$('notesToggle').onclick=()=>{const enabled=document.body.classList.toggle('show-notes');$('notesToggle').setAttribute('aria-pressed',String(enabled));hideRuler();};
 $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(_){$('fullscreen').textContent='Use browser full screen';}};
 $('printPage').onclick=()=>window.print();
-let scrollFrame=false;window.addEventListener('scroll',()=>{hideRuler();if(stage||scrollFrame)return;scrollFrame=true;requestAnimationFrame(()=>{let best=0;slides.forEach((s,i)=>{if(s.getBoundingClientRect().top<window.innerHeight*.4)best=i});if(best!==current){current=best;status()}scrollFrame=false;})},{passive:true});
-document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,select,textarea,summary,dialog'))return;if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();navigate(current+1)}if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();navigate(current-1)}if(e.key.toLowerCase()==='n')$('notesToggle').click();if(e.key.toLowerCase()==='h'){$('highlightToggle').checked=!$('highlightToggle').checked;hideRuler()}if(e.key==='Escape'&&stage)toggleStage(false);});
+document.addEventListener('scroll',()=>{hideRuler();$('chartTooltip').hidden=true},{capture:true,passive:true});
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]')||e.target.closest('input,select,textarea,summary,[contenteditable="true"]'))return;
+  const targets={ArrowRight:current+1,PageDown:current+1,ArrowLeft:current-1,PageUp:current-1,Home:0,End:slides.length-1};
+  if(e.key in targets){e.preventDefault();navigate(targets[e.key])}
+  if(e.key.toLowerCase()==='n')$('notesToggle').click();
+  if(e.key.toLowerCase()==='h'){$('highlightToggle').checked=!$('highlightToggle').checked;hideRuler()}
+});
+// Native scroll takes priority inside the current page and data panes.
+function canScroll(target,delta,axis='y'){
+  for(let el=target;el&&el!==document.body;el=el.parentElement){
+    const css=getComputedStyle(el),overflow=axis==='y'?css.overflowY:css.overflowX;
+    const pos=axis==='y'?el.scrollTop:el.scrollLeft;
+    const max=axis==='y'?el.scrollHeight-el.clientHeight:el.scrollWidth-el.clientWidth;
+    if(/auto|scroll/.test(overflow)&&max>2&&(delta>0?pos<max-2:pos>2))return true;
+  }
+  return false;
+}
+let wheelLast=0,wheelTotal=0,wheelConsumed=false,wheelDirection=0,turnedAt=0;
+$('main').addEventListener('wheel',e=>{
+  if(e.ctrlKey||document.querySelector('dialog[open]')||e.target.closest('input,select,textarea'))return;
+  if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
+  const now=performance.now(),direction=Math.sign(e.deltaY);
+  if(now-wheelLast>200){wheelTotal=0;wheelConsumed=false;wheelDirection=direction}
+  wheelLast=now;
+  if(canScroll(e.target,e.deltaY)){wheelConsumed=true;return}
+  e.preventDefault();
+  // Ignore trackpad momentum until the user starts a fresh gesture.
+  if(wheelConsumed||now-turnedAt<550)return;
+  if(direction!==wheelDirection){wheelTotal=0;wheelDirection=direction}
+  wheelTotal+=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
+  if(Math.abs(wheelTotal)>=55){navigate(current+direction);wheelConsumed=true;turnedAt=now}
+},{passive:false});
+let swipe=null;
+$('main').addEventListener('touchstart',e=>{
+  swipe=null;
+  if(e.touches.length!==1||e.target.closest('button,a,input,select,textarea,summary,dialog'))return;
+  const t=e.touches[0];swipe={x:t.clientX,y:t.clientY,target:e.target,time:performance.now(),scrollUp:canScroll(e.target,-1),scrollDown:canScroll(e.target,1),horizontalPane:!!e.target.closest('.table-wrap,.chart,pre,.formula')};
+},{passive:true});
+$('main').addEventListener('touchmove',e=>{
+  if(!swipe||e.touches.length!==1)return;
+  const dx=swipe.x-e.touches[0].clientX,dy=swipe.y-e.touches[0].clientY;
+  const horizontal=Math.abs(dx)>Math.abs(dy)*1.4&&!swipe.horizontalPane;
+  const vertical=Math.abs(dy)>Math.abs(dx)*1.4&&!(dy>0?swipe.scrollDown:swipe.scrollUp);
+  if((horizontal&&Math.abs(dx)>15)||(vertical&&Math.abs(dy)>15))e.preventDefault();
+},{passive:false});
+$('main').addEventListener('touchend',e=>{
+  if(!swipe)return;
+  const start=swipe;swipe=null;
+  if(e.changedTouches.length!==1||performance.now()-start.time>900||getSelection().toString())return;
+  const dx=start.x-e.changedTouches[0].clientX,dy=start.y-e.changedTouches[0].clientY;
+  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4&&!start.horizontalPane)navigate(current+Math.sign(dx));
+  else if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)*1.4&&!(dy>0?start.scrollDown:start.scrollUp))navigate(current+Math.sign(dy));
+},{passive:true});
+$('main').addEventListener('touchcancel',()=>{swipe=null},{passive:true});
 const initial=slides.findIndex(s=>'#'+s.id===location.hash);if(initial>=0)current=initial;status();
+window.addEventListener('hashchange',()=>{const i=slides.findIndex(s=>'#'+s.id===location.hash);if(i>=0)navigate(i)});
 // A reading ruler follows the actual rendered text line under the pointer.
 const ruler=$('readingLine');function hideRuler(){ruler.style.display='none'}let pointer=null,pointerScheduled=false;
 document.addEventListener('pointermove',e=>{pointer=e;if(pointerScheduled)return;pointerScheduled=true;requestAnimationFrame(()=>{pointerScheduled=false;const ev=pointer;if(!$('highlightToggle').checked||ev.pointerType==='touch'||ev.target.closest('button,a,input,select,summary,table,svg,nav,header,footer,dialog')){hideRuler();return}const block=ev.target.closest('p,li,h1,h2,h3,.formula');if(!block||!block.closest('main')){hideRuler();return}const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);let node,bounds=[];while(node=walker.nextNode()){if(!node.textContent.trim())continue;const range=document.createRange();range.selectNodeContents(node);for(const rect of range.getClientRects())if(ev.clientY>=rect.top-2&&ev.clientY<=rect.bottom+2)bounds.push(rect);}if(!bounds.length){hideRuler();return}const box=block.getBoundingClientRect(),top=Math.min(...bounds.map(b=>b.top)),bottom=Math.max(...bounds.map(b=>b.bottom));Object.assign(ruler.style,{display:'block',left:Math.max(0,box.left-5)+'px',top:top-2+'px',width:Math.min(box.width+10,innerWidth-Math.max(0,box.left-5))+'px',height:bottom-top+4+'px'});});});
