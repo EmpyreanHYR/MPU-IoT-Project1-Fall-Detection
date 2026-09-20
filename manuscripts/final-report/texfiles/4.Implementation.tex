@@ -1,28 +1,22 @@
-\section{System Implementation}
+\subsection{Offline inference and hardware acceleration}
 
-\subsection{Edge Pose Node and Transport}
+The implementation reuses Ultralytics pose estimation~\cite{ultralyticsPose}, the Hailo inference runtime, and Mamba state-space operators~\cite{gu2023mamba}; TCNTE~\cite{yu2025tcnte} provides a comparison baseline. Our work combines bidirectional temporal processing, attention, masking, and pose-quality pooling, and integrates the classifier with local alert storage, deferred cloud synchronization, and the monitoring interface.
 
-The edge implementation targets a Raspberry Pi~5, USB camera, and YOLO26n-pose model~\cite{jocher2026yolo26}. The sender selects the highest-confidence person, normalizes 17 COCO keypoints, computes confidence summaries, and publishes at most five pose packets per second. Old packets are dropped on congestion. An optional annotated preview is relayed in memory for authenticated viewing and is separate from the inference packet.
+The edge runtime reads a USB camera or a local video. FFmpeg decodes AV1 inputs and preserves their presentation timestamps. YOLOv8s-pose on Hailo produces 17 COCO keypoints and a person confidence. HailoRT converts the network outputs to floating-point tensors before bounding-box and keypoint decoding. The highest-confidence person supplies the 12 body joints used by the temporal model. A CPU ONNX pose backend supports operation without the accelerator.
 
-The available AI HAT+~2 contains a Hailo-10H accelerator, but the recorded Hailo pose trial returned invalid landmark coordinates from the installed postprocessor. The software YOLO26n-pose sender is therefore the documented usable path. Accelerator speed is not inferred from this incomplete integration. The private Tailscale relay authenticates packets; the cloud puller rejects stale sequence numbers and sends fresh observations to a loopback backend. Separate credentials protect the two hops, and the public HTTPS gateway blocks pose-ingestion routes.
+A timestamped buffer forms one-second windows up to five times per second. Each window is interpolated to 30 samples and normalized as in training. The three quality features of Eq.~\eqref{eq:quality_features} form the quality input. ONNX Runtime executes MaskedBiMamba locally on the Pi CPU. Camera acquisition runs in a separate thread so that a slow inference call does not accumulate old images.
 
-\subsection{Cloud Service and Operating Interface}
+\subsection{Record storage and synchronization}
 
-Deployment notes describe a Python~3.11 backend on an OpenCloudOS~9 cloud VM, with SQLite event storage and an authenticated Nginx HTTPS gateway. Server-Sent Events (SSE) update the dashboard. Both Pi COCO packets and browser landmarks can enter the selected temporal-model adapter. When its runtime or inference is unavailable, the Pi path falls back to an explicitly labeled geometry baseline. Model selection and initialization status must therefore be checked before interpreting a score.
+SQLite commits each prediction together with its updated alert state. A separate outbox service exposes pending records through the private network. The cloud importer stores each record once and retains the original observation time; repeated delivery does not create duplicate events. The sender marks records as delivered only after the cloud confirms its database transaction. Polling resumes automatically after connectivity returns, with pending batches drained before returning to the normal polling interval.
 
-The live model catalog references September~16 course-trained checkpoints, including MaskedBiMamba; these belong to the earlier Le2i--CAUCAFall experiment. They are not the September~18 subject-disjoint primary checkpoints evaluated in Section~\ref{sec:experiments}. The browser path uses MediaPipe landmarks and the Pi path uses YOLO26n-pose; the offline experiments use YOLOv8s-pose caches. The live adapter takes the latest 30 received frames without timestamp resampling. At the Pi limit of 5~Hz, their first-to-last span is at least 5.8~s, whereas training resamples a 1~s window. Extractor and temporal-scale differences require validation before transferring offline results.
+\subsection{Detection interface}
 
-Figure~\ref{fig:dashboard} shows the actual operating interface captured from an isolated local backend during this review. The operator selects a model, checks readiness, selects a camera source, and inspects the preview, pose panel, probability, and alert state. Alert history supports acknowledgement with notes, and Pi controls expose camera start/stop. In the captured session, the Pi relay was not configured and the model runtime was unavailable; no live prediction is claimed. A separate, explicitly labeled synthetic replay exercised event creation, SSE delivery, SQLite persistence, and acknowledgement. It validates application behavior, not fall-recognition accuracy or current remote-cloud availability.
+Figure~\ref{fig:dashboard} shows the monitoring interface. The operator selects an input source, views the pose and fall probability, and reviews the current alert state. Event history supports acknowledgement with notes. Camera start and stop controls are available for the Pi input. A separate local page displays annotated camera frames, current classification, and pending-record counts directly on the Pi during network outages. Local integration tests cover alert transitions, record persistence across restarts, retry handling, and acknowledgement.
 
-\begin{figure*}[tp]
+\begin{figure}[tbp]
     \centering
-    \includegraphics[width=0.96\textwidth,height=0.38\textheight,keepaspectratio]{figs/detection_system_ui_reviewed.png}
-    \caption{Actual FallGuard operation interface from a local review session (September~19, 2026). Camera selection and controls, pose display, and current decision are visible. The camera and pose panels are idle: this local session had neither a configured Pi relay nor an available model runtime. This screenshot is interface evidence, not a cloud deployment benchmark.}
+    \includegraphics[width=\columnwidth]{figs/detection_system_edge_records.png}
+    \caption{FallGuard event interface displaying actual Raspberry Pi predictions on OmniFall-Synthetic videos. The local review instance shows the event timeline, model score, original recording time, and acknowledgement controls.}
     \label{fig:dashboard}
-\end{figure*}
-
-\subsection{Reused Components and Project Additions}
-
-The TCNTE paper and repository provide the baseline architecture~\cite{yu2025tcnte,tcnteCode}. The project reimplements its training pipeline with raw logits, a held-out validation split, and explicit configuration; it uses the paper's kernel size~5 rather than the released code's size~3. Ultralytics provides pretrained pose estimation~\cite{ultralyticsPose}, and \texttt{mamba-ssm} provides Mamba layers~\cite{mambaCode}. The ONNX wrapper uses mean joint confidence in place of detector-box confidence for its third quality feature. The project adds dataset adapters, frozen window protocols, confidence features, bidirectional fusion, quality pooling, retrained ablations, robustness evaluation, edge transport, the alert state machine, storage, and the dashboard. MaskedBiMamba is inspired by Fall-Mamba and is not its multimodal reproduction.
-
-The project workspace contains \path{code/src/fallbench/models.py}, \path{engine.py}, frozen YAML configurations, and training/evaluation entry points. \path{webui/server.py}, \path{cloud_model.py}, and the edge/cloud subdirectories implement the demonstration. Dependency files and basic commands are in \path{code/README.md}, \path{webui/README.md}, and the reviewed report README. Per-run configurations, predictions, and metrics provide experiment provenance; the missing raw caches and original fold manifests must be restored for a full training replay.
+\end{figure}

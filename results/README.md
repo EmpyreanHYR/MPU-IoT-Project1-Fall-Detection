@@ -13,3 +13,5 @@ This directory contains compact CSV summaries used by the final report. It exclu
 
 Each experiment folder contains `all_runs.csv` and/or `summary.csv`. See [`manuscripts/final-report/RESULTS_PROVENANCE.md`](../manuscripts/final-report/RESULTS_PROVENANCE.md) for interpretation limits and completeness counts.
 
+
+The [`edge/`](edge/) folder adds measured local-inference, synthetic-clip, short-session stability and cloud-delivery evidence. These are system measurements with their own sample sizes and must not be pooled with model cross-validation results.

@@ -1,0 +1,182 @@
+{
+  "timing": {
+    "cpu": {
+      "fps": {
+        "mean": 1.72995589813436,
+        "sample_sd": 0.022230981760589106
+      },
+      "pose_median_ms": {
+        "mean": 527.1484347467776,
+        "sample_sd": 2.4918553310780682
+      },
+      "classifier_median_ms": {
+        "mean": 9.282898012315854,
+        "sample_sd": 1.8331238159051928
+      },
+      "cpu_percent_one_core": {
+        "mean": 356.5853915809981,
+        "sample_sd": 2.309073594570288
+      },
+      "rss_mib": {
+        "mean": 261.9765625,
+        "sample_sd": 1.041112203624429
+      },
+      "measured_frames": 648,
+      "replays": 8,
+      "pose_p50_ms": 527.5385460117832,
+      "pose_p95_ms": 893.2010236312635
+    },
+    "hailo": {
+      "fps": {
+        "mean": 20.56472225390005,
+        "sample_sd": 0.3912745741367151
+      },
+      "pose_median_ms": {
+        "mean": 37.5559055028134,
+        "sample_sd": 0.3990764993318601
+      },
+      "classifier_median_ms": {
+        "mean": 7.7001653698971495,
+        "sample_sd": 0.42789916991240035
+      },
+      "cpu_percent_one_core": {
+        "mean": 44.58502789553796,
+        "sample_sd": 1.4733853267987873
+      },
+      "rss_mib": {
+        "mean": 200.8359375,
+        "sample_sd": 1.951597617063664
+      },
+      "measured_frames": 648,
+      "replays": 8,
+      "pose_p50_ms": 37.51037048641592,
+      "pose_p95_ms": 40.61197925766464
+    },
+    "speedup": 11.887425729221022
+  },
+  "synthetic": {
+    "clips": 40,
+    "classified_clips": 39,
+    "coverage": 0.975,
+    "frames": 3240,
+    "valid_pose_frames": 3154,
+    "predictions": 663,
+    "confusion_matrix_true_rows_predicted_columns": [
+      [
+        11,
+        8,
+        1
+      ],
+      [
+        0,
+        20,
+        0
+      ]
+    ],
+    "columns": [
+      "non_fall",
+      "fall",
+      "no_output"
+    ],
+    "accuracy_on_classified": 0.7948717948717948,
+    "correct_fraction_all_clips": 0.775,
+    "precision": 0.7142857142857143,
+    "recall": 1.0,
+    "specificity_on_classified": 0.5789473684210527,
+    "f1": 0.8333333333333334
+  },
+  "stability": {
+    "duration_s": 603.8200568879838,
+    "frames": 11016,
+    "predictions": 2312,
+    "completed_replays": 136,
+    "analysis": {
+      "replay_fps_mean": 20.894561814714653,
+      "replay_fps_sd": 0.3217926357526393,
+      "overall_fps_including_clip_opening": 18.243845785406904,
+      "temperature_min_c": 52.9,
+      "temperature_max_c": 57.85,
+      "rss_min_mib": 143.875,
+      "rss_max_mib": 150.53125,
+      "rss_after_warmup_growth_mib": 0.21875,
+      "throttled_samples": 0
+    }
+  },
+  "recovery": {
+    "committed_records_recovered": 100,
+    "cloud_records_matched": 85,
+    "replayed_without_duplicates": 34,
+    "outage_s": 30,
+    "backlog_records": 17,
+    "pending_samples": [
+      {
+        "elapsed_s": 0.9876094833016396,
+        "pending": 17
+      },
+      {
+        "elapsed_s": 2.2144560031592846,
+        "pending": 17
+      },
+      {
+        "elapsed_s": 2.8277968876063824,
+        "pending": 0
+      }
+    ],
+    "connected_latency_s": [
+      0.213,
+      0.32,
+      0.418,
+      0.475,
+      0.583,
+      0.668,
+      0.725,
+      0.833,
+      0.918,
+      0.975,
+      1.083,
+      1.099,
+      1.168,
+      1.225,
+      1.333,
+      1.349,
+      1.418,
+      1.475,
+      1.583,
+      1.599,
+      1.668,
+      1.725,
+      1.833,
+      1.849,
+      1.918,
+      1.975,
+      2.083,
+      2.099,
+      2.168,
+      2.225,
+      2.349,
+      2.599,
+      2.849,
+      3.099
+    ],
+    "latency_summary": {
+      "n": 34,
+      "median_s": 1.4465,
+      "p95_s": 2.6864999999999997,
+      "max_s": 3.099,
+      "metric": "last source frame capture to cloud receipt timestamp"
+    }
+  },
+  "protocol": {
+    "synthetic_clips": 40,
+    "timing_replays_per_backend": 8,
+    "timing_clips": 4,
+    "timing_repetitions": 2,
+    "pose_model": "YOLOv8s-pose",
+    "input_shape": [
+      640,
+      640
+    ],
+    "classifier": "MaskedBiMamba",
+    "network_isolation": "No external interface or route during the offline benchmark"
+  }
+}

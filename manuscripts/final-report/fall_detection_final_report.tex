@@ -114,7 +114,7 @@
 \usepackage{orcidlink}                  % ORCID链接
 \usepackage{enumitem}                   % 列表环境定制
 % \usepackage{siunitx}                  % 国际单位制符号
-% \usepackage{tikz}                     % 绘图宏包
+\usepackage{tikz}                     % 绘图宏包
 
 % ==================== 自定义命令 ====================
 % BibTeX标志
@@ -150,9 +150,10 @@
 % \newcommand{\important}[1]{\textbf{#1}}  % 重要内容
 % \newcommand{\term}[1]{\textit{#1}}       % 术语
 
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
 \begin{document}
 
-\title{Privacy-Oriented Edge--Cloud Fall Detection\\
+\title{Privacy-Oriented Edge-Cloud Fall Detection\\
 with Quality-Aware Bidirectional Temporal Modeling}
 
 \author{
@@ -170,9 +171,9 @@ Macao Polytechnic University, Macao SAR, China}
 
 \input{texfiles/2.Introduction}
 
-\input{texfiles/3.System_Overview}
-
 \input{texfiles/3.Methodology}
+
+\input{texfiles/3.System_Overview}
 
 \input{texfiles/4.Implementation}
 

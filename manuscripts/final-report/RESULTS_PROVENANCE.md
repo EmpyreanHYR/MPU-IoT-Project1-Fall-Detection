@@ -45,3 +45,7 @@ Current deployment catalog entries belong to September 16, not the September 18 
 Figure 1 is drawn from the implementation and all 12 primary MaskedBiMamba configurations. Figure 2 is an actual local idle-state screenshot. The additional brief screenshot shows an explicitly labeled synthetic application test. Local API/SSE/storage/acknowledgement were exercised; remote cloud operation, camera inference, latency, power and accuracy were not remeasured.
 
 The old full Le2i--CAUCAFall result table and the superseded report snapshot remain in the private review archive rather than the public repository, keeping the A4 report and public source tree focused on the reviewed final version.
+
+## Current edge deployment evidence
+
+The current source includes the completed Raspberry Pi and cloud results. Public values and protocol definitions are available in [`results/edge/`](../../results/edge/). There are 39 classified clips out of 40, with 20 TP, 11 TN, 8 FP and one no-output clip. The paired Hailo/CPU throughput comparison, 603.8-second replay, writer recovery and deployed cloud retry/outage observations are summarized separately from the model cross-validation experiments. Source figures use PNG for this repository's source-only distribution.

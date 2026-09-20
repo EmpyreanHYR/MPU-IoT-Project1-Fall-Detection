@@ -1,26 +1,37 @@
-\section{System Overview}
+\section{System design}
+\label{sec:system}
 
-The system follows the complete IoT path from sensing to user output: camera input, edge pose extraction, private feature transfer, cloud inference, persistent event management, and dashboard notification. The edge--cloud partition is summarized in Table~\ref{tab:system_partition}. Continuous RGB video is used only for local pose estimation and an optional authenticated live preview; the temporal fall detector receives normalized keypoints, confidence values, timing information, and device telemetry.
+FallGuard performs pose extraction and temporal classification on the Raspberry Pi. The Hailo accelerator runs the pose network, while the Pi CPU evaluates a one-second skeleton window with MaskedBiMamba. The local alert state and prediction records remain available during network outages. When connectivity returns, a synchronization service transfers pending records to the cloud for event history and dashboard updates. Figure~\ref{fig:edge_flow} shows this data flow.
 
-\begin{table*}[tp]
-    \centering
-    \small
-    \caption{Edge--cloud partition and information flow in the implemented prototype.}
-    \label{tab:system_partition}
-    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{4.7cm}X}
-        \toprule
-        Stage & Component & Main operation & Data passed to the next stage \\
-        \midrule
-        Input & USB camera & Captures the monitored indoor scene & RGB frames remain on the edge device \\
-        Edge processing & Raspberry Pi~5 & Detects the primary person and extracts 17 COCO keypoints, confidence, and pose quality & Timestamped pose packet without direct identity fields \\
-        Private transport & Tailscale relay and cloud puller & Authenticates packets, rejects stale sequence numbers, and forwards fresh observations & Keypoints, quality, sequence number, and telemetry \\
-        Cloud processing & Temporal-model service & Buffers pose frames, performs fall inference, and updates the alert state machine & Fall probability and alert transition \\
-        Cloud backend & Python API and SQLite & Stores alert transitions, acknowledgements, and recent device state & Persistent event record and live snapshot \\
-        Output & HTTPS dashboard and SSE & Displays camera/pose status, model output, event history, and acknowledgement controls & User-visible warning and audit trail \\
-        \bottomrule
-    \end{tabularx}
-\end{table*}
+\begin{figure*}[tp]
+\centering
+\begin{tikzpicture}[font=\small,box/.style={draw,rounded corners=2pt,align=center,minimum height=0.85cm,text width=2.25cm,fill=blue!4},arr/.style={-{Latex[length=2mm]},thick}]
+\node[box] (camera) {Camera or local video};
+\node[box,right=0.35cm of camera] (pose) {YOLOv8 pose\\Hailo / CPU};
+\node[box,right=0.35cm of pose] (model) {1-s pose window\\MaskedBiMamba};
+\node[box,right=0.35cm of model] (queue) {Local alert state\\SQLite records};
+\draw[arr] (camera)--(pose);\draw[arr] (pose)--(model);\draw[arr] (model)--(queue);
+\node[box,below=1.2cm of queue,fill=orange!6] (cloud) {Cloud event store\\and dashboard};
+\draw[arr] ([xshift=-.35cm]queue.south)--node[left,font=\footnotesize,align=right]{Pending records\\on reconnection}([xshift=-.35cm]cloud.north);
+\draw[arr] ([xshift=.35cm]cloud.north)--node[right,font=\footnotesize]{Acknowledgement}([xshift=.35cm]queue.south);
+\begin{scope}[on background layer]
+\node[draw,dashed,rounded corners,fit=(camera)(pose)(model)(queue),inner sep=8pt,label=above:{Raspberry Pi: inference continues without a network}] {};
+\end{scope}
+\end{tikzpicture}
+\caption{Local inference and deferred cloud synchronization. CPU pose estimation provides a fallback when the Hailo backend is unavailable. Cloud acknowledgement follows durable storage, allowing safe retries after an interrupted transfer.}
+\label{fig:edge_flow}
+\end{figure*}
 
-The design separates privacy-sensitive perception from temporal decision making. Raw camera frames are not stored by the application backend, and normal inference packets contain no names or video URLs. The cloud is responsible for temporal context, event persistence, and multi-client access, while the edge remains responsible for camera acquisition and pose extraction. This division reduces upstream data volume and limits routine cloud processing to derived body-motion features. Skeletons can still reveal behavior or identity-related information; this is data minimization, not a formal anonymity guarantee. The optional authenticated preview sends image pixels through the cloud in memory and is an explicit exception to pose-only transport.
+Routine synchronization transfers pose features and classification records. An authenticated preview can relay annotated images for monitoring; preview frames are held temporarily and kept separate from the event archive.
 
-The alert logic converts model probabilities into \textsc{Normal}, \textsc{Suspected}, \textsc{Confirmed}, and \textsc{Cleared} states. The implementation enters suspicion at probability at least 0.65 and confirms after at least two consecutive observations at or above 0.65 when the current probability is at least 0.82. Two consecutive observations at or below 0.35 clear an active event. Intermediate probabilities reset both counters. These operational thresholds differ from the offline metric threshold of 0.5. Alert acknowledgement is stored separately from model evidence so that a user action does not alter the original prediction history. Thresholds used by the current dashboard support system demonstration; deployment-specific calibration remains part of the planned evaluation.
+\subsection{Alert-state transitions}
+
+The edge node converts a sequence of fall probabilities into \textsc{Normal}, \textsc{Suspected}, \textsc{Confirmed}, and \textsc{Cleared} states. Let $p_k$ be the probability of the $k$th locally classified window. The high- and low-probability counters are
+\begin{equation}
+\begin{aligned}
+ c_k^+ &= \mathbf{1}[p_k\geq0.65](c_{k-1}^++1),\\
+ c_k^- &= \mathbf{1}[p_k\leq0.35](c_{k-1}^-+1).
+\end{aligned}
+\label{eq:alert_counters}
+\end{equation}
+A high observation opens a suspected event. Confirmation requires $c_k^+\geq2$ and $p_k\geq0.82$; $c_k^-\geq2$ clears an active event. Requiring consecutive high-probability observations prevents an isolated spike from confirming an event. Acknowledgement and user notes are stored with the event, separately from the prediction sequence.

@@ -1,63 +1,125 @@
-\section{Temporal Detection Method}
+\section{MaskedBiMamba for skeleton-based fall detection}
+\label{sec:method}
 
-\subsection{Data and Pose Caching}
+\subsection{Pose representation and temporal windows}
 
-The study uses CAUCAFall and GMDCSA-24 for the new subject-disjoint primary experiment and reserves Le2i for the TCNTE reproduction and cross-dataset evaluation, as summarized in Table~\ref{tab:datasets}. Le2i was introduced as a realistic single-camera fall-detection benchmark with changes in scene, viewpoint, clothing, illumination, shadow, and occlusion~\cite{charfi2012le2i}. The released annotated subset used by TCNTE is commonly reported as 191 videos (48 ADL and 143 fall videos), recorded at $320\times240$ pixels and 25 fps~\cite{yu2025tcnte}. The project copy was obtained from the Kaggle Le2i mirror and checked against the original dataUBFC catalogue entry~\cite{le2iKaggle2023,le2iDataUBFC2024}. It contained 190 decodable videos distributed over six recording-scene groups. Because reliable participant identifiers were absent from this copy, Le2i is not mixed into the subject-disjoint primary folds.
-
-CAUCAFall was collected in an intentionally uncontrolled home environment. Ten participants each performed five fall types---forward, backward, left, right, and from sitting---and five ADLs---walking, hopping, picking up an object, sitting, and kneeling~\cite{guerrero2022caucafall}. We used the 100 videos in the official Mendeley Data version~5 release~\cite{caucafallDatasetV5}. They were recorded at $1080\times960$ pixels and 23 fps under natural, artificial, and night lighting, with variation in clothing, occlusion, background motion, fall angle, and camera distance. Subject folders are retained, enabling subject-disjoint folds. CAUCAFall additionally provides frame-level fall/no-fall and person-region labels, although this work uses the videos and temporal labels rather than training a frame detector.
-
-GMDCSA-24 contributes 160 videos from four subject folders. The audited project copy contains 81 ADL videos and 79 fall videos, and every video passed a full decode audit before pose extraction. The dataset article is identified by DOI \href{https://doi.org/10.1016/j.dib.2024.110892}{10.1016/j.dib.2024.110892}; the corresponding versioned dataset is available from \href{https://doi.org/10.5281/zenodo.12921216}{Zenodo}~\cite{alam2024gmdcsa,gmdcsaDatasetV2}.
-
-Temporal activity intervals for all three datasets came from the corresponding Le2i, CAUCAFall, and GMDCSA-24 label files in OmniFall~\cite{omnifallDataset2026}. Each label table was joined to local video paths through an explicit path map: all 190 Le2i, 100 CAUCAFall, and 160 GMDCSA-24 videos matched. The OmniFall download also contained 12,000 OF-Synthetic videos, but no synthetic video appears in a segment manifest, fold, or training run. Thus, OmniFall contributes annotation normalization only, not synthetic training samples, to the experiments in this paper.
-
-\begin{table*}[tp]
-    \centering
-    \small
-    \caption{Datasets used in this study. ``Reported'' describes the source publication or commonly used released subset; ``used'' is the number successfully processed by our pipeline.}
-    \label{tab:datasets}
-    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{2.8cm}X}
-        \toprule
-        Dataset & Videos & Subjects/groups & ADL/fall types & Resolution and rate & Role in this study \\
-        \midrule
-        Le2i & 191 reported (48/143 ADL/fall); 190 used & 9 subjects reported; 6 scene groups available & 6 ADL / 3 fall types & $320\times240$, 25 fps & TCNTE reproduction and external test \\
-        CAUCAFall & 100 reported and used (50/50 ADL/fall) & 10 subject groups & 5 ADL / 5 fall types & $1080\times960$, 23 fps & Primary training, validation, and test folds \\
-        GMDCSA-24 & 160 used (81/79 ADL/fall) & 4 subject groups & Dataset-labelled ADL / falls & Full decode verified & Primary training, validation, and test folds \\
-        \bottomrule
-    \end{tabularx}
-\end{table*}
-
-The resulting 450 videos contain 967 Le2i, 258 CAUCAFall, and 458 GMDCSA-24 annotation segments. Pose extraction produced one validated cache per video: 450 unique cache records with finite arrays and consistent shapes. The positive label \emph{fall} denotes the dynamic transition; post-fall \emph{fallen} intervals are not merged into the positive class. A pretrained YOLOv8s-pose model~\cite{ultralyticsPose} with BoT-SORT tracking extracts one primary person track per video. Each cache stores timestamps, 17 COCO keypoints and their confidence values, a normalized person box, detector confidence, and the track identifier. Raw RGB frames are used only during this pose-extraction stage; the temporal classifiers train on cached pose arrays rather than the videos.
-
-Only the 12 non-face body joints are used by the temporal classifiers. For each frame, coordinates are independently min--max normalized over the retained joints. The TCNTE reproduction uses $(x,y)$ and therefore has 24 input features per frame. The primary protocol additionally uses pose confidence, yielding 36 features. Three observation-quality features are retained at each time step: mean keypoint confidence, the proportion of joints with confidence at least 0.2, and person-box confidence.
-
-\subsection{Window Construction and Data Splits}
-
-Each window spans 1.0~s, consecutive windows begin 0.2~s apart, and every window is linearly resampled to 30 time steps. A window is positive when at least 50\% of its duration overlaps a fall segment. Windows with nonzero but sub-threshold overlap are discarded to avoid ambiguous transition labels. For videos containing a fall, all frozen protocols enable \texttt{exclude\_after\_fall}: windows beginning at or after the end of the last annotated fall transition are excluded. Consequently, prolonged post-fall lying is not evaluated as a positive event.
-
-Two protocols are reported separately. The paper-aligned TCNTE reproduction and external benchmark use the 12,650 Le2i windows: 1,338 positive and 11,312 negative. The new primary protocol combines CAUCAFall and GMDCSA-24 in four subject-disjoint folds. CAUCAFall is grouped by its 10 subject identifiers and GMDCSA-24 by its four subject folders. Dataset names prefix every group identifier to prevent accidental collisions; every train, validation, and test partition contains both datasets, and no subject occurs in more than one partition within a fold.
-The frozen primary manifest contains 7,869 windows: 1,371 positive and 6,498 negative. Each fold assigns the same window definitions to train, validation, and test only after group-level partitioning, so overlapping windows from one video never cross splits. Le2i is evaluated separately with all 12,650 windows marked as external test data; it is never used to fit the CAUCAFall--GMDCSA-24 models.
-
-\subsection{Compared Temporal Models}
-
-All models receive the same window manifest within a protocol. The TCN contains three residual temporal blocks with channels $[8,16,32]$, kernel size 5, dilations $1,2,4$, and dropout 0.2. The Transformer encoder (TE) linearly projects each frame to 32 dimensions, adds learned positional encoding, and applies one four-head encoder layer with a feed-forward width of 32. TCNTE passes the TCN sequence to the same encoder before temporal mean pooling.
-
-The state-space baseline, UniMamba, projects each frame to 64 dimensions and uses two unidirectional Mamba layers with state size 16, convolution width 4, and expansion factor 2. Figure~\ref{fig:masked_bimamba} details the proposed MaskedBiMamba. During training, each frame is independently zeroed with probability 0.15, while at least one frame is retained. A 36-to-64 projection and learned positional encoding precede four-head temporal self-attention with a residual connection and layer normalization. Independent forward and reverse stacks each contain two residual Mamba layers (state size 16, convolution width 4, expansion 2). The reversed output is restored to the original time order; concatenated 128-dimensional features are projected to 64 dimensions and normalized. The three quality features are not zeroed by the training-time frame mask. A learned scalar gate $a_t$ is computed from the three-dimensional quality vector $\mathbf q_t$ and used for temporal aggregation:
+The model receives a sequence of estimated human poses. We retain $J=12$ body joints, excluding the five facial keypoints. Let $r_{t,j}^{(a)}$ be joint $j$'s coordinate along axis $a\in\{x,y\}$ at time $t$, and $c_{t,j}\in[0,1]$ its confidence. Each axis is normalized within a frame:
 \begin{equation}
-    \mathbf z = \frac{\sum_{t=1}^{T} a_t\mathbf h_t}{\sum_{t=1}^{T}a_t},
-    \qquad
-    a_t = \max\!\left(10^{-6},\sigma(g(\mathbf q_t))\right).
+    \bar r_{t,j}^{(a)}=
+    \frac{r_{t,j}^{(a)}-\min_k r_{t,k}^{(a)}}
+    {\max\!\left(\max_k r_{t,k}^{(a)}-\min_k r_{t,k}^{(a)},10^{-4}\right)}.
+    \label{eq:pose_normalization}
 \end{equation}
-The quality network has widths $3\rightarrow32\rightarrow1$ with ReLU and sigmoid, and the final linear layer maps $\mathbf z$ from 64 dimensions to two logits. The softmax fall probability is used for evaluation. Masking is disabled at test time. Bidirectionality operates inside a complete buffered window; it does not establish frame-by-frame causal or zero-latency inference. This skeleton model is inspired by masked Mamba modeling but is not presented as an exact reproduction of the multimodal Fall-Mamba architecture.
+The frame vector $\mathbf x_t=[\bar r_{t,j}^{(x)},\bar r_{t,j}^{(y)},c_{t,j}]_{j=1}^{J}\in\mathbb R^{36}$ describes relative body configuration and joint confidence. This normalization reduces dependence on image position and scale. A separate quality vector records the mean joint confidence, visible-joint fraction, and person-box confidence $b_t$:
+\begin{equation}
+    \mathbf q_t=
+    \left[\frac{1}{J}\sum_{j=1}^{J}c_{t,j},\;
+    \frac{1}{J}\sum_{j=1}^{J}\mathbb I(c_{t,j}\geq0.2),\;b_t\right]^{\!\top}.
+    \label{eq:quality_features}
+\end{equation}
+Here $\mathbb I(\cdot)$ is the indicator function.
+
+Each input window spans 1.0~s and is linearly interpolated to $T=30$ time steps. Successive windows advance by 0.2~s.
+
+\subsection{Masked input and temporal attention}
+
+MaskedBiMamba combines training-time frame masking, temporal self-attention, bidirectional Mamba stacks, and quality-weighted pooling (Fig.~\ref{fig:masked_bimamba}). These additions address incomplete pose observations and the need to compare motion before and after a rapid posture change. The selective state-space operator itself follows Mamba~\cite{gu2023mamba}.
+
+During training, a Bernoulli variable $m_t$ determines whether the pose at time $t$ is retained. The masked pose is embedded in $d=64$ dimensions:
+\begin{equation}
+    m_t\sim\operatorname{Bernoulli}(1-\rho),\qquad
+    \mathbf e_t=\mathbf W_e(m_t\mathbf x_t)+\mathbf b_e+\mathbf p_t,
+    \label{eq:masked_embedding}
+\end{equation}
+where $\rho=0.15$, $\mathbf W_e\in\mathbb R^{d\times36}$, $\mathbf b_e\in\mathbb R^d$, and $\mathbf p_t\in\mathbb R^d$ is a learned position embedding. If every frame is masked, the first is retained. This augmentation trains the classifier to use surrounding motion when individual observations disappear. The quality stream remains unchanged; inference uses $m_t=1$ for every frame.
+
+Stacking $\mathbf e_t^\top$ gives $\mathbf E\in\mathbb R^{T\times d}$. Four attention heads compare all positions within the window. For head $k$, with $d_h=d/4=16$,
+\begin{equation}
+    \mathbf A_k=\operatorname{softmax}\!\left(
+    \frac{(\mathbf E\mathbf W_k^Q)(\mathbf E\mathbf W_k^K)^\top}
+    {\sqrt{d_h}}\right)(\mathbf E\mathbf W_k^V),
+    \label{eq:temporal_attention}
+\end{equation}
+where the softmax acts along each row and $\mathbf W_k^Q,\mathbf W_k^K,\mathbf W_k^V\in\mathbb R^{d\times d_h}$ are learned projections. The attended sequence is
+\begin{equation}
+    \mathbf H=\operatorname{LN}\!\left(
+    \mathbf E+[\mathbf A_1\Vert\cdots\Vert\mathbf A_4]\mathbf W^O
+    \right),
+    \label{eq:attention_residual}
+\end{equation}
+where $\Vert$ denotes feature concatenation, $\mathbf W^O\in\mathbb R^{d\times d}$, and $\operatorname{LN}$ is layer normalization. Affine projection biases are omitted in Eqs.~\eqref{eq:temporal_attention} and~\eqref{eq:attention_residual} for readability. Attention supplies direct interactions between distant frames before recurrent state updates.
+
+\subsection{Selective state space and bidirectional fusion}
+
+Mamba makes its state update depend on the current input~\cite{gu2023mamba}. Its selective scan can be written for expanded feature channel $a$ and state component $r$ as
+\begin{equation}
+    \begin{aligned}
+        s_{t,a,r}&=e^{\Delta_{t,a}A_{a,r}}s_{t-1,a,r}
+                    +\Delta_{t,a}B_{t,r}u_{t,a},\\
+        v_{t,a}&=\sum_{r=1}^{n}C_{t,r}s_{t,a,r}+D_a u_{t,a}.
+    \end{aligned}
+    \label{eq:selective_scan}
+\end{equation}
+Here $u_{t,a}$ is the feature entering the scan, $s_{t,a,r}$ is its recurrent state, $A_{a,r}$ controls state decay, and $D_a$ is a learned skip coefficient. The positive step size $\Delta_{t,a}$ and input/output coefficients $B_{t,r},C_{t,r}$ depend on the current feature. Thus, the update can retain earlier motion or give more weight to the current observation. The initial state is zero. Each Mamba block also retains the standard input projection, causal depthwise convolution, SiLU activation and gate, and output projection. We use state size $n=16$, convolution width 4, and expansion factor 2, giving 128 internal channels.
+
+To use both temporal directions, independent forward and backward stacks process the same attended window. Let $\mathcal R$ reverse the time axis, and let $\mathcal M_f^{(\ell)}$ and $\mathcal M_b^{(\ell)}$ denote the Mamba blocks at layer $\ell$. Starting with $\mathbf F^{(0)}=\mathbf H$ and $\mathbf B^{(0)}=\mathcal R(\mathbf H)$, the two residual stacks compute
+\begin{equation}
+    \begin{aligned}
+        \mathbf F^{(\ell)}&=\mathbf F^{(\ell-1)}+
+        \mathcal M_f^{(\ell)}(\mathbf F^{(\ell-1)}),\\
+        \mathbf B^{(\ell)}&=\mathbf B^{(\ell-1)}+
+        \mathcal M_b^{(\ell)}(\mathbf B^{(\ell-1)}),
+    \end{aligned}\quad \ell=1,2.
+    \label{eq:bidirectional_stacks}
+\end{equation}
+The reverse output is restored to the original time order before fusion:
+\begin{equation}
+    \mathbf H^*=\operatorname{LN}\!\left(
+    [\mathbf F^{(2)}\Vert\mathcal R(\mathbf B^{(2)})]\mathbf W_f+\mathbf b_f
+    \right),
+    \label{eq:direction_fusion}
+\end{equation}
+where $\mathbf W_f\in\mathbb R^{128\times64}$ and $\mathbf b_f\in\mathbb R^{64}$. Its row $\mathbf h_t^\top$ describes time $t$ using preceding and subsequent observations in the buffered window. This arrangement lets the classifier relate a rapid descent to the posture that follows it. Bidirectional processing therefore produces one decision for a complete window.
 
 \begin{figure*}[tp]
     \centering
     \includegraphics[width=\textwidth]{figs/masked_bimamba_architecture_reviewed.png}
-    \caption{Implemented MaskedBiMamba architecture for the primary protocol. Tensor dimensions omit the batch axis. Frame masking is active only during training; quality features take a separate path. The reverse stream is time-aligned before fusion.}
+    \caption{MaskedBiMamba architecture. Pose features pass through training-time frame masking, temporal attention and two independent Mamba stacks. The reverse stream is aligned before fusion. A separate quality network supplies the temporal pooling weights. Tensor dimensions omit the batch axis.}
     \label{fig:masked_bimamba}
 \end{figure*}
 
-\subsection{Optimization and Model Selection}
+\subsection{Quality-weighted pooling and classification}
 
-All models are trained for 100 epochs using Adam with learning rate $10^{-4}$, batch size 64, and weighted focal loss with $\gamma=3$. The TCNTE reproduction uses class weights $[1,30]$; the primary protocol estimates class weights from the training partition only. The checkpoint with the highest validation F1 is used for test evaluation. The reproduction uses seed 42; the primary comparison uses seeds 42, 3407, and 2026. CUDA mixed precision and deterministic seeds are enabled, while nondeterministic fused attention kernels are disabled.
+Uniform pooling assigns the same coefficient to every frame, even when pose confidence varies. We instead learn a scalar weight from each quality vector:
+\begin{equation}
+    a_t=\max\!\left\{10^{-6},\,
+    \sigma\!\left[\mathbf w_2^\top\operatorname{ReLU}
+    (\mathbf W_1\mathbf q_t+\mathbf b_1)+b_2\right]\right\},
+    \label{eq:quality_gate}
+\end{equation}
+where $\mathbf W_1\in\mathbb R^{32\times3}$, $\mathbf b_1,\mathbf w_2\in\mathbb R^{32}$, $b_2\in\mathbb R$, and $\sigma$ is the sigmoid function. The gate is trained jointly with the classifier. Normalizing its outputs gives
+\begin{equation}
+    \alpha_t=\frac{a_t}{\sum_{u=1}^{T}a_u},\qquad
+    \mathbf z=\sum_{t=1}^{T}\alpha_t\mathbf h_t.
+    \label{eq:quality_pooling}
+\end{equation}
+The coefficients satisfy $\alpha_t>0$ and $\sum_t\alpha_t=1$. They allow the model to adjust each frame's contribution using observation quality; equal weights recover temporal mean pooling. The window representation $\mathbf z\in\mathbb R^{64}$ yields two class logits and probabilities:
+\begin{equation}
+    \boldsymbol\ell=\mathbf W_c\mathbf z+\mathbf b_c,\qquad
+    \pi_c=\frac{e^{\ell_c}}{e^{\ell_0}+e^{\ell_1}},\quad c\in\{0,1\},
+    \label{eq:classification_probability}
+\end{equation}
+where $\mathbf W_c\in\mathbb R^{2\times64}$, $\mathbf b_c\in\mathbb R^2$, and class 1 denotes a fall.
 
-After the primary matrix, ten MaskedBiMamba variants are retrained over the same four folds and three seeds, producing 120 ablation runs. The variants remove bidirectionality, temporal attention, quality-weighted pooling, frame masking, confidence input, or both confidence input and quality pooling; the frame-mask ratio is additionally set to 0.05, 0.10, 0.20, or 0.30 around the full model's value of 0.15. For robustness evaluation, the selected TCNTE and MaskedBiMamba checkpoints are tested without refitting under random joint removal, random frame removal, confidence noise at severities 0.1--0.3, and complete lower-body removal. Frame and joint removal independently zero observations with the stated probability before normalization; time steps remain in place, and frame removal also zeroes the corresponding box features. Confidence noise is Gaussian with standard deviation 0.1--0.3, followed by clipping to $[0,1]$, rather than a percentage of missing confidence values. The same checkpoints are then evaluated on the full Le2i manifest as an external test; no Le2i sample is used to fit the primary models.
+\subsection{Training objective}
+
+The training set contains more non-fall than fall windows. Weighted focal loss~\cite{lin2017focal} reduces the influence of easy examples while balancing the two classes:
+\begin{equation}
+    \begin{aligned}
+        \mathcal L&=-\frac{1}{N_b}\sum_{i=1}^{N_b}
+        w_{y_i}(1-\pi_{i,y_i})^{\gamma}\log\pi_{i,y_i},\\
+        w_c&=\frac{N_{\mathrm{train}}}{2N_c}.
+    \end{aligned}
+    \label{eq:focal_loss}
+\end{equation}
+Here $N_b$ is the batch size, $y_i$ is the true class, $\pi_{i,y_i}$ is its predicted probability, $N_c$ is the training count of class $c$, and $N_{\mathrm{train}}=N_0+N_1$. The exponent $\gamma$ controls the down-weighting of easy examples.
