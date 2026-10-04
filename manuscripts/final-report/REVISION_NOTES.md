@@ -2,7 +2,7 @@
 
 The IEEE report was polished using Nature-inspired scientific-writing principles. The abstract now follows the problem, design, central comparison, system result and bounded implication. The discussion interprets operating trade-offs without attributing frame-loss tolerance to a clean-data ablation.
 
-Yaorong Huang is first author. All five names share one IEEE affiliation. An independent **Code and Project Materials** block follows the keywords. The main report remains ten A4 pages; the standalone personal appendix records Huang's reported work, with four name-and-TBD entries for the other members.
+Yaorong Huang is first author. All five names share one unmarked affiliation; faculty, university and region appear on one line. An independent **Code and Project Materials** block follows the keywords. The combined report has eleven A4 pages: ten for main text and references, and one for the final integrated appendix. The contribution appendix records Huang's reported work, with four name-and-TBD entries for the other members.
 
 Numbered mathematics and all 1,853 aggregate archive values remain unchanged. Current robustness conclusions exclude the spatial-mask normalization confound. TE's better clean F1, mixed ablations, low external specificity and limited fall-interval detection remain visible. No new training or performance experiment was run for this revision.
 

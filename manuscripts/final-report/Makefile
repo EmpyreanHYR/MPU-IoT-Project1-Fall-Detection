@@ -6,7 +6,7 @@
 
 # 主文档文件名（不含.tex扩展名）
 MAIN = fall_detection_final_report
-SOURCES = $(MAIN).tex $(wildcard texfiles/*.tex) references.bib $(wildcard figs/*.png)
+SOURCES = $(MAIN).tex personal_contributions.tex $(wildcard texfiles/*.tex) references.bib $(wildcard figs/*.png)
 
 # LaTeX编译器选择
 # 可选: pdflatex, xelatex, lualatex

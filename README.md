@@ -38,7 +38,7 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080/docs/`, or open `docs/index.html` directly. See [`docs/README.md`](docs/README.md) for keyboard controls and Pages configuration.
 
-The final manuscript source is synchronized with the current report, including an independent repository block after the keywords, a single shared IEEE affiliation, fixed-rule alert replay, and valid robustness conditions. PNG figures are included; compiled PDFs and LaTeX build outputs remain excluded from Git. Build using the manuscript's Makefile. The separate [`personal_contributions.tex`](manuscripts/final-report/personal_contributions.tex) records Yaorong Huang's reported work in code, writing and the presentation; the other four members retain name-and-TBD entries for their own completion.
+The final manuscript source is synchronized with the current report, including an independent repository block after the keywords, a single shared IEEE affiliation, fixed-rule alert replay, and valid robustness conditions. PNG figures are included; compiled PDFs and LaTeX build outputs remain excluded from Git. Build using the manuscript's Makefile. The included [`personal_contributions.tex`](manuscripts/final-report/personal_contributions.tex) is inserted after the bibliography in the same PDF and records Yaorong Huang's reported work in code, writing and the presentation; the other four members retain name-and-TBD entries for their own completion.
 
 Production deployment files, credentials, raw camera footage, databases and private device addresses are not part of this repository. GitHub Pages serves the static presentation; it does not host the live detection or cloud services.
 

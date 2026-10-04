@@ -1,50 +1,36 @@
-% !TEX program = pdflatex
-% Standalone companion appendix. Huang's entry is based on his stated work.
-\documentclass[a4paper,11pt]{article}
-\usepackage[margin=24mm]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage{mathptmx}
-\usepackage{enumitem}
-\usepackage[hidelinks]{hyperref}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{5pt}
-\title{FallGuard\\Individual Contributions and Reflections}
-\author{Faculty of Applied Sciences\\Macao Polytechnic University\\Macao SAR, China}
-\date{}
-\begin{document}
-\maketitle
-\begin{center}\textbf{Companion Appendix A}\end{center}
-This appendix records individual contributions to FallGuard. Yaorong Huang's entry describes the code, writing, and web-presentation responsibilities he reported. The other entries remain TBD and must be completed by the corresponding members before submission. Author order does not imply a verified division of work.
+% Included after the bibliography by the main report; do not compile independently.
+\appendix[Individual Contributions and Reflections]
+\label{app:personal-contributions}
 
-\section*{A.1 Yaorong Huang}
-\subsection*{Code implementation and project integration}
+This appendix records individual contributions to FallGuard. Yaorong Huang's entry describes his code, writing, and web-presentation responsibilities. The other entries remain TBD and must be completed by the corresponding members before submission. Author order does not imply a verified division of work.
+
+\subsection{Yaorong Huang}
+\subsubsection*{Code implementation and project integration}
 I carried out most of the project's code implementation and organization. This work covered the temporal-model code, pose-sequence preprocessing, training and evaluation tools, model export, and the edge--cloud integration described in the report. The implementation combines established Mamba operators and pose-estimation components with temporal attention, bidirectional processing, frame masking, and pose-quality weighting. My contribution concerned the composition, implementation, evaluation tooling, and integration of these components; the underlying Mamba operator and pose extractor originate from the cited work.
 
 The public code evidence includes \path{code/src/fallbench/models.py}, \path{code/src/fallbench/data.py}, \path{code/src/fallbench/engine.py}, and \path{code/scripts/export_mamba_onnx.py}. Deployment-specific source is retained in the separate project deployment materials. The code and result archives connect the model experiments to local inference, persistent records, and deferred cloud delivery.
 
-\subsection*{Technical issues and evidence boundaries}
+\subsubsection*{Technical issues and evidence boundaries}
 An important preprocessing issue concerned the archived missing-joint tests. Zero filling before per-frame normalization also changed the coordinates of observed joints. The current code applies joint masking after normalization, while the affected historical results remain excluded from current model conclusions. Correcting the implementation does not retrospectively validate those archived experiments.
 
 Another issue was the distinction between a positive classification and a confirmed alert. The project separates window and video predictions, merged predicted events, and the fixed confirmation rules. The report and presentation also distinguish pipeline throughput from detection timing and cloud receipt latency. These distinctions avoid attributing a system-level guarantee to a classifier score or a processing-speed measurement.
 
-\subsection*{Manuscript writing and evidence organization}
+\subsubsection*{Manuscript writing and evidence organization}
 I took primary responsibility for preparing and revising the project manuscript. This included organizing the method description, mathematical notation, evaluation protocol, results, system implementation, and limitations in LaTeX. I maintained consistency between the manuscript, figures, aggregate results, and repository materials. The written interpretation retains unfavorable and limiting results, including TE's higher clean F1, mixed clean-data ablations, limited external discrimination, and incomplete fall-interval detection on synthetic clips.
 
 The writing evidence is located in \path{manuscripts/final-report/}, including the main source and section files. Result summaries and their provenance are retained in \path{results/}. The manuscript credits external algorithms and datasets rather than presenting the complete software stack as original work.
 
-\subsection*{GitHub Pages presentation}
+\subsubsection*{GitHub Pages presentation}
 I developed and refined the static project presentation in \path{docs/}. The page organizes the research question, model architecture, comparison results, offline deployment, and recovery evidence into a twelve-slide talk. It provides interactive charts, bilingual speaker notes, a searchable result archive, projection controls, a presenter console, rehearsal timing, and question-and-answer material. The presentation exposes saved evidence and remains separate from the live Pi and cloud demonstration.
 
-\subsection*{Reflection}
+\subsubsection*{Reflection}
 The project emphasized that a working prototype and a well-supported performance claim require different evidence. High clip recall can coexist with late detection, and high video F1 can coexist with low specificity. Preprocessing order can also invalidate an apparently meaningful robustness comparison. Future improvements should therefore begin with continuous-recording evaluation and alert calibration, followed by longer camera tests across recording conditions. Maintaining one consistent evidence chain across code, writing, and presentation is essential to making these limitations visible.
 
-\section*{A.2 Jiahao Zhao}
+\subsection{Jiahao Zhao}
 TBD.
-\section*{A.3 Chengyi Xu}
+\subsection{Chengyi Xu}
 TBD.
-\section*{A.4 Zhonglin Chang}
+\subsection{Zhonglin Chang}
 TBD.
-\section*{A.5 Jiayun Song}
+\subsection{Jiayun Song}
 TBD.
-
-\end{document}
