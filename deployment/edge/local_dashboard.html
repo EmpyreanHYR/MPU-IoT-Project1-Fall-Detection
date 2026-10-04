@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FallGuard · 树莓派本地检测</title>
+<style>
+:root{font-family:system-ui,"Noto Sans CJK SC",sans-serif;color:#142e37;background:#edf2f2;font-synthesis:none}*{box-sizing:border-box}body{margin:0;padding:26px;max-width:1700px;margin-inline:auto}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:15px}h1{font-size:25px;margin:4px 0}h2{font-size:18px;margin:0 0 16px}p{margin:5px 0;line-height:1.6}.eyebrow{font-size:12px;letter-spacing:2px;font-weight:700;color:#367d73}.muted{color:#61767d;font-size:13px}.badge{border:1px solid #bcd7cf;border-radius:30px;padding:7px 13px;background:#e4f3ed;font-size:13px}button{cursor:pointer;background:#163e44;color:white;border:0;border-radius:8px;padding:10px 16px;margin-left:10px}main{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(310px,1fr);gap:20px}.card{background:white;border:1px solid #dce6e5;border-radius:15px;padding:20px;min-width:0}.screen{position:relative;aspect-ratio:4/3;background:#10282f;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#c8d4d6}.screen img{width:100%;height:100%;object-fit:contain}.screen span{position:absolute;bottom:12px;left:14px;background:#10282fe6;padding:5px 10px;border-radius:5px;font-size:13px}.screen img[hidden]{display:none}.video-head{display:flex;justify-content:space-between;gap:15px}.details{display:flex;gap:20px;flex-wrap:wrap;margin-top:13px;font-size:13px}.state{font-size:31px;font-weight:700;margin:8px 0}.score{font-size:48px;font-weight:750;letter-spacing:-2px;margin:9px 0}.track{height:7px;border-radius:5px;background:#e7eeee;margin:14px 0 20px;overflow:hidden}.fill{height:100%;background:#188875;width:0;transition:width .2s}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{padding:15px;background:#f3f7f6;border-radius:9px}.metric strong{display:block;font-size:29px;margin-top:7px}.notice{padding:13px 15px;background:#f4f7f7;border-left:3px solid #8da9a5;border-radius:4px;margin-top:18px;font-size:13px;line-height:1.6}.history{margin-top:20px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:11px 9px;border-bottom:1px solid #e6eeec}th{font-weight:500;color:#637880}td:last-child{color:#267667}.foot{margin-top:15px;font-size:12px;color:#657d82}.alert{color:#be3e35}@media(max-width:900px){body{padding:15px}main{grid-template-columns:1fr}.score{font-size:38px}header{align-items:flex-start}.badge{display:none}.history{overflow:auto}}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow">FALLGUARD / LOCAL EDGE</div><h1>树莓派本地检测</h1><p class="muted">姿态提取 · 跌倒分类 · 本地保存</p></div><div><span class="badge">页面与推理均在本机运行</span><button id="fullscreen">全屏展示</button></div></header>
+<main><section class="card"><div class="video-head"><h2>摄像头与骨架预览</h2><span class="muted" id="frameTime">等待画面</span></div><div class="screen"><img id="preview" alt="树莓派当前摄像头骨架预览" hidden><span id="previewLabel">正在读取本机摄像头</span></div><div class="details"><span>姿态后端：<b id="backend">—</b></span><span>处理速度：<b id="fps">—</b></span><span>分类器：<b>MaskedBiMamba / Pi CPU</b></span></div></section>
+<section class="card"><div class="eyebrow">CURRENT OBSERVATION</div><div class="state" id="state">正在连接本地服务</div><p class="muted" id="hint">等待状态更新</p><div class="score" id="score">—</div><p class="muted">当前窗口跌倒概率</p><div class="track"><div class="fill" id="bar"></div></div><div class="metrics"><div class="metric"><span class="muted">本次运行分类窗口</span><strong id="predictions">—</strong></div><div class="metric"><span class="muted">等待云端确认</span><strong id="pending">—</strong></div></div><div class="notice">断网时，摄像头、姿态提取、分类和记录保存继续在本机运行。恢复网络后，已配置的云端服务自动接收待传记录。</div><p class="foot" id="ack">最近云端确认：—</p><p class="foot">队列数反映记录交付状态，不代表网络连通性。</p></section></main>
+<section class="card history"><div class="video-head"><h2>最近保存的记录</h2><span class="muted" id="total">读取中</span></div><table><thead><tr><th>原始采集时间</th><th>设备</th><th>跌倒概率</th><th>告警状态</th><th>交付状态</th></tr></thead><tbody id="rows"></tbody></table><p class="foot">历史记录按采集时间显示；无有效人体时不显示旧概率作为当前判断。</p></section>
+<script>
+const $=id=>document.getElementById(id), names={normal:'正常',suspected:'疑似跌倒',confirmed:'跌倒告警',cleared:'告警解除'};
+const localTime=t=>t?new Date(t).toLocaleString('zh-CN',{hour12:false}):'—';
+let busy=false, fresh=false;
+function unavailable(){fresh=false;$('state').textContent='本地服务未连接';$('hint').textContent='请检查本地页面服务是否正在运行';$('score').textContent='—';$('bar').style.width='0';$('preview').hidden=true;$('previewLabel').textContent='预览不可用';for(const id of ['pending','predictions','fps','total','ack'])$(id).textContent='—';}
+async function refresh(){if(busy)return;busy=true;try{
+ const response=await fetch('/api/status',{cache:'no-store'});if(!response.ok)throw Error();const data=await response.json(), r=data.runtime;
+ fresh=data.runtime_age_s!==null&&data.runtime_age_s<5;
+ const predAge=r.last_prediction_at?(Date.now()-Date.parse(r.last_prediction_at))/1000:Infinity;
+ const valid=fresh&&r.valid_pose&&predAge<2&&Number.isFinite(r.last_prediction);
+ $('state').textContent=!fresh?'检测服务未运行':!r.valid_pose?'等待完整人体':!valid?'正在形成姿态窗口':(names[r.last_state]||'正在识别');
+ $('state').classList.toggle('alert',valid&&['suspected','confirmed'].includes(r.last_state));
+ $('hint').textContent=!fresh?'请启动摄像头检测服务':!r.valid_pose?'调整机位，让肩部、髋部和双腿尽量完整入镜':!valid?'正在收集连续姿态，窗口长度为 1 秒':'已获得有效姿态，当前结果由本机计算';
+ $('score').textContent=valid?(r.last_prediction*100).toFixed(1)+'%':'—';$('bar').style.width=valid?(r.last_prediction*100)+'%':'0';
+ $('backend').textContent=r.backend==='hailo'?'Hailo-10H':r.backend==='cpu'?'CPU 回退':'—';
+ $('fps').textContent=fresh&&Number.isFinite(r.edge_fps)?r.edge_fps.toFixed(1)+' 帧/秒':'—';
+ $('predictions').textContent=fresh?(r.predictions??'—'):'—';$('pending').textContent=data.storage_available?data.pending_records:'不可用';
+ $('total').textContent=data.storage_available?'本地累计 '+data.total_records+' 条记录':'记录存储暂不可用';
+ $('ack').textContent='最近云端确认：'+localTime(data.last_acknowledged?data.last_acknowledged*1000:null);
+ $('frameTime').textContent='采集时间 '+(r.last_capture_at?new Date(r.last_capture_at).toLocaleTimeString('zh-CN',{hour12:false}):'—');
+ $('previewLabel').textContent=fresh?(r.valid_pose?'本机实时预览':'当前视野：等待有效人体'):'预览不可用';
+ $('rows').replaceChildren();for(const item of data.records){const tr=document.createElement('tr');for(const value of [localTime(item.timestamp),item.device_id,Number.isFinite(item.fall_probability)?(item.fall_probability*100).toFixed(1)+'%':'—',names[item.alert_state]||item.alert_state,item.delivered?'云端已确认':'本地已保存 · 待传']){const td=document.createElement('td');td.textContent=value;tr.append(td)}$('rows').append(tr)}
+ if(!data.records.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='暂无分类记录';tr.append(td);$('rows').append(tr)}
+ if(!fresh)$('preview').hidden=true;
+}catch(_){unavailable()}finally{busy=false;}}
+$('preview').onload=()=>{$('preview').hidden=!fresh};$('preview').onerror=()=>{$('preview').hidden=true};
+setInterval(()=>{if(fresh)$('preview').src='/preview.jpg?t='+Date.now()},600);setInterval(refresh,1000);refresh();
+$('fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()};
+</script></body></html>

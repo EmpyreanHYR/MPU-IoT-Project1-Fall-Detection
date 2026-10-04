@@ -1,0 +1,22 @@
+[Unit]
+Description=FallGuard Local read-only edge dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=fallguard
+Group=fallguard
+WorkingDirectory=/opt/fallguard/deployment/edge
+EnvironmentFile=/etc/fallguard/edge.env
+ExecStart=/opt/fallguard/.venv/bin/python /opt/fallguard/deployment/edge/local_dashboard.py --database /var/lib/fallguard-edge/edge.sqlite3 --status /run/fallguard-edge/status.json --preview /run/fallguard-edge/preview.jpg --port 18300
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+StateDirectory=fallguard-edge
+RuntimeDirectory=fallguard-edge
+RuntimeDirectoryPreserve=yes
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

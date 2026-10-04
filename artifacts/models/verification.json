@@ -1,0 +1,44 @@
+{
+  "checked_at_utc": "2026-10-04T19:10:58.136132+00:00",
+  "platform": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "python": "3.12.14"
+  },
+  "packages": {
+    "numpy": "2.5.3",
+    "torch": "2.14.1",
+    "onnx": "1.23.1",
+    "onnxruntime": "1.30.0",
+    "opencv": "5.0.0",
+    "pandas": "2.3.3"
+  },
+  "unit_and_integration_tests": {
+    "passed": 12,
+    "failed": 0,
+    "command": "python -m unittest discover -s tests -v"
+  },
+  "published_model_vs_portable_pytorch": {
+    "cases": 5,
+    "max_absolute_logit_error": 9.5367431640625e-07,
+    "tolerance": 0.0002
+  },
+  "reexport_quality_input": {
+    "max_absolute_logit_error": 3.5762786865234375e-07,
+    "opset": 17,
+    "inputs": [
+      "pose",
+      "quality"
+    ]
+  },
+  "pose_model_helper": {
+    "model": "yolov8s-pose",
+    "export_output_shape": [
+      1,
+      56,
+      8400
+    ],
+    "black_frame_inference": "finite 17x3 pose, zero detection confidence"
+  },
+  "scope": "Software/CPU numerical checks only. No accuracy experiments rerun; no physical Hailo or production services tested in this release."
+}

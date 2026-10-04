@@ -1,0 +1,26 @@
+{
+  "revision": "83572a37b9e3081df8c06a56874b1d1f2a19386c",
+  "verified_sources": [
+    {
+      "dataset": "caucafall",
+      "url": "https://huggingface.co/datasets/simplexsigil2/omnifall/resolve/83572a37b9e3081df8c06a56874b1d1f2a19386c/labels/caucafall.csv",
+      "sha256": "7283def2b2aa80f4b6004ce59262114ef9e4dca22601f8f0afa37983d1286c9e",
+      "segments": 258,
+      "videos": 100
+    },
+    {
+      "dataset": "GMDCSA24",
+      "url": "https://huggingface.co/datasets/simplexsigil2/omnifall/resolve/83572a37b9e3081df8c06a56874b1d1f2a19386c/labels/GMDCSA24.csv",
+      "sha256": "d4682729276a08be783a2c189c1617f6202f92c87c0b1b74ad88a2e1f634337a",
+      "segments": 458,
+      "videos": 160
+    },
+    {
+      "dataset": "le2i",
+      "url": "https://huggingface.co/datasets/simplexsigil2/omnifall/resolve/83572a37b9e3081df8c06a56874b1d1f2a19386c/labels/le2i.csv",
+      "sha256": "bb144196f7d384d2b5153022d73ea349132f428229986ce8183902a25e213132",
+      "segments": 967,
+      "videos": 190
+    }
+  ]
+}

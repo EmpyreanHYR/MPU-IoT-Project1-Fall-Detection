@@ -41,8 +41,9 @@ def main() -> None:
         merged.loc[as_number.notna(), "label"] = as_number[as_number.notna()].astype(int).map(LABELS)
     if merged.label.isna().any():
         raise ValueError("Unknown labels remain after OmniFall conversion")
-    dataset = (merged["dataset"].astype(str) if "dataset" in merged.columns
-               else pd.Series(args.dataset or "unknown", index=merged.index))
+    dataset = (pd.Series(args.dataset, index=merged.index) if args.dataset
+               else merged["dataset"].astype(str) if "dataset" in merged.columns
+               else pd.Series("unknown", index=merged.index))
     subject = (merged["subject"].fillna("unknown").astype(str)
                if "subject" in merged.columns else pd.Series("unknown", index=merged.index))
     view = (merged["cam"].fillna("").astype(str)
@@ -60,4 +61,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

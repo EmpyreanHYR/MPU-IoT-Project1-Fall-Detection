@@ -1,0 +1,22 @@
+[Unit]
+Description=FallGuard Commit-before-ack edge synchronization
+After=network.target
+
+[Service]
+Type=simple
+User=fallguard
+Group=fallguard
+WorkingDirectory=/opt/fallguard/deployment/cloud
+EnvironmentFile=/etc/fallguard/cloud.env
+ExecStart=/opt/fallguard/.venv/bin/python /opt/fallguard/deployment/cloud/pull_edge_records.py
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+StateDirectory=fallguard-cloud
+RuntimeDirectory=fallguard-cloud
+RuntimeDirectoryPreserve=yes
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

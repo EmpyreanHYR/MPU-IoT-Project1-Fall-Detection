@@ -12,7 +12,7 @@
 
 ## 2. 服务器实测结论
 
-训练实例在本次核验时已切换为 RTX 3090 有卡模式。GMDCSA-24 全量姿态提取、统一缓存审计和正式切窗已完成，主实验矩阵正在运行。公开文档中统一使用 `$FALLGUARD_WORK_DIR` 表示项目数据工作目录。
+训练实例在本次核验时已切换为 RTX 3090 有卡模式。GMDCSA-24 全量姿态提取、统一缓存审计和正式切窗已完成，主实验矩阵已经完成，完整结果见 `../results/main/`。公开文档中统一使用 `$FALLGUARD_WORK_DIR` 表示项目数据工作目录。
 
 | 数据或派生物 | 服务器路径 | 实测规模 | 是否进入已报告实验 | 实际作用 |
 |---|---|---:|---|---|
@@ -21,7 +21,7 @@
 | OmniFall 完整下载 | `data/raw/omnifall` | 9.3 GB；24,589 个文件；其中 12,000 个 OF-Syn 视频 | 只使用标签；OF-Syn 未用于训练 | 使用 Le2i、CAUCAFall 和 GMDCSA-24 的统一动作区间标签；合成视频未出现在任何训练清单中 |
 | 统一片段与划分清单 | `data/manifests` | 226 MB（含派生窗口张量缓存） | 是 | 保存路径映射、1,683 条真实片段、冻结的 fold、窗口清单和可复用预处理结果 |
 | 姿态缓存 | `data/poses/real_combined` | 126 MB；450 个 `.npz` | 是 | 每个真实视频一份缓存，450 行索引均通过形状与有限数审计 |
-| GMDCSA-24 | `data/raw/gmdcsa24_v2_1` | 1.1 GB；170 个文件；160 个 MP4、8 个 CSV | 已进入正式 GPU 实验；结果待完成 | 458 条 OmniFall 片段全部映射；160 份姿态缓存已新建；与 CAUCAFall 组成 7,869 窗口主实验 |
+| GMDCSA-24 | `data/raw/gmdcsa24_v2_1` | 1.1 GB；170 个文件；160 个 MP4、8 个 CSV | 已完成正式 GPU 实验 | 458 条 OmniFall 片段全部映射；160 份姿态缓存已新建；与 CAUCAFall 组成 7,869 窗口主实验 |
 
 服务器上的一对一路径映射已经完成：`caucafall_path_mapping.csv` 有 100 行，`le2i_path_mapping.csv` 有 190 行，`gmdcsa24_path_mapping.csv` 有 160 行；对应片段清单分别为 258、967 和 458 行。正式姿态目录现有 450 个 `.npz`；索引状态为既有 290、新建 160，无缺失、重复或损坏缓存。
 
@@ -72,7 +72,7 @@ OmniFall 在本项目中只承担标签规范化作用：读取 `labels/le2i.csv
 - `caucafall_gmdcsa24_segments.csv`：正式真实训练清单，260 个视频、716 条片段、14 个跨数据集唯一受试者组；
 - `real_all_segments.csv`：450 个真实视频、1,683 条片段，用于有卡模式下安全更新统一姿态缓存索引，Le2i 仍保留为外部评估数据。
 
-无卡模式下的单视频 CPU smoke test 仅用于验证数据链路，不进入结果表。有卡模式已完成 160/160 个 GMDCSA-24 视频的全量姿态提取，并生成四份各 7,869 行的冻结窗口清单（6,498 负类、1,371 正类）。目前正式 100-epoch GPU 训练已启动；只有提交完整 `metrics.json` 的运行才能进入性能表。
+无卡模式下的单视频 CPU smoke test 仅用于验证数据链路，不进入结果表。有卡模式已完成 160/160 个 GMDCSA-24 视频的全量姿态提取，并生成四份各 7,869 行的冻结窗口清单（6,498 负类、1,371 正类）。正式 100-epoch GPU 训练已完成；完整性核验后的 60 个主运行进入当前性能表。原始训练/验证划分和姿态缓存尚未恢复到公开仓库；已由保存的预测恢复测试折，重建方法与边界见 `../REPRODUCIBILITY.md`。
 
 ## 4. 数据进入模型前的处理链
 
@@ -119,14 +119,14 @@ video_id, dataset, subject, source_path, pose_model
 |---|---|---|---:|---|
 | TCNTE 复现 | 仅 Le2i 的 190 个视频 | 3 个按视频分组的 fold；非测试视频中 15% 用于验证 | 每个 fold 使用同一组 12,650 个窗口：1,338 正、11,312 负 | TCN、TE、TCNTE；seed 42 |
 | 早期比较（保留审计） | Le2i 190 + CAUCAFall 100 | 4 个 group-disjoint fold；Le2i 按 scene 代理分组 | 每 fold 15,836 个窗口：1,955 正、13,881 负 | 已完成的旧表，不当作 GMDCSA-24 结果 |
-| 新主实验（GPU 运行中） | CAUCAFall 100 + GMDCSA-24 160；Le2i 仅外部测试 | 14 个带数据集前缀的 subject，4 个 subject-disjoint fold；每个 split 均含两种数据 | 每 fold 7,869 个窗口：1,371 正、6,498 负 | TCN、TE、TCNTE、UniMamba、MaskedBiMamba；seeds 42、3407、2026；100 epochs |
+| 主实验（已完成） | CAUCAFall 100 + GMDCSA-24 160；Le2i 仅外部测试 | 14 个带数据集前缀的 subject，4 个 subject-disjoint fold；每个 split 均含两种数据 | 每 fold 7,869 个窗口：1,371 正、6,498 负 | TCN、TE、TCNTE、UniMamba、MaskedBiMamba；seeds 42、3407、2026；100 epochs |
 
 fold 在切窗之前冻结；同一视频、同一受试者或同一场景的片段不会跨 train/validation/test。每个 fold 的窗口总数相同，变化的是分组后的 split 归属。模型权重按验证集 F1 选择，测试集只用于最终评价。
 
 ## 6. 哪些数据没有被使用
 
 - OF-Syn 的 12,000 个合成视频：已下载，但没有进入任何已报告的清单或训练。
-- GMDCSA-24 的 smoke 指标：不使用。全量数据已进入正式 GPU 实验，但在 60 个主运行完成前仍不报告性能数值。
+- GMDCSA-24 的 smoke 指标：不使用。全量数据已完成正式 GPU 实验；CPU smoke 指标仍不进入结果表。
 - CAUCAFall 的 PNG/TXT：保存在原始发布内容中，但当前时序分类实验没有用它们微调人体检测器；实验使用 AVI 视频和 OmniFall 时间段标签。
 - Le2i、CAUCAFall 或 GMDCSA-24 的 RGB 外观：只用于离线姿态提取，不作为 TCN、Transformer 或 Mamba 分类器的输入。
 
@@ -150,4 +150,4 @@ fold 在切窗之前冻结；同一视频、同一受试者或同一场景的片
 - 正类只定义为动态 `fall`；`fallen` 不并入正类。
 - TCNTE 复现为 Le2i-only；新主实验为 CAUCAFall+GMDCSA-24 受试者隔离四折、三随机种子，Le2i 只做外部测试。
 - 训练、验证和测试按视频/受试者/场景分组，先分组后切窗。
-- GMDCSA-24 已完成全量姿态提取并正在训练；在完整性审计通过前，不得把部分运行、smoke 或估算值写进结果表。
+- GMDCSA-24 已完成全量姿态提取和正式训练；当前表只包含通过完整性审计的正式结果，不包含 smoke 或估算值。

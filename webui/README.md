@@ -1,18 +1,7 @@
-# FallGuard dashboard frontend
+# FallGuard cloud dashboard
 
-This directory contains only the dashboard's browser-facing files:
+The browser UI is served by `server.py`. `edge_ingest.py` imports offline edge records transactionally, preserves UUIDs and capture times, and creates each transition at most once. SQLite data, tokens and machine-specific configurations remain excluded.
 
-- `index.html` — interface structure;
-- `styles.css` — visual styling;
-- `app.js` — browser interaction and API integration logic;
-- `favicon.svg` — project icon;
-- `vendor/mediapipe/` — locally served MediaPipe browser assets and their license.
+Use the [deployment guide](../deployment/README.md) and unified launcher. The public backend receives classifications computed on the edge; historical browser/cloud-model inference and private remote-camera control are unavailable without their separate components. The edge camera preview uses the included local dashboard. GitHub Pages publishes the report presentation under `docs/`, not this runtime service.
 
-No backend source, deployment configuration, credentials, runtime database, device address, private-network information, or machine-specific path is included.
-
-The frontend uses relative `/api/...` paths. A separately managed backend must provide those endpoints when the complete system is run. Opening the files without that backend is suitable only for inspecting the interface source; live status, event history, camera control, and model inference require the private backend.
-
-## Privacy guidance
-
-Do not commit `.env` files, passwords, tokens, certificates, device addresses, private server addresses, databases, camera recordings, personal images, pose records, or deployment service files. The repository-level `.gitignore` blocks common sensitive and deployment-specific paths as an additional safeguard.
-
+`vendor/mediapipe/` retains its bundled browser assets and upstream license. All backend routes use relative `/api/...` paths. An opened static HTML file cannot connect to a live SQLite/backend automatically.

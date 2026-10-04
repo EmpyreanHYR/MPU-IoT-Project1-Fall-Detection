@@ -164,7 +164,23 @@ function renderSystem() {
   $('streamHealth').textContent = app.streamConnected ? 'STREAMING' : 'RECONNECTING';
   $('streamHealth').className = `health-status ${app.streamConnected ? 'ok' : ''}`;
   $('deviceList').innerHTML = app.snapshot.devices.length ? app.snapshot.devices.map(d => `<div class="device-entry"><strong>${escapeHTML(d.device_id)}</strong><span class="${d.online ? 'online' : 'offline'}">${d.online ? 'ONLINE / 在线' : 'STALE / 数据过期'}</span><p>${d.source === 'demo' ? 'Synthetic demo / 合成演示' : 'Live reading / 实时读数'} · ${escapeHTML(relativeTime(d.received_at))}<br>Model / 模型：${escapeHTML(d.model)} · FPS：${metric(d.edge_fps)}</p></div>`).join('') : '<div class="empty-state">No device readings yet.<br>尚无设备读数。</div>';
-  $('contractExample').textContent = `POST /api/pose\nX-Device-Token: <configured token>\n\n{\n  "device_id": "edge-device-01",\n  "timestamp": "2026-09-15T08:00:00Z",\n  "frame_seq": 1001,\n  "pose_quality": 0.91,\n  "edge_fps": 5.4,\n  "keypoints": [[0.50, 0.12, 0.94], ...]\n}\n\nResearch model / 研究模型 → POST /api/ingest`;
+  $('contractExample').textContent = `POST /api/edge/records
+X-Device-Token: <configured cloud token>
+
+{"records": [{
+  "record_id": "00000000-0000-4000-8000-000000000001",
+  "device_id": "edge-device-01",
+  "timestamp": "2026-09-15T08:00:00Z",
+  "frame_seq": 1001,
+  "fall_probability": 0.90,
+  "pose_quality": 0.91,
+  "model": "MaskedBiMamba local",
+  "alert_state": "suspected",
+  "transition": "suspected"
+}]}
+
+Classify offline on edge / 端侧离线分类
+Commit on cloud, then acknowledge UUIDs / 云端提交后确认记录ID`;
 }
 async function refresh() {
   try {

@@ -120,7 +120,7 @@ class PortableFallMamba(nn.Module):
         visible = (confidence >= 0.2).to(pose.dtype).mean(dim=-1, keepdim=True)
         return torch.cat((mean_confidence, visible, mean_confidence), dim=-1)
 
-    def forward(self, pose: torch.Tensor) -> torch.Tensor:
+    def forward(self, pose: torch.Tensor, quality: torch.Tensor | None = None) -> torch.Tensor:
         hidden = self.position(self.projection(pose))
         if self.use_attention:
             attended, _ = self.attention(hidden, hidden, hidden, need_weights=False)
@@ -134,15 +134,19 @@ class PortableFallMamba(nn.Module):
             hidden = forward
         hidden = self.norm(hidden)
         if self.use_quality:
-            weights = self.quality_gate(self.quality_from_pose(pose)).clamp_min(1e-6)
+            # Deployment supplies the detector box confidence independently of
+            # keypoint confidence, as in the training cache.
+            weights = self.quality_gate(
+                self.quality_from_pose(pose) if quality is None else quality
+            ).clamp_min(1e-6)
             pooled = (hidden * weights).sum(dim=1) / weights.sum(dim=1)
         else:
             pooled = hidden.mean(dim=1)
         return self.classifier(pooled)
 
 
-def export(checkpoint: Path, destination: Path) -> None:
-    saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
+def export(checkpoint: Path, destination: Path, quality_input: bool = False) -> None:
+    saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
     model = PortableFallMamba(saved["model_name"], int(saved["pose_size"]),
                               int(saved["quality_size"]), saved["config"]["model"])
     missing, unexpected = model.load_state_dict(saved["model_state"], strict=False)
@@ -153,15 +157,18 @@ def export(checkpoint: Path, destination: Path) -> None:
     sample = torch.rand((1, 30, int(saved["pose_size"])), generator=generator)
     sample[..., 2::3] = torch.rand((1, 30, int(saved["pose_size"]) // 3), generator=generator)
     destination.parent.mkdir(parents=True, exist_ok=True)
+    quality = torch.rand((1, 30, int(saved["quality_size"])), generator=generator)
+    arguments = (sample, quality) if quality_input else (sample,)
+    names = ["pose", "quality"] if quality_input else ["pose"]
     with torch.no_grad():
-        expected = model(sample).numpy()
-    torch.onnx.export(model, (sample,), destination, input_names=["pose"],
+        expected = model(*arguments).numpy()
+    torch.onnx.export(model, arguments, destination, input_names=names,
                       output_names=["logits"], opset_version=17,
-                      dynamic_axes={"pose": {0: "batch"}, "logits": {0: "batch"}},
+                      dynamic_axes={name: {0: "batch"} for name in names + ["logits"]},
                       dynamo=False)
     onnx.checker.check_model(onnx.load(destination))
     session = ort.InferenceSession(str(destination), providers=["CPUExecutionProvider"])
-    actual = session.run(["logits"], {"pose": sample.numpy()})[0]
+    actual = session.run(["logits"], dict(zip(names, [value.numpy() for value in arguments])))[0]
     difference = float(np.max(np.abs(expected - actual)))
     if difference > 2e-4:
         raise RuntimeError(f"ONNX parity failed: max_abs_diff={difference}")
@@ -172,8 +179,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("destination", type=Path)
+    parser.add_argument("--quality-input", action="store_true",
+                        help="Export separate pose and quality inputs for the offline runtime")
     args = parser.parse_args()
-    export(args.checkpoint, args.destination)
+    export(args.checkpoint, args.destination, args.quality_input)
 
 
 if __name__ == "__main__":

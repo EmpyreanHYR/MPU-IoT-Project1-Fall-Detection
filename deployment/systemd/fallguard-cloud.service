@@ -1,0 +1,22 @@
+[Unit]
+Description=FallGuard Cloud dashboard and durable record ingestion
+After=network.target
+
+[Service]
+Type=simple
+User=fallguard
+Group=fallguard
+WorkingDirectory=/opt/fallguard/webui
+EnvironmentFile=/etc/fallguard/cloud.env
+ExecStart=/opt/fallguard/.venv/bin/python /opt/fallguard/webui/server.py
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+StateDirectory=fallguard-cloud
+RuntimeDirectory=fallguard-cloud
+RuntimeDirectoryPreserve=yes
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+{
+  "origin": "Recovered from primary test_predictions.csv; identical test video sets verified across all 60 primary runs.",
+  "scope": "Test assignment only. Original training/validation assignments and pose caches have not been recovered. Subject aliases are parsed from publisher video identifiers.",
+  "sources": [
+    {
+      "path": "masked_bimamba/fold_0/seed_42/test_predictions.csv",
+      "sha256": "3fa23d69fea035fe0b744a5d399b95b4a6fa813b0c83e175572eb33186d3e273",
+      "test_videos": 62
+    },
+    {
+      "path": "masked_bimamba/fold_1/seed_42/test_predictions.csv",
+      "sha256": "453b6062205e4f66da1e52971266f5b4ef6b5992f9063ce6e58cd7958209e7a6",
+      "test_videos": 78
+    },
+    {
+      "path": "masked_bimamba/fold_2/seed_42/test_predictions.csv",
+      "sha256": "b978e41897c6d7db7cdfa5cf6d493e3f2fde98b68e1c23360777d03450434304",
+      "test_videos": 63
+    },
+    {
+      "path": "masked_bimamba/fold_3/seed_42/test_predictions.csv",
+      "sha256": "b5cf36e2fb988f5ec436ef2f5a050209497bf4b2dbc6dfa5ab591228f9d5dd7a",
+      "test_videos": 57
+    }
+  ],
+  "videos": 260,
+  "subject_groups": 14
+}

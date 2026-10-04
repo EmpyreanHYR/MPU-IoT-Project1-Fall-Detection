@@ -11,12 +11,14 @@ The presentation includes 12 paged slides, approximately seven minutes of prepar
 | Directory | Purpose |
 | --- | --- |
 | [`docs/`](docs/) | English HTML presentation, figures, speaker notes and bundled data; GitHub Pages publishes this directory. |
-| [`scripts/`](scripts/) | Standard-library builder for the presentation data. |
+| [`scripts/`](scripts/) | Presentation builders, unified service launcher, pose-model preparation and asset verification. |
+| [`deployment/`](deployment/) | Offline edge inference, durable outbox, cloud sync, local dashboard and generic service/configuration templates. |
+| [`artifacts/models/`](artifacts/models/) | Selected temporal classifier weights, ONNX, model card and checksums. |
 | [`code/`](code/) | Model code, experiment configurations and evaluation instructions. |
 | [`manuscripts/`](manuscripts/) | LaTeX sources for the proposal and final report. |
 | [`results/`](results/) | Aggregate model CSV evidence and a public, compact edge/system summary. |
 | [`datasets/`](datasets/) | Dataset provenance and usage documentation; no raw videos. |
-| [`webui/`](webui/) | Original dashboard frontend and browser-side MediaPipe assets. |
+| [`webui/`](webui/) | Dashboard frontend, cloud record receiver and browser-side MediaPipe assets. |
 
 ## Main findings
 
@@ -40,8 +42,14 @@ Open `http://localhost:8080/docs/`, or open `docs/index.html` directly. See [`do
 
 The final manuscript source is synchronized with the current report, including an independent repository block after the keywords, a single shared IEEE affiliation, fixed-rule alert replay, and valid robustness conditions. PNG figures are included; compiled PDFs and LaTeX build outputs remain excluded from Git. Build using the manuscript's Makefile. The included [`personal_contributions.tex`](manuscripts/final-report/personal_contributions.tex) is inserted after the bibliography in the same PDF and records Yaorong Huang's reported work in code, writing and the presentation; the other four members retain name-and-TBD entries for their own completion.
 
-Production deployment files, credentials, raw camera footage, databases and private device addresses are not part of this repository. GitHub Pages serves the static presentation; it does not host the live detection or cloud services.
+Sanitized deployment source and generic templates are included. Production credentials, raw camera footage, databases and private device addresses remain excluded. GitHub Pages serves the static presentation; it does not host the live detection or cloud services.
 
 ## Evidence status
 
 Current robustness plots use frame removal and confidence noise. Archived joint-removal and lower-body-removal conditions are excluded because zero filling before normalization rescaled other joints. Original values remain in the annotated CSV and a separate excluded-history view. The corrected preprocessing is included in `code/src/fallbench/data.py`; the excluded experiments have not been rerun.
+
+## Run the system and reproduce the work
+
+See [deployment instructions](deployment/README.md) for the one-command local launcher, camera/CPU/Hailo modes, cloud synchronization and Linux service templates. The selected [temporal model](artifacts/models/README.md) is included; separately licensed pose weights can be obtained and exported with `scripts/prepare_pose_model.py`.
+
+[Reproducibility status and full rebuild commands](REPRODUCIBILITY.md) distinguish the recovered 260-video test assignment from newly generated validation folds. Original validation assignments and pose caches are not available in this release. CI verifies the model interface, numerical parity and delivery behavior on every push.

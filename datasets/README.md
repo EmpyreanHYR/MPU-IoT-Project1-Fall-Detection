@@ -7,3 +7,5 @@ This directory records dataset sources, versions, licenses, processing boundarie
 
 Obtain each dataset from its cited publisher and comply with its own license. The repository does not grant redistribution rights for third-party data.
 
+
+`primary_test_folds.csv` recovers the 260 primary video test assignments from saved predictions, checked across all 60 main runs. Its provenance file records source hashes. It does not reconstruct the original training/validation assignments. See [rebuild instructions](../REPRODUCIBILITY.md) for that distinction.

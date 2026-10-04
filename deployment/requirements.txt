@@ -1,0 +1,4 @@
+# Python 3.12 portable CPU runtime; HailoRT is installed by the device vendor.
+numpy>=1.26,<3
+onnxruntime>=1.20,<2
+opencv-python-headless>=4.10,<5

@@ -1,8 +1,6 @@
 # FallBench: reproducible fall-detection experiments
 
-This is the clean experiment workspace for the new study. Previous results and
-run directories are intentionally excluded. The old modified project and the
-downloaded TCNTE archive are reference material only.
+This is the experiment code for the completed study. Aggregate reported results are in `../results/`; the selected deployment weights are in `../artifacts/models/`. Full run directories and raw data remain excluded. See [the current reproduction guide](../REPRODUCIBILITY.md) for recovered test folds and the limits of rebuilding validation assignments.
 
 The repository supports two explicitly separated tracks:
 
@@ -29,7 +27,7 @@ code/
 └── README.md
 ```
 
-Raw videos, pose caches, weights and results must live outside the repository.
+Raw videos, pose caches, new weights and generated run outputs must live in the ignored data/output directories or outside the repository. The deliberately published small deployment model is the exception.
 Recommended workspace layout (set `FALLGUARD_WORK_DIR` to this directory):
 
 ```text
@@ -65,15 +63,19 @@ python scripts/make_splits.py \
 python scripts/build_windows.py \
   --fold-manifest data/manifests/folds/fold_0.csv \
   --pose-index data/poses/index.csv \
-  --output data/manifests/fold_0_windows.csv \
+  --output data/manifests/folds_windows/fold_0_windows.csv \
   --window-seconds 1.0 --stride-seconds 0.2 --timesteps 30 \
   --positive-overlap 0.5 --exclude-after-fall
 
 # 5. Train one fold/seed. No early stopping is implemented.
 python scripts/train.py \
   --config configs/main_protocol.yaml \
-  --windows data/manifests/fold_0_windows.csv \
+  --windows data/manifests/folds_windows/fold_0_windows.csv \
   --model tcnte --seed 42 --output outputs/main/tcnte/fold_0/seed_42
+
+# Build fold_1_windows.csv through fold_3_windows.csv in the same directory
+# before running the full matrix. For the recorded primary test folds, use
+# rebuild_primary.py as documented in ../REPRODUCIBILITY.md instead.
 
 # 6. Run the declared model/fold/seed matrix with resumable jobs.
 python scripts/run_suite.py \
@@ -113,4 +115,4 @@ window-manifest schemas.
 - Report window-level and event/file-level metrics separately.
 - Record the config file, command, package versions, GPU and git commit in every
   output directory.
-- Missing results remain `TBD`; old runs are not copied into this repository.
+- Missing results remain `TBD`; rebuilt experiments must be named separately from the reported original runs.

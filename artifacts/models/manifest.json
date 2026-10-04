@@ -1,0 +1,49 @@
+{
+  "files": [
+    {
+      "path": "artifacts/models/masked_bimamba.pt",
+      "bytes": 783550,
+      "sha256": "a68df0a347ae12eba9a994891ae11eb0f7e18fd5caa5a27186530587ff77b485"
+    },
+    {
+      "path": "artifacts/models/masked_bimamba_quality.onnx",
+      "bytes": 1323111,
+      "sha256": "3a5143a7da61be834bfa2252f776b2c24909cc7944f5585559a413ddcbe0adeb"
+    },
+    {
+      "path": "artifacts/models/deployment_selection.json",
+      "bytes": 1049,
+      "sha256": "8696b487d6be857f2088edd40dcffbdef8cbef03539a1f458c1461a59a67823a"
+    },
+    {
+      "path": "datasets/primary_test_folds.csv",
+      "bytes": 12888,
+      "sha256": "b928089c728d9083f826f8f3cb127687a4f614daa2258c13ecd9deb54cc0ec3e"
+    },
+    {
+      "path": "datasets/primary_test_folds.provenance.json",
+      "bytes": 1121,
+      "sha256": "8ef19c18b12a089a200f6ffce7172ded331e5156f30d17ca3bd6029a6b1630f5"
+    },
+    {
+      "path": "datasets/annotation_sources.json",
+      "bytes": 1010,
+      "sha256": "d9721a12106496854eb273abed35d2f9a25dabacb6292c3444a876499e01ce84"
+    },
+    {
+      "path": "datasets/mapping_templates/caucafall.csv",
+      "bytes": 1786,
+      "sha256": "7a597068af0e2c9f3dfe32d032a05a9a3c30b91a67a83bff686708859bbf5a58"
+    },
+    {
+      "path": "datasets/mapping_templates/GMDCSA24.csv",
+      "bytes": 2975,
+      "sha256": "464abc24624f7f7505f3bcfe28b1b22df2253122e87ae1b4323127eb23584fbf"
+    },
+    {
+      "path": "datasets/mapping_templates/le2i.csv",
+      "bytes": 3992,
+      "sha256": "53b28ec087dea4045ff20b38fd29fa6d76f80f56c75e5d23f8fbb5b2066bc9e2"
+    }
+  ]
+}

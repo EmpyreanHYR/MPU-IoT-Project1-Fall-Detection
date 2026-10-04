@@ -1,0 +1,22 @@
+[Unit]
+Description=FallGuard Durable edge record API
+After=network.target
+
+[Service]
+Type=simple
+User=fallguard
+Group=fallguard
+WorkingDirectory=/opt/fallguard/deployment/edge
+EnvironmentFile=/etc/fallguard/edge.env
+ExecStart=/opt/fallguard/.venv/bin/python /opt/fallguard/deployment/edge/outbox_server.py --database /var/lib/fallguard-edge/edge.sqlite3 --port 18082
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+StateDirectory=fallguard-edge
+RuntimeDirectory=fallguard-edge
+RuntimeDirectoryPreserve=yes
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
