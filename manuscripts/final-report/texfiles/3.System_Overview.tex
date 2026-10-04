@@ -1,7 +1,7 @@
 \section{System design}
 \label{sec:system}
 
-FallGuard performs pose extraction and temporal classification on the Raspberry Pi. The Hailo accelerator runs the pose network, while the Pi CPU evaluates a one-second skeleton window with MaskedBiMamba. The local alert state and prediction records remain available during network outages. When connectivity returns, a synchronization service transfers pending records to the cloud for event history and dashboard updates. Figure~\ref{fig:edge_flow} shows this data flow.
+FallGuard performs pose extraction and temporal classification on the Raspberry Pi. The Hailo accelerator runs the pose network, while the Pi CPU evaluates a one-second skeleton window with MaskedBiMamba. The local alert state and prediction records remain available during network outages. After reconnection, a synchronization service transfers pending records to the cloud. The cloud retains these records for the event history and monitoring dashboard. Figure~\ref{fig:edge_flow} shows this data flow.
 
 \begin{figure*}[tp]
 \centering
@@ -22,11 +22,13 @@ FallGuard performs pose extraction and temporal classification on the Raspberry 
 \label{fig:edge_flow}
 \end{figure*}
 
-Routine synchronization transfers pose features and classification records. An authenticated preview can relay annotated images for monitoring; preview frames are held temporarily and kept separate from the event archive.
+Routine synchronization transfers pose keypoints, model scores, timestamps, and alert records, but not stored video. An authenticated preview can relay annotated images on demand; these frames remain in memory and are not added to the event archive. Pose records can reveal movement and are treated as protected application data. The absence of routine video transfer does not establish anonymity.
+
+The deployed backend runs on a Tencent Cloud Lighthouse VM with OpenCloudOS~9. The Python service is bound to the VM loopback interface behind an Nginx HTTPS gateway. Dashboard access uses HTTP Basic authentication over TLS. Edge records are pulled through a Tailscale private route from a token-protected endpoint; the corresponding public device path is not exposed. Service credentials are loaded from permission-restricted environment files rather than stored in the submitted source. These controls describe the implemented deployment boundary; they do not constitute a formal privacy or security evaluation.
 
 \subsection{Alert-state transitions}
 
-The edge node converts a sequence of fall probabilities into \textsc{Normal}, \textsc{Suspected}, \textsc{Confirmed}, and \textsc{Cleared} states. Let $p_k$ be the probability of the $k$th locally classified window. The high- and low-probability counters are
+The edge node converts consecutive window probabilities into four alert states: \textsc{Normal}, \textsc{Suspected}, \textsc{Confirmed}, and \textsc{Cleared} states. Let $p_k$ be the probability of the $k$th locally classified window. The high- and low-probability counters are
 \begin{equation}
 \begin{aligned}
  c_k^+ &= \mathbf{1}[p_k\geq0.65](c_{k-1}^++1),\\
@@ -34,4 +36,4 @@ The edge node converts a sequence of fall probabilities into \textsc{Normal}, \t
 \end{aligned}
 \label{eq:alert_counters}
 \end{equation}
-A high observation opens a suspected event. Confirmation requires $c_k^+\geq2$ and $p_k\geq0.82$; $c_k^-\geq2$ clears an active event. Requiring consecutive high-probability observations prevents an isolated spike from confirming an event. Acknowledgement and user notes are stored with the event, separately from the prediction sequence.
+A high observation opens a suspected event. Confirmation requires $c_k^+\geq2$ and $p_k\geq0.82$; $c_k^-\geq2$ clears an active event. An isolated high-probability observation is therefore insufficient to confirm an event. Acknowledgement and user notes are stored with the event, separately from the prediction sequence.

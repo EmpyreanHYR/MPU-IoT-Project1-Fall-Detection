@@ -1,0 +1,161 @@
+{
+  "analysis": "descriptive test-set replay of deployed alert thresholds",
+  "matching": "confirmation window has positive-duration overlap with an unused merged positive-window interval",
+  "confirmation_offset": "confirmation-window end minus merged positive-window interval start",
+  "limitations": [
+    "thresholds were not selected through this analysis",
+    "the retained video segments do not represent continuous-care exposure",
+    "the reference intervals are formed from positive evaluation windows rather than independently annotated onset times"
+  ],
+  "summary": {
+    "confirmed_event_recall": {
+      "mean": 0.7751738504426676,
+      "sample_sd": 0.09581364816560449,
+      "count": 12
+    },
+    "confirmed_false_alerts_per_hour": {
+      "mean": 66.66336316405422,
+      "sample_sd": 45.21962744150271,
+      "count": 12
+    },
+    "mean_confirmation_offset_seconds": {
+      "mean": 1.8841165224794134,
+      "sample_sd": 0.2847796640574958,
+      "count": 12
+    }
+  },
+  "runs": [
+    {
+      "run": "fold_0/seed_2026",
+      "reference_events": 31,
+      "confirmed_alerts": 39,
+      "matched_alerts": 27,
+      "false_confirmed_alerts": 12,
+      "confirmed_event_recall": 0.8709677419354839,
+      "confirmed_false_alerts_per_hour": 110.42944785276079,
+      "mean_confirmation_offset_seconds": 1.8148148148148149,
+      "evaluated_hours": 0.10866666666666662
+    },
+    {
+      "run": "fold_0/seed_3407",
+      "reference_events": 31,
+      "confirmed_alerts": 37,
+      "matched_alerts": 27,
+      "false_confirmed_alerts": 10,
+      "confirmed_event_recall": 0.8709677419354839,
+      "confirmed_false_alerts_per_hour": 92.02453987730065,
+      "mean_confirmation_offset_seconds": 1.8740740740740742,
+      "evaluated_hours": 0.10866666666666662
+    },
+    {
+      "run": "fold_0/seed_42",
+      "reference_events": 31,
+      "confirmed_alerts": 31,
+      "matched_alerts": 24,
+      "false_confirmed_alerts": 7,
+      "confirmed_event_recall": 0.7741935483870968,
+      "confirmed_false_alerts_per_hour": 64.41717791411045,
+      "mean_confirmation_offset_seconds": 2.066666666666667,
+      "evaluated_hours": 0.10866666666666662
+    },
+    {
+      "run": "fold_1/seed_2026",
+      "reference_events": 39,
+      "confirmed_alerts": 27,
+      "matched_alerts": 22,
+      "false_confirmed_alerts": 5,
+      "confirmed_event_recall": 0.5641025641025641,
+      "confirmed_false_alerts_per_hour": 29.527559055118115,
+      "mean_confirmation_offset_seconds": 2.390909090909091,
+      "evaluated_hours": 0.1693333333333333
+    },
+    {
+      "run": "fold_1/seed_3407",
+      "reference_events": 39,
+      "confirmed_alerts": 31,
+      "matched_alerts": 26,
+      "false_confirmed_alerts": 5,
+      "confirmed_event_recall": 0.6666666666666666,
+      "confirmed_false_alerts_per_hour": 29.527559055118115,
+      "mean_confirmation_offset_seconds": 2.253846153846154,
+      "evaluated_hours": 0.1693333333333333
+    },
+    {
+      "run": "fold_1/seed_42",
+      "reference_events": 39,
+      "confirmed_alerts": 59,
+      "matched_alerts": 34,
+      "false_confirmed_alerts": 25,
+      "confirmed_event_recall": 0.8717948717948718,
+      "confirmed_false_alerts_per_hour": 147.63779527559058,
+      "mean_confirmation_offset_seconds": 1.9,
+      "evaluated_hours": 0.1693333333333333
+    },
+    {
+      "run": "fold_2/seed_2026",
+      "reference_events": 31,
+      "confirmed_alerts": 25,
+      "matched_alerts": 24,
+      "false_confirmed_alerts": 1,
+      "confirmed_event_recall": 0.7741935483870968,
+      "confirmed_false_alerts_per_hour": 8.245533669262485,
+      "mean_confirmation_offset_seconds": 1.9583333333333333,
+      "evaluated_hours": 0.12127777777777775
+    },
+    {
+      "run": "fold_2/seed_3407",
+      "reference_events": 31,
+      "confirmed_alerts": 31,
+      "matched_alerts": 27,
+      "false_confirmed_alerts": 4,
+      "confirmed_event_recall": 0.8709677419354839,
+      "confirmed_false_alerts_per_hour": 32.98213467704994,
+      "mean_confirmation_offset_seconds": 1.837037037037037,
+      "evaluated_hours": 0.12127777777777775
+    },
+    {
+      "run": "fold_2/seed_42",
+      "reference_events": 31,
+      "confirmed_alerts": 24,
+      "matched_alerts": 23,
+      "false_confirmed_alerts": 1,
+      "confirmed_event_recall": 0.7419354838709677,
+      "confirmed_false_alerts_per_hour": 8.245533669262485,
+      "mean_confirmation_offset_seconds": 1.973913043478261,
+      "evaluated_hours": 0.12127777777777775
+    },
+    {
+      "run": "fold_3/seed_2026",
+      "reference_events": 27,
+      "confirmed_alerts": 31,
+      "matched_alerts": 21,
+      "false_confirmed_alerts": 10,
+      "confirmed_event_recall": 0.7777777777777778,
+      "confirmed_false_alerts_per_hour": 92.30769230769234,
+      "mean_confirmation_offset_seconds": 1.380952380952381,
+      "evaluated_hours": 0.1083333333333333
+    },
+    {
+      "run": "fold_3/seed_3407",
+      "reference_events": 27,
+      "confirmed_alerts": 27,
+      "matched_alerts": 19,
+      "false_confirmed_alerts": 8,
+      "confirmed_event_recall": 0.7037037037037037,
+      "confirmed_false_alerts_per_hour": 73.84615384615387,
+      "mean_confirmation_offset_seconds": 1.631578947368421,
+      "evaluated_hours": 0.1083333333333333
+    },
+    {
+      "run": "fold_3/seed_42",
+      "reference_events": 27,
+      "confirmed_alerts": 34,
+      "matched_alerts": 22,
+      "false_confirmed_alerts": 12,
+      "confirmed_event_recall": 0.8148148148148148,
+      "confirmed_false_alerts_per_hour": 110.7692307692308,
+      "mean_confirmation_offset_seconds": 1.5272727272727273,
+      "evaluated_hours": 0.1083333333333333
+    }
+  ]
+}

@@ -5,7 +5,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const modelNames={masked_bimamba:'MaskedBiMamba',tcn:'TCN',te:'Transformer (TE)',tcnte:'TCNTE',unimamba:'UniMamba'};
 const variantNames={full:'Full model',no_bidirectional:'No bidirectionality',no_temporal_attention:'No temporal attention',no_quality_pooling:'No quality pooling',no_frame_masking:'No frame masking',no_confidence_input:'No joint confidence',no_confidence_or_quality:'No confidence or quality',mask_ratio_005:'Mask ratio 0.05',mask_ratio_010:'Mask ratio 0.10',mask_ratio_020:'Mask ratio 0.20',mask_ratio_030:'Mask ratio 0.30'};
 const suiteNames={gmdcsa24_main_v1:'Primary · current',gmdcsa24_ablations_v1:'Ablations',gmdcsa24_robustness_v1:'Primary robustness',gmdcsa24_external_le2i_v1:'External Le2i',tcnte_reproduction:'Le2i baselines',main:'Earlier main · archived'};
-const metricNames={window_f1:'Window F1',window_precision:'Window precision',window_recall:'Window recall',video_f1:'Video F1',window_auroc:'Window AUROC',event_event_recall:'Event recall',event_false_alarms_per_hour:'False alarms / evaluated hour'};
+const metricNames={window_f1:'Window F1',window_precision:'Window precision',window_recall:'Window recall',video_f1:'Video F1',window_auroc:'Window AUROC',event_event_recall:'Event recall',event_false_alarms_per_hour:'Unmatched predicted events / evaluated hour'};
 const value=(v,d=4)=>v===null||!Number.isFinite(v)?'—':v.toFixed(d);
 const lookup=(suite,group,metric)=>rows.find(r=>r.suite===suite&&r.group===group&&r.metric===metric);
 const publicTable=(headers,body,caption='')=>`<table>${caption?`<caption>${esc(caption)}</caption>`:''}<thead><tr>${headers.map(x=>`<th scope="col">${esc(x)}</th>`).join('')}</tr></thead><tbody>${body.map(r=>`<tr tabindex="0">${r.map(x=>`<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
@@ -24,11 +24,11 @@ function updateBaseline(){const m=$('mainMetric').value;const d=['tcn','te','tcn
 function updateAblation(){const m=$('ablationMetric').value;const primary=lookup('gmdcsa24_main_v1','masked_bimamba',m);const variants=['no_bidirectional','no_temporal_attention','no_quality_pooling','no_frame_masking','no_confidence_input','no_confidence_or_quality','mask_ratio_005','mask_ratio_010','mask_ratio_020','mask_ratio_030'];const d=[{...primary,name:'Full model',featured:true},...variants.map(k=>({...lookup('gmdcsa24_ablations_v1',k+'/masked_bimamba',m),name:variantNames[k],featured:false}))];dotChart('ablationChart',d.slice(0,7),m);resultTable('ablationTable',d,m);}
 function updateRobustness(){
  const suite=$('robustDataset').value,c=$('robustCondition').value,m=$('robustMetric').value;
- const severities=c==='lower_body_missing'?[0,1]:[0,.1,.2,.3],W=1000,H=335,left=85,right=70,top=30,bottom=65;
- const x=s=>left+s/(c==='lower_body_missing'?1:.3)*(W-left-right),y=v=>top+(1-Math.max(0,Math.min(1,v)))*(H-top-bottom);
+ const severities=[0,.1,.2,.3],W=1000,H=335,left=85,right=70,top=30,bottom=65;
+ const x=s=>left+s/.3*(W-left-right),y=v=>top+(1-Math.max(0,Math.min(1,v)))*(H-top-bottom);
  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(metricNames[m])} under ${esc(c.replaceAll('_',' '))}"><title>Robustness comparison</title><desc>Mean scores across 12 evaluations. Shaded regions show one sample standard deviation.</desc>`;
  for(let i=0;i<=4;i++){const v=i/4;svg+=`<line class="grid" x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}"/><text class="tick" x="${left-15}" y="${y(v)+5}" text-anchor="end">${v.toFixed(2)}</text>`;}
- severities.forEach(s=>{svg+=`<text class="tick" x="${x(s)}" y="${H-bottom+23}" text-anchor="middle">${c==='lower_body_missing'?(s?'Removed':'None'):s.toFixed(1)}</text>`;});
+ severities.forEach(s=>{svg+=`<text class="tick" x="${x(s)}" y="${H-bottom+23}" text-anchor="middle">${s.toFixed(1)}</text>`;});
  const full=[];
  ['masked_bimamba','tcnte'].forEach((model,index)=>{
   const color=index?'#bb562c':'#007e74',d=severities.map(s=>{const group=s===0?`${model}/clean/0.0`:`${model}/${c}/${s.toFixed(1)}`;const row=lookup(suite,group,m);return {...row,s,name:modelNames[model]};});full.push(...d);
@@ -36,19 +36,25 @@ function updateRobustness(){
   svg+=`<polygon points="${band}" fill="${color}" opacity=".11"/><polyline points="${d.map(r=>`${x(r.s)},${y(r.mean)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="3" ${index?'stroke-dasharray="7 4"':''}/>`;
   d.forEach(r=>{const tip=`${r.name}; severity ${r.s}: ${value(r.mean)} ± ${value(r.sd)} (n=${r.n})`;svg+=`<g class="chart-row" tabindex="0" data-tip="${esc(tip)}" aria-label="${esc(tip)}"><circle cx="${x(r.s)}" cy="${y(r.mean)}" r="12" fill="transparent"/><circle cx="${x(r.s)}" cy="${y(r.mean)}" r="5" fill="${color}"/></g>`;});
  });
- svg+=`<text class="tick" transform="translate(19,160) rotate(-90)" text-anchor="middle">${esc(metricNames[m])}</text><text class="tick" x="${W/2}" y="${H-12}" text-anchor="middle">${c==='confidence_noise'?'Confidence noise standard deviation':c==='lower_body_missing'?'Lower-body observations':'Removal fraction'}</text><text x="${left+8}" y="16" style="fill:#007e74">● MaskedBiMamba</text><text x="${left+215}" y="16" style="fill:#bb562c">– – TCNTE</text></svg>`;
+ svg+=`<text class="tick" transform="translate(19,160) rotate(-90)" text-anchor="middle">${esc(metricNames[m])}</text><text class="tick" x="${W/2}" y="${H-12}" text-anchor="middle">${c==='confidence_noise'?'Confidence noise standard deviation':'Removal fraction'}</text><text x="${left+8}" y="16" style="fill:#007e74">● MaskedBiMamba</text><text x="${left+215}" y="16" style="fill:#bb562c">– – TCNTE</text></svg>`;
  $('robustChart').innerHTML=svg;$('robustTable').innerHTML=publicTable(['Model','Severity',metricNames[m],'Sample SD','n'],full.map(r=>[r.name,r.s,value(r.mean),value(r.sd),r.n]));
  const end=severities.at(-1),a=full.find(r=>r.name==='MaskedBiMamba'&&r.s===end),b=full.find(r=>r.name==='TCNTE'&&r.s===end);
- $('robustFinding').textContent=`${$('robustDataset').selectedOptions[0].text} · ${$('robustCondition').selectedOptions[0].text} ${c==='lower_body_missing'?'':`(${end})`}: ${metricNames[m].toLowerCase()} is ${value(a.mean)} for MaskedBiMamba and ${value(b.mean)} for TCNTE.`;
+ $('robustFinding').textContent=`${$('robustDataset').selectedOptions[0].text} · ${$('robustCondition').selectedOptions[0].text} (${end}): ${metricNames[m].toLowerCase()} is ${value(a.mean)} for MaskedBiMamba and ${value(b.mean)} for TCNTE.`;
 }
 $('mainMetric').addEventListener('change',updateBaseline);$('ablationMetric').addEventListener('change',updateAblation);for(const id of ['robustDataset','robustCondition','robustMetric'])$(id).addEventListener('change',updateRobustness);
 updateBaseline();updateAblation();updateRobustness();
+const replay=DATA.alertReplay.summary;
+$('alertReplayTable').innerHTML=publicTable(['Fixed-rule replay metric','Mean','Sample SD','n'],[
+ ['Confirmed-event recall',value(replay.confirmed_event_recall.mean),value(replay.confirmed_event_recall.sample_sd),replay.confirmed_event_recall.count],
+ ['Unmatched confirmed alerts / evaluated hour',value(replay.confirmed_false_alerts_per_hour.mean,1),value(replay.confirmed_false_alerts_per_hour.sample_sd,1),replay.confirmed_false_alerts_per_hour.count],
+ ['Confirmation offset (s)',value(replay.mean_confirmation_offset_seconds.mean,2),value(replay.mean_confirmation_offset_seconds.sample_sd,2),replay.mean_confirmation_offset_seconds.count]
+],'Deployed rules replayed on 12 test sequences; thresholds were not tuned by this analysis');
 const timing=edge.timing;
 $('edgeTable').innerHTML=publicTable(['Measurement','CPU ONNX','Hailo'],[['Complete pipeline (fps)',`${value(timing.cpu.fps.mean,2)} ± ${value(timing.cpu.fps.sample_sd,2)}`,`${value(timing.hailo.fps.mean,2)} ± ${value(timing.hailo.fps.sample_sd,2)}`],['Pose median latency (ms)',`${value(timing.cpu.pose_median_ms.mean,2)} ± ${value(timing.cpu.pose_median_ms.sample_sd,2)}`,`${value(timing.hailo.pose_median_ms.mean,2)} ± ${value(timing.hailo.pose_median_ms.sample_sd,2)}`],['Classifier median latency (ms)',`${value(timing.cpu.classifier_median_ms.mean,2)} ± ${value(timing.cpu.classifier_median_ms.sample_sd,2)}`,`${value(timing.hailo.classifier_median_ms.mean,2)} ± ${value(timing.hailo.classifier_median_ms.sample_sd,2)}`],['Process memory (MiB)',`${value(timing.cpu.rss_mib.mean,2)} ± ${value(timing.cpu.rss_mib.sample_sd,2)}`,`${value(timing.hailo.rss_mib.mean,2)} ± ${value(timing.hailo.rss_mib.sample_sd,2)}`],['Measured frames',timing.cpu.measured_frames,timing.hailo.measured_frames],['Replays',timing.cpu.replays,timing.hailo.replays]],'Timing means ± sample SD across eight replays per backend')+publicTable(['Synthetic sample metric','Value'],Object.entries(edge.synthetic).filter(([k,v])=>typeof v==='number').map(([k,v])=>[k.replaceAll('_',' '),Number.isInteger(v)?v:value(v)]));
 $('cloudTable').innerHTML=publicTable(['Time after reconnection (s)','Pending records'],edge.recovery.pending_samples.map(r=>[value(r.elapsed_s,4),r.pending]),'Observed queue recovery: 17 records from a 30-second outage');
 $('latencyTable').innerHTML=publicTable(['Rank','Capture-to-cloud receipt (s)'],edge.recovery.connected_latency_s.map((v,i)=>[i+1,value(v,4)]),'All 34 connected delivery times, sorted ascending');
 let page=0,filtered=[];
-function updateExplorer(reset=true){if(reset)page=0;const suite=$('suiteFilter').value,q=$('dataSearch').value.trim().toLowerCase();filtered=rows.filter(r=>(suite==='all'||r.suite===suite)&&(!q||`${r.group} ${r.metric}`.toLowerCase().includes(q)));const size=$('pageSize').value==='all'?Math.max(1,filtered.length):Number($('pageSize').value);const pages=Math.max(1,Math.ceil(filtered.length/size));page=Math.min(Math.max(0,page),pages-1);const selected=filtered.slice(page*size,(page+1)*size),body=$('dataTable').querySelector('tbody');body.replaceChildren();for(const r of selected){const tr=document.createElement('tr');tr.tabIndex=0;const values=[suiteNames[r.suite],r.group,r.metric,value(r.mean,6),value(r.sd,6),r.n];for(let i=0;i<values.length;i++){const td=document.createElement('td');td.textContent=values[i];if(i>=3)td.className='numeric';tr.append(td)}body.append(tr)}if(!selected.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.textContent='No matching rows. Try another filter.';tr.append(td);body.append(tr)}$('pageInfo').textContent=`${filtered.length? page*size+1:0}–${Math.min((page+1)*size,filtered.length)} of ${filtered.length} rows · page ${page+1}/${pages}`;$('dataCaption').textContent=`${suite==='all'?'All experiment suites':suiteNames[suite]} · values rounded to six decimal places`; $('previousPage').disabled=page===0;$('nextPage').disabled=page>=pages-1;}
+function updateExplorer(reset=true){if(reset)page=0;const suite=$('suiteFilter').value,q=$('dataSearch').value.trim().toLowerCase();filtered=rows.filter(r=>(suite==='excluded_joint_removal'?r.status==='excluded':r.status!=='excluded'&&(suite==='all'||r.suite===suite))&&(!q||`${r.group} ${r.metric}`.toLowerCase().includes(q)));const size=$('pageSize').value==='all'?Math.max(1,filtered.length):Number($('pageSize').value);const pages=Math.max(1,Math.ceil(filtered.length/size));page=Math.min(Math.max(0,page),pages-1);const selected=filtered.slice(page*size,(page+1)*size),body=$('dataTable').querySelector('tbody');body.replaceChildren();for(const r of selected){const tr=document.createElement('tr');tr.tabIndex=0;const values=[suiteNames[r.suite],r.group,r.metric,value(r.mean,6),value(r.sd,6),r.n,r.status==='excluded'?'Excluded: coordinate-rescaling confound':r.status==='earlier_protocol'?'Earlier protocol':'Current'];for(let i=0;i<values.length;i++){const td=document.createElement('td');td.textContent=values[i];if(i>=3&&i<=5)td.className='numeric';tr.append(td)}body.append(tr)}if(!selected.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='No matching rows. Try another filter.';tr.append(td);body.append(tr)}$('pageInfo').textContent=`${filtered.length? page*size+1:0}–${Math.min((page+1)*size,filtered.length)} of ${filtered.length} rows · page ${page+1}/${pages}`;$('dataCaption').textContent=`${suite==='all'?'All eligible and earlier suites':suite==='excluded_joint_removal'?'Excluded spatial-mask history':suiteNames[suite]} · values rounded to six decimal places`; $('previousPage').disabled=page===0;$('nextPage').disabled=page>=pages-1;}
 for(const id of ['suiteFilter','pageSize'])$(id).addEventListener('change',()=>updateExplorer());$('dataSearch').addEventListener('input',()=>updateExplorer());$('previousPage').onclick=()=>{page--;updateExplorer(false)};$('nextPage').onclick=()=>{page++;updateExplorer(false)};updateExplorer();
 // The deck always shows one page; expanded material can scroll inside it.
 const slides=[...document.querySelectorAll('.slide')],navLinks=[...document.querySelectorAll('.chapter-nav a')];
@@ -57,7 +63,7 @@ document.body.classList.add('deck');
 const menu=$('contentsDialog');
 slides.forEach((slide,i)=>{
   const button=document.createElement('button');
-  button.textContent=`${i===12?'A':String(i+1).padStart(2,'0')} · ${slide.dataset.title}`;
+  button.textContent=`${slide.classList.contains('appendix')?'A'+(i-11):String(i+1).padStart(2,'0')} · ${slide.dataset.title}`;
   button.onclick=()=>{menu.close();navigate(i)};
   $('contentsList').append(button);
 });
@@ -65,7 +71,9 @@ function status(){
   slides.forEach((s,i)=>s.classList.toggle('current',i===current));
   navLinks.forEach((a,i)=>{a.classList.toggle('active',i===current);if(i===current)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});
   [...$('contentsList').children].forEach((b,i)=>b.setAttribute('aria-current',String(i===current)));
-  $('chapterStatus').textContent=(current===12?'Appendix':`${String(current+1).padStart(2,'0')} / 12`)+` · ${slides[current].dataset.title}`;
+  $('chapterStatus').textContent=(slides[current].classList.contains('appendix')?'Appendix '+(current-11):`${String(current+1).padStart(2,'0')} / 12`)+` · ${slides[current].dataset.title}`;
+  $('talkProgress').style.width=(Math.min(current+1,12)/12*100)+'%';
+  document.dispatchEvent(new Event('fallguard-slide-change'));
   $('prevSlide').disabled=current===0;$('nextSlide').disabled=current===slides.length-1;
 }
 function navigate(index){
@@ -89,6 +97,10 @@ document.addEventListener('scroll',()=>{hideRuler();$('chartTooltip').hidden=tru
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]')||e.target.closest('input,select,textarea,summary,[contenteditable="true"]'))return;
   const targets={ArrowRight:current+1,PageDown:current+1,ArrowLeft:current-1,PageUp:current-1,Home:0,End:slides.length-1};
+  if(e.key===' '){e.preventDefault();navigate(current+1)}
+  if(e.key.toLowerCase()==='p')$('presentToggle').click();
+  if(e.key.toLowerCase()==='b')$('blankScreen').hidden?setBlank(true):setBlank(false);
+  if(e.key==='Escape'){setBlank(false);setPresenting(false)}
   if(e.key in targets){e.preventDefault();navigate(targets[e.key])}
   if(e.key.toLowerCase()==='n')$('notesToggle').click();
   if(e.key.toLowerCase()==='h'){$('highlightToggle').checked=!$('highlightToggle').checked;hideRuler()}
@@ -150,3 +162,45 @@ const tooltip=$('chartTooltip');document.addEventListener('pointerover',e=>{cons
 document.querySelectorAll('[data-zoom]').forEach(button=>button.addEventListener('click',()=>{$('largeImage').src=button.dataset.zoom;$('largeImage').alt=button.querySelector('img').alt;$('imageDialog').showModal();}));$('closeImage').onclick=()=>$('imageDialog').close();$('imageDialog').addEventListener('click',e=>{if(e.target===$('imageDialog'))$('imageDialog').close()});
 
 $('edgeJSON').textContent=JSON.stringify(edge,null,2);
+
+// Audience/presenter messages carry only slide state; no inference or cloud API.
+const deckSession=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+let presenterChannel=null;
+try{presenterChannel=new BroadcastChannel('fallguard-presenter-v1')}catch(_){/* Storage fallback remains available. */}
+let lastCommandStamp=0,stateStamp=0,highlightBeforePresent=$('highlightToggle').checked;
+function publishDeckState(){
+  stateStamp=Math.max(Date.now(),stateStamp+1);
+  const message={type:'state',session:deckSession,slideId:slides[current].id,index:current,blank:!$('blankScreen').hidden,stamp:stateStamp};
+  if(presenterChannel)presenterChannel.postMessage(message);
+  try{localStorage.setItem('fallguard-presenter-state',JSON.stringify(message))}catch(_){/* File previews may restrict storage. */}
+}
+function setPresenting(enabled){
+  const wasPresenting=document.body.classList.contains('presenting');
+  if(enabled&&!wasPresenting){highlightBeforePresent=$('highlightToggle').checked;$('highlightToggle').checked=false}
+  if(!enabled&&wasPresenting)$('highlightToggle').checked=highlightBeforePresent;
+  document.body.classList.toggle('presenting',enabled);document.body.classList.remove('show-notes');
+  $('notesToggle').setAttribute('aria-pressed','false');$('presentToggle').setAttribute('aria-pressed',String(enabled));
+  $('exitPresent').hidden=!enabled;hideRuler();publishDeckState();
+}
+function setBlank(enabled){document.body.classList.toggle('blanked',enabled);$('blankScreen').hidden=!enabled;publishDeckState()}
+function receivePresenterCommand(message){
+  if(message?.type!=='command'||(message.targetSession&&message.targetSession!==deckSession)||message.stamp<=lastCommandStamp)return;
+  lastCommandStamp=message.stamp;
+  if(message.action==='navigate'){const index=slides.findIndex(s=>s.id===message.slideId);if(index>=0)navigate(index)}
+  if(message.action==='blank')setBlank(message.value===true);
+  publishDeckState();
+}
+if(presenterChannel)presenterChannel.onmessage=event=>receivePresenterCommand(event.data);
+window.addEventListener('storage',event=>{if(event.key==='fallguard-presenter-command'&&event.newValue){try{receivePresenterCommand(JSON.parse(event.newValue))}catch(_){}}});
+document.addEventListener('fallguard-slide-change',publishDeckState);
+$('presentToggle').onclick=()=>setPresenting(!document.body.classList.contains('presenting'));
+$('exitPresent').onclick=()=>setPresenting(false);$('blankScreen').onclick=()=>setBlank(false);
+$('presenterOpen').onclick=()=>{
+  window.name='fallguardAudience';
+  const params=new URLSearchParams({session:deckSession,slide:slides[current].id});
+  const popup=window.open('presenter.html?'+params.toString(),'fallguardPresenter','popup,width=1050,height=820');
+  if(!popup)$('presenterOpen').textContent='Allow popup for presenter view';
+  publishDeckState();
+};
+if(new URLSearchParams(location.search).get('present')==='1')setPresenting(true);
+publishDeckState();

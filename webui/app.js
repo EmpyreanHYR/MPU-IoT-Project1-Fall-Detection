@@ -145,8 +145,8 @@ function drawPose(points) {
   context.strokeStyle = 'rgba(145,220,209,.10)'; context.lineWidth = 2;
   context.beginPath();context.ellipse(w/2,h/2,144,172,0,0,Math.PI*2);context.stroke();
   if (points.length !== 17) {
-    context.textAlign = 'center';context.fillStyle = '#7b9ca5';context.font = '700 14px DM Sans, sans-serif';context.fillText('AWAITING ANONYMOUS POSE',w/2,h/2-4);
-    context.font = '12px DM Sans, sans-serif';context.fillText('等待匿名骨架数据',w/2,h/2+21);
+    context.textAlign = 'center';context.fillStyle = '#7b9ca5';context.font = '700 14px DM Sans, sans-serif';context.fillText('AWAITING POSE',w/2,h/2-4);
+    context.font = '12px DM Sans, sans-serif';context.fillText('等待人体骨架数据',w/2,h/2+21);
     return;
   }
   const locate = p => [w*.2 + p[0]*w*.6, h*.04 + p[1]*h*.91];

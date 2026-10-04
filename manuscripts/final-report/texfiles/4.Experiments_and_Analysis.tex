@@ -3,7 +3,7 @@
 
 \subsection{Datasets and evaluation protocol}
 
-The primary experiment uses CAUCAFall~\cite{guerrero2022caucafall,caucafallDatasetV5} and GMDCSA-24~\cite{alam2024gmdcsa,gmdcsaDatasetV2}. CAUCAFall includes ten participants performing five daily activities and five fall types in a home environment; GMDCSA-24 adds four subject groups. Le2i~\cite{charfi2012le2i,yu2025tcnte} provides a separate baseline comparison and an external test of the primary models. Table~\ref{tab:datasets} summarizes the 450 videos. Temporal labels follow the corresponding annotations in OmniFall~\cite{omnifallDataset2026}.
+The primary experiment used CAUCAFall~\cite{guerrero2022caucafall,caucafallDatasetV5} and GMDCSA-24~\cite{alam2024gmdcsa,gmdcsaDatasetV2}. CAUCAFall includes ten participants performing five daily activities and five fall types in a home environment; GMDCSA-24 adds four subject groups. Le2i~\cite{charfi2012le2i,yu2025tcnte} provides a separate baseline comparison and an external test of the primary models. Table~\ref{tab:datasets} summarizes the 450 videos. Temporal labels follow the corresponding annotations in OmniFall~\cite{omnifallDataset2026}.
 
 \begin{table}[!ht]
     \centering
@@ -28,7 +28,7 @@ A window is positive when at least half of its duration overlaps a fall interval
 
 Four subject-disjoint folds separate the 14 primary participant groups into training, validation, and test partitions, with both datasets represented in every partition. Overlapping windows from one video remain in the same partition. Le2i is held out when training the primary models. The separate Le2i comparison uses three video-grouped folds and a 15\% validation subset.
 
-The edge deployment test uses OmniFall-Synthetic~\cite{omnifallDataset2026}. Before inference, 20 fall and 20 non-fall clips were sampled with a fixed seed from the supplied annotations. These 40 clips contain 3,240 frames. The classifier was selected using primary validation F1 without training or threshold tuning on the synthetic clips. Clip-level prediction uses the maximum window probability at threshold 0.5. Clips without valid pose windows are reported separately as missing outputs.
+The edge deployment test used OmniFall-Synthetic~\cite{omnifallDataset2026}. Before inference, 20 fall and 20 non-fall clips were sampled with a fixed seed from the supplied annotations. These 40 clips contain 3,240 frames. The classifier was selected using primary validation F1 before synthetic evaluation. Neither the classifier nor its decision threshold was fitted to these clips. Clip-level prediction uses the maximum window probability at threshold 0.5. Clips without valid pose windows are reported separately as missing outputs.
 
 \subsection{Experimental environment and configuration}
 
@@ -54,7 +54,7 @@ Table~\ref{tab:environment} lists the hardware and software used for model exper
 \end{table}
 
 \subsubsection{Training and comparison models}
-All models train for 100 epochs using Adam, learning rate $10^{-4}$, and batch size 64. The focal-loss parameter in Eq.~\eqref{eq:focal_loss} is $\gamma=3$. Class weights are computed from the training partition for the primary comparison and set to $[1,30]$ for the separate Le2i comparison. The primary runs clip the gradient norm at 1.0. Model selection uses validation F1. Primary experiments use seeds 42, 3407, and 2026, giving 12 evaluations per model across four folds; the Le2i comparison uses seed 42. Results are reported as mean and sample standard deviation across folds and seeds.
+All models train for 100 epochs using Adam, learning rate $10^{-4}$, and batch size 64. The focal-loss parameter in Eq.~\eqref{eq:focal_loss} is $\gamma=3$. Class weights are computed from the training partition for the primary comparison and set to $[1,30]$ for the separate Le2i comparison. The primary runs clip the gradient norm at 1.0. Model selection uses validation F1. Primary experiments use seeds 42, 3407, and 2026, giving 12 evaluations per model across four folds; the Le2i comparison uses seed 42. We report arithmetic means and sample standard deviations across folds and seeds. These are descriptive summaries; no paired significance test was prespecified.
 
 The comparison includes TCN, Transformer encoder (TE), TCNTE~\cite{yu2025tcnte}, and UniMamba. The TCN has three residual blocks with channels $[8,16,32]$, kernel size 5, dilations $1,2,4$, and dropout 0.2. TE uses a 32-dimensional embedding, learned positions, one four-head encoder layer, and feed-forward width 32. TCNTE applies that encoder to the TCN sequence. UniMamba uses the same 64-dimensional Mamba backbone as MaskedBiMamba with two forward layers and mean pooling. All primary models receive the same windows and pose features.
 
@@ -106,18 +106,20 @@ For window boundaries $[a_i,b_i]$, the evaluated duration and false-alarm rate a
 \end{aligned}
 \label{eq:metric_far}
 \end{equation}
-The exposure includes the retained portions of both fall and non-fall videos. For a matched pair $(g,h)$ with interval start times $s_g$ and $s_h$, the mean onset offset is
+The exposure includes the retained portions of both fall and non-fall videos. Consequently, this rate describes unmatched predicted events in the evaluation segments, not notifications during continuous monitoring. For a matched pair $(g,h)$ with interval start times $s_g$ and $s_h$, the mean onset offset is
 \begin{equation}
  D_{\mathrm{onset}}=\frac{\sum_v\sum_{(g,h)\in\mathcal M_v}(s_h-s_g)}{\sum_v|\mathcal M_v|}.
 \label{eq:metric_onset}
 \end{equation}
 A negative offset denotes an early prediction. This measure describes interval alignment; system latency additionally includes image processing, communication, and alert confirmation.
 
+We also replay the deployed alert rules on each MaskedBiMamba test sequence, resetting the state between videos. A confirmed alert is matched to the first unused reference interval having positive-duration overlap with its confirmation window. Confirmed-event recall and unmatched confirmed alerts per evaluated hour use the same reference events and exposure as Eqs.~\eqref{eq:metric_event}--\eqref{eq:metric_far}. Confirmation offset is measured from the start of the merged positive-window interval to the end of the confirmation window. This retrospective replay evaluates fixed implementation rules; it does not tune their thresholds.
+
 \subsection{Results and analysis}
 
 \subsubsection{Comparison with temporal baselines}
 
-Figure~\ref{fig:results_baselines} shows that TE gives the highest window F1 (0.6581), AUROC (0.8881), video F1 (0.7686), and event recall (0.9767). MaskedBiMamba gives the highest window precision (0.6048) and the lowest false-alarm rate (198.5 per evaluated hour), with video F1 0.7632. These results show a trade-off between recall and the reliability of positive predictions: TE detects more fall windows, while MaskedBiMamba produces fewer unmatched event predictions.
+TE achieved the highest window F1 (0.6581), AUROC (0.8881), video F1 (0.7686), and event recall (0.9767) in the primary comparison (Figure~\ref{fig:results_baselines}). At threshold 0.5, MaskedBiMamba achieved the highest window precision (0.6048) and lowest unmatched predicted-event rate (198.5 per evaluated hour). Its video F1 was 0.7632 under the same evaluation protocol. TE detected more fall windows, whereas MaskedBiMamba produced fewer unmatched events at this threshold. The comparison does not establish that one model would retain the same false-alarm ordering after model-specific calibration.
 
 \begin{figure*}[tp]
     \centering
@@ -128,50 +130,54 @@ Figure~\ref{fig:results_baselines} shows that TE gives the highest window F1 (0.
 
 \subsubsection{Le2i baseline comparison}
 
-Figure~\ref{fig:results_baselines} compares the three baseline architectures on Le2i. TE gives the highest window F1 and AUROC. TCNTE gives the highest video F1, increasing it from TE's 0.8533 to 0.8768, while reducing false alarms from 158.1 to 118.4 per evaluated hour. The change in model ranking between window and video metrics reflects the effect of temporal aggregation.
+Figure~\ref{fig:results_baselines} compares the three baseline architectures on Le2i. TE achieved the highest window F1 and AUROC among the three Le2i baselines. TCNTE achieved the highest video F1 (0.8768), compared with 0.8533 for TE. Its unmatched predicted-event rate was also lower, at 118.4 versus 158.1 per evaluated hour. The change in model ranking between window and video metrics reflects the effect of temporal aggregation.
 
 
 
 \subsubsection{Ablation study}
 
-We evaluate ten MaskedBiMamba variants over the same four folds and three seeds (Figure~\ref{fig:results_ablation}). Removing bidirectionality reduces window F1 from 0.6395 to 0.6236; removing temporal attention reduces it to 0.6230. Both variants also reduce video F1 and increase false alarms. Thus, attention and bidirectional processing contribute to both local classification and event aggregation in this comparison.
+We evaluated ten MaskedBiMamba variants over the same four folds and three seeds (Figure~\ref{fig:results_ablation}). Removing bidirectionality reduced window F1 from 0.6395 to 0.6236; removing temporal attention reduced it to 0.6230. Both variants also reduced video F1 and increased unmatched predicted events. These matched comparisons support retaining attention and bidirectional processing in the evaluated architecture.
 
-The other components show a mixed effect. Removing frame masking gives the highest clean window F1 (0.6516), while removing quality pooling gives the highest video F1 (0.7729). Removing confidence input increases false alarms from 198.5 to 222.0 per hour. Mask ratios 0.05, 0.20, and 0.30 produce fewer false alarms than 0.15, whereas 0.10 gives more. The model's operating point therefore depends on how masking and quality weighting balance sensitivity against false positives.
+The remaining components had mixed effects under the clean evaluation protocol. Removing frame masking yielded the highest clean window F1 (0.6516), while removing quality pooling yielded the highest video F1 (0.7729). Removing confidence input increased unmatched predicted events from 198.5 to 222.0 per evaluated hour. Mask ratios 0.05, 0.20, and 0.30 produced fewer unmatched events than 0.15, whereas 0.10 produced more. The model's operating point therefore depends on how masking and quality weighting balance sensitivity against false positives.
 
 \begin{figure*}[tp]
     \centering
     \includegraphics[width=\textwidth]{figs/results_ablation.png}
-    \caption{Ablation results across four folds and three seeds. Points and whiskers show mean and sample standard deviation. The dotted line marks the full model; green points vary the training-time frame-mask ratio. Lower false-alarm rates are preferable.}
+    \caption{Ablation results across four folds and three seeds. Points and whiskers show mean and sample standard deviation. The dotted line marks the full model; green points vary the training-time frame-mask ratio. Lower unmatched-event rates are preferable.}
     \label{fig:results_ablation}
 \end{figure*}
 
 \subsubsection{Robustness to missing observations}
 
-We perturb the resampled poses before normalization. Joint and frame removal independently set observations to zero with probabilities 0.1, 0.2, and 0.3; frame removal also clears the corresponding box features. Time positions are retained. Confidence noise adds Gaussian noise with standard deviation 0.1, 0.2, or 0.3 and clips the result to $[0,1]$. A further condition removes every lower-body joint. Figure~\ref{fig:results_robustness} reports all evaluated levels of each perturbation for MaskedBiMamba and TCNTE. At frame-drop probability 0.30, MaskedBiMamba retains window F1 0.6276, compared with 0.4361 for TCNTE. Their clean scores in this evaluation are 0.6395 and 0.6255, respectively. Both models deteriorate under random joint removal and complete lower-body loss. The larger performance loss from removing joints suggests that temporal context compensates more readily for missing observations across time than for persistent loss of body geometry.
+We evaluated frame removal and confidence noise on the extracted pose sequences. Frame removal sets all pose and box observations to zero with probabilities 0.1, 0.2, and 0.3 while retaining the time positions. Confidence noise adds Gaussian noise with standard deviation 0.1, 0.2, or 0.3 and clips the result to $[0,1]$. Figure~\ref{fig:results_robustness} reports both conditions for MaskedBiMamba and TCNTE. At frame-drop probability 0.30, MaskedBiMamba retained window F1 0.6276, compared with 0.4361 for TCNTE. Their corresponding clean scores were 0.6395 and 0.6255, respectively. Confidence noise changed both models less than frame removal over the evaluated range.
 
 \begin{figure*}[tp]
     \centering
     \includegraphics[width=\textwidth]{figs/results_robustness.png}
-    \caption{Robustness on the primary test partitions (top) and external Le2i videos (bottom). Solid lines show window F1 and dashed lines show video F1. Shading denotes one sample standard deviation over 12 evaluations. Corruptions are applied at test time.}
+    \caption{Robustness on the primary test partitions (top) and external Le2i videos (bottom). Blue denotes MaskedBiMamba and orange denotes TCNTE; solid lines show window F1 and dashed lines show video F1. Shading denotes one sample standard deviation over 12 evaluations. Corruptions are applied at test time.}
     \label{fig:results_robustness}
 \end{figure*}
 
 \subsubsection{Cross-dataset evaluation}
 
-We apply the trained MaskedBiMamba and TCNTE models to all 12,650 Le2i windows (Figure~\ref{fig:results_robustness}). TCNTE gives higher clean window F1, 0.4950 versus 0.4687, while their video F1 values are close: 0.8307 and 0.8299. At frame-drop probability 0.30, MaskedBiMamba retains window F1 0.4507 and video F1 0.8243, compared with TCNTE's 0.2782 and 0.8126.
+We applied the trained MaskedBiMamba and TCNTE models to all 12,650 Le2i windows (Figure~\ref{fig:results_robustness}). TCNTE achieved higher clean window F1, at 0.4950 versus 0.4687 for MaskedBiMamba. Their clean video F1 values were close, at 0.8307 and 0.8299, respectively. At frame-drop probability 0.30, MaskedBiMamba retained window F1 0.4507 and video F1 0.8243, compared with TCNTE's 0.2782 and 0.8126.
 
 Le2i contains 130 positive and 60 negative videos under the evaluation labels. An all-positive video classifier therefore has F1 $260/(260+60)=0.8125$. Clean video specificity is 0.1958 for MaskedBiMamba and 0.1736 for TCNTE. The high proportion of fall videos and max pooling in Eq.~\eqref{eq:metric_video} raise video F1 here, while window F1 and video specificity give a more complete view of cross-dataset performance.
+
+\subsubsection{Alert-state replay}
+
+Across the 12 MaskedBiMamba evaluations, replaying the deployed confirmation rules yielded confirmed-event recall $0.7752\pm0.0958$ and $66.7\pm45.2$ unmatched confirmed alerts per evaluated hour. The mean confirmation offset was $1.88\pm0.28$~s from the start of the merged positive-window interval. These values are descriptive results for the retained test segments and fixed implementation thresholds; they are not estimates of caregiver notification burden in continuous operation.
 
 
 
 \subsubsection{Offline edge deployment}
-Figure~\ref{fig:pi_results} summarizes hardware measurements. The Hailo pipeline processes $20.56\pm0.39$ frames/s, compared with $1.73\pm0.02$ frames/s for CPU ONNX, an 11.9-fold throughput increase. The mean per-replay median pose latency falls from $527.1\pm2.5$ to $37.6\pm0.4$ ms. Local MaskedBiMamba inference takes approximately 7.7 ms per window with the Hailo pipeline. These throughput measurements include video decoding, pose processing, window classification, and local record writes, but exclude model initialization.
+Figure~\ref{fig:pi_results} summarizes hardware measurements. The Hailo pipeline processed $20.56\pm0.39$ frames/s, compared with $1.73\pm0.02$ frames/s for CPU ONNX, an 11.9-fold throughput increase. The mean per-replay median pose latency fell from $527.1\pm2.5$ to $37.6\pm0.4$ ms. Local MaskedBiMamba inference took approximately 7.7 ms per window with the Hailo pipeline. These throughput measurements include video decoding, pose processing, window classification, and local record writes, but exclude model initialization.
 
-On the 40 synthetic clips, all 20 fall clips have a positive prediction, while eight of the 20 non-fall clips are false positives. One non-fall clip yields no valid pose window. Coverage is 39/40 (97.5\%), accuracy among classified clips is 31/39 (79.49\%), and F1 is 0.8333. Valid body poses occur in 3,154 of 3,240 frames, producing 663 classified windows and durable records. The eight false positives include two sitting and two standing-up clips. Only 14 of the 20 positive clips produce a positive window ending inside the annotated fall interval; five of the six misses have intervals ending before the one-second input window is available. Clip-level recall therefore differs from detection during the annotated event.
+All 20 synthetic fall clips yielded a positive prediction, while eight of the 20 non-fall clips were false positives. One non-fall clip yielded no valid pose window for classification. Coverage is 39/40 (97.5\%), accuracy among classified clips is 31/39 (79.49\%), and F1 is 0.8333. Valid body poses occurred in 3,154 of 3,240 frames, producing 663 classified windows and durable records. The eight false positives include two sitting and two standing-up clips. Only 14 of the 20 positive clips produced a positive window ending inside the annotated fall interval; five of the six misses have intervals ending before the one-second input window is available. Clip-level recall therefore differs from detection during the annotated event.
 
-A 603.8-second isolated replay processes 11,016 frames and writes 2,312 records without interruption. CPU temperature reaches 57.85\,$^\circ$C with no reported throttling; peak process memory is 150.53 MiB. Killing the record writer preserves all 100 confirmed writes and the corresponding alert states on restart.
+A 603.8-second isolated replay processed 11,016 frames and wrote 2,312 records without interruption. CPU temperature reached 57.85\,$^\circ$C with no reported throttling; peak process memory is 150.53 MiB. Killing the record writer preserved all 100 confirmed writes and the corresponding alert states on restart.
 
-Six integration tests cover local storage and batch synchronization. On the deployed cloud, 34 queued records survive a withheld acknowledgement and service restart without duplicate insertion. Figure~\ref{fig:cloud_recovery} shows delivery after a 30-second upload-path outage and the receipt-time distribution during connected operation. The 17 retained records are delivered, and the queue is observed empty 2.83 seconds after recovery. All 85 records across the delivery tests match their edge identifiers and capture timestamps. Connected operation has a median receipt time of 1.45 seconds over 34 records (95th percentile 2.69 seconds). These measurements support recovery of the event history after interrupted connectivity. A separate USB-camera test confirms disconnected acquisition; full-body framing is required before that camera can classify.
+Six integration tests cover local storage and batch synchronization. On the deployed cloud, 34 queued records survived a withheld acknowledgement and service restart without duplicate insertion. Figure~\ref{fig:cloud_recovery} shows delivery after a 30-second upload-path outage and the receipt-time distribution during connected operation. All 17 retained records were delivered; the queue was first observed empty 2.83 seconds after recovery. All 85 records across the delivery tests matched their edge identifiers and capture timestamps. Connected operation had a median receipt time of 1.45 seconds over 34 records (95th percentile 2.69 seconds). These measurements support recovery of the event history after interrupted connectivity. A separate USB-camera test confirmed acquisition without an external network connection. Classification from that input still requires valid full-body pose observations.
 
 \begin{figure*}[tp]
 \centering

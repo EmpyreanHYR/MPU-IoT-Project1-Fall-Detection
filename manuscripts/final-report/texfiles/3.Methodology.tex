@@ -3,14 +3,14 @@
 
 \subsection{Pose representation and temporal windows}
 
-The model receives a sequence of estimated human poses. We retain $J=12$ body joints, excluding the five facial keypoints. Let $r_{t,j}^{(a)}$ be joint $j$'s coordinate along axis $a\in\{x,y\}$ at time $t$, and $c_{t,j}\in[0,1]$ its confidence. Each axis is normalized within a frame:
+MaskedBiMamba receives a sequence of estimated poses of one person. We retain $J=12$ body joints, excluding the five facial keypoints. Let $r_{t,j}^{(a)}$ be joint $j$'s coordinate along axis $a\in\{x,y\}$ at time $t$, and $c_{t,j}\in[0,1]$ its confidence. Each axis is normalized within a frame:
 \begin{equation}
     \bar r_{t,j}^{(a)}=
     \frac{r_{t,j}^{(a)}-\min_k r_{t,k}^{(a)}}
     {\max\!\left(\max_k r_{t,k}^{(a)}-\min_k r_{t,k}^{(a)},10^{-4}\right)}.
     \label{eq:pose_normalization}
 \end{equation}
-The frame vector $\mathbf x_t=[\bar r_{t,j}^{(x)},\bar r_{t,j}^{(y)},c_{t,j}]_{j=1}^{J}\in\mathbb R^{36}$ describes relative body configuration and joint confidence. This normalization reduces dependence on image position and scale. A separate quality vector records the mean joint confidence, visible-joint fraction, and person-box confidence $b_t$:
+The frame vector $\mathbf x_t=[\bar r_{t,j}^{(x)},\bar r_{t,j}^{(y)},c_{t,j}]_{j=1}^{J}\in\mathbb R^{36}$ describes relative body configuration and joint confidence. Per-frame normalization reduces dependence on image position and body scale. A separate quality vector records the mean joint confidence, visible-joint fraction, and person-box confidence $b_t$:
 \begin{equation}
     \mathbf q_t=
     \left[\frac{1}{J}\sum_{j=1}^{J}c_{t,j},\;
@@ -23,7 +23,7 @@ Each input window spans 1.0~s and is linearly interpolated to $T=30$ time steps.
 
 \subsection{Masked input and temporal attention}
 
-MaskedBiMamba combines training-time frame masking, temporal self-attention, bidirectional Mamba stacks, and quality-weighted pooling (Fig.~\ref{fig:masked_bimamba}). These additions address incomplete pose observations and the need to compare motion before and after a rapid posture change. The selective state-space operator itself follows Mamba~\cite{gu2023mamba}.
+MaskedBiMamba combines frame masking, temporal attention, bidirectional Mamba stacks, and quality-weighted pooling (Fig.~\ref{fig:masked_bimamba}). The architecture relates observations before and after a posture change while retaining pose quality as a separate input. The selective state-space operator itself follows Mamba~\cite{gu2023mamba}.
 
 During training, a Bernoulli variable $m_t$ determines whether the pose at time $t$ is retained. The masked pose is embedded in $d=64$ dimensions:
 \begin{equation}
@@ -31,7 +31,7 @@ During training, a Bernoulli variable $m_t$ determines whether the pose at time 
     \mathbf e_t=\mathbf W_e(m_t\mathbf x_t)+\mathbf b_e+\mathbf p_t,
     \label{eq:masked_embedding}
 \end{equation}
-where $\rho=0.15$, $\mathbf W_e\in\mathbb R^{d\times36}$, $\mathbf b_e\in\mathbb R^d$, and $\mathbf p_t\in\mathbb R^d$ is a learned position embedding. If every frame is masked, the first is retained. This augmentation trains the classifier to use surrounding motion when individual observations disappear. The quality stream remains unchanged; inference uses $m_t=1$ for every frame.
+where $\rho=0.15$, $\mathbf W_e\in\mathbb R^{d\times36}$, $\mathbf b_e\in\mathbb R^d$, and $\mathbf p_t\in\mathbb R^d$ is a learned position embedding. If every frame is masked, the first is retained. Training-time masking exposes the classifier to windows with missing frame observations. The quality stream remains unchanged; inference uses $m_t=1$ for every frame.
 
 Stacking $\mathbf e_t^\top$ gives $\mathbf E\in\mathbb R^{T\times d}$. Four attention heads compare all positions within the window. For head $k$, with $d_h=d/4=16$,
 \begin{equation}
@@ -47,20 +47,11 @@ where the softmax acts along each row and $\mathbf W_k^Q,\mathbf W_k^K,\mathbf W
     \right),
     \label{eq:attention_residual}
 \end{equation}
-where $\Vert$ denotes feature concatenation, $\mathbf W^O\in\mathbb R^{d\times d}$, and $\operatorname{LN}$ is layer normalization. Affine projection biases are omitted in Eqs.~\eqref{eq:temporal_attention} and~\eqref{eq:attention_residual} for readability. Attention supplies direct interactions between distant frames before recurrent state updates.
+where $\Vert$ denotes feature concatenation, $\mathbf W^O\in\mathbb R^{d\times d}$, and $\operatorname{LN}$ is layer normalization. Affine projection biases are omitted in Eqs.~\eqref{eq:temporal_attention} and~\eqref{eq:attention_residual} for readability. Attention connects observations at different positions before the recurrent state updates.
 
 \subsection{Selective state space and bidirectional fusion}
 
-Mamba makes its state update depend on the current input~\cite{gu2023mamba}. Its selective scan can be written for expanded feature channel $a$ and state component $r$ as
-\begin{equation}
-    \begin{aligned}
-        s_{t,a,r}&=e^{\Delta_{t,a}A_{a,r}}s_{t-1,a,r}
-                    +\Delta_{t,a}B_{t,r}u_{t,a},\\
-        v_{t,a}&=\sum_{r=1}^{n}C_{t,r}s_{t,a,r}+D_a u_{t,a}.
-    \end{aligned}
-    \label{eq:selective_scan}
-\end{equation}
-Here $u_{t,a}$ is the feature entering the scan, $s_{t,a,r}$ is its recurrent state, $A_{a,r}$ controls state decay, and $D_a$ is a learned skip coefficient. The positive step size $\Delta_{t,a}$ and input/output coefficients $B_{t,r},C_{t,r}$ depend on the current feature. Thus, the update can retain earlier motion or give more weight to the current observation. The initial state is zero. Each Mamba block also retains the standard input projection, causal depthwise convolution, SiLU activation and gate, and output projection. We use state size $n=16$, convolution width 4, and expansion factor 2, giving 128 internal channels.
+Mamba's selective state-space update makes its step size and input/output coefficients depend on the current feature~\cite{gu2023mamba}. We retain the standard Mamba input projection, causal depthwise convolution, SiLU gate, selective scan, and output projection. Each block uses state size 16, convolution width 4, and expansion factor 2, giving 128 internal channels. Our architectural change consists of independent forward and backward processing. The underlying Mamba operator is retained without a change to its selective update.
 
 To use both temporal directions, independent forward and backward stacks process the same attended window. Let $\mathcal R$ reverse the time axis, and let $\mathcal M_f^{(\ell)}$ and $\mathcal M_b^{(\ell)}$ denote the Mamba blocks at layer $\ell$. Starting with $\mathbf F^{(0)}=\mathbf H$ and $\mathbf B^{(0)}=\mathcal R(\mathbf H)$, the two residual stacks compute
 \begin{equation}
@@ -79,7 +70,7 @@ The reverse output is restored to the original time order before fusion:
     \right),
     \label{eq:direction_fusion}
 \end{equation}
-where $\mathbf W_f\in\mathbb R^{128\times64}$ and $\mathbf b_f\in\mathbb R^{64}$. Its row $\mathbf h_t^\top$ describes time $t$ using preceding and subsequent observations in the buffered window. This arrangement lets the classifier relate a rapid descent to the posture that follows it. Bidirectional processing therefore produces one decision for a complete window.
+where $\mathbf W_f\in\mathbb R^{128\times64}$ and $\mathbf b_f\in\mathbb R^{64}$. Its row $\mathbf h_t^\top$ describes time $t$ using preceding and subsequent observations in the buffered window. The aligned representation relates a descent to its subsequent posture within the buffered window. Bidirectional processing produces one classification after that window has been collected.
 
 \begin{figure*}[tp]
     \centering
@@ -103,7 +94,7 @@ where $\mathbf W_1\in\mathbb R^{32\times3}$, $\mathbf b_1,\mathbf w_2\in\mathbb 
     \mathbf z=\sum_{t=1}^{T}\alpha_t\mathbf h_t.
     \label{eq:quality_pooling}
 \end{equation}
-The coefficients satisfy $\alpha_t>0$ and $\sum_t\alpha_t=1$. They allow the model to adjust each frame's contribution using observation quality; equal weights recover temporal mean pooling. The window representation $\mathbf z\in\mathbb R^{64}$ yields two class logits and probabilities:
+The coefficients satisfy $\alpha_t>0$ and $\sum_t\alpha_t=1$. These coefficients adjust each frame's contribution using the separate quality input. Equal coefficients recover temporal mean pooling over the complete window. The window representation $\mathbf z\in\mathbb R^{64}$ yields two class logits and probabilities:
 \begin{equation}
     \boldsymbol\ell=\mathbf W_c\mathbf z+\mathbf b_c,\qquad
     \pi_c=\frac{e^{\ell_c}}{e^{\ell_0}+e^{\ell_1}},\quad c\in\{0,1\},

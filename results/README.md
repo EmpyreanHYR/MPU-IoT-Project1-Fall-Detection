@@ -9,9 +9,12 @@ This directory contains compact CSV summaries used by the final report. It exclu
 | `robustness/` | Missing-observation evaluations. |
 | `external-le2i/` | External Le2i evaluations. |
 | `tcnte-reproduction/` | Le2i TCNTE reproduction. |
+| `alert-replay/` | Fixed deployed-rule replay on 12 primary test sequences. |
 | `verification/` | Independently recomputed compact verification summary. |
 
 Each experiment folder contains `all_runs.csv` and/or `summary.csv`. See [`manuscripts/final-report/RESULTS_PROVENANCE.md`](../manuscripts/final-report/RESULTS_PROVENANCE.md) for interpretation limits and completeness counts.
 
 
 The [`edge/`](edge/) folder adds measured local-inference, synthetic-clip, short-session stability and cloud-delivery evidence. These are system measurements with their own sample sizes and must not be pooled with model cross-validation results.
+
+Archived spatial-mask conditions are excluded from current conclusions because pre-normalization zero filling changed the coordinates of observed joints. The annotated presentation export records evidence status and exclusion reasons without changing the original numerical archive.

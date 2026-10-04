@@ -1,6 +1,6 @@
 # Experiment-result provenance for the final report
 
-Updated: 2026-09-20
+Updated: 2026-10-05 (content boundaries; experiment archives unchanged)
 
 This file records the local evidence used to update `fall_detection_final_report.tex` and its included section files. It is an audit aid, not part of the rendered paper.
 
@@ -13,6 +13,7 @@ This file records the local evidence used to update `fall_detection_final_report
 | R-ROB | Missing-observation tests on the primary protocol | `../../results/robustness/summary.csv` | 24/24 checkpoint evaluations: 2 models × 4 folds × 3 seeds |
 | R-EXT | External Le2i evaluation and perturbations | `../../results/external-le2i/summary.csv` | 24/24 checkpoint evaluations: 2 models × 4 folds × 3 seeds |
 | R-REP | Le2i TCNTE reproduction | `../../results/tcnte-reproduction/summary.csv` | 9/9 training runs: 3 models × 3 folds × seed 42 |
+| R-ALERT | Fixed deployed-rule replay | `../../results/alert-replay/summary.json` | 12 MaskedBiMamba test prediction files |
 
 All reported summary values are arithmetic means and sample standard deviations produced by the experiment aggregation scripts. The paper reports descriptive results only; no formal paired hypothesis test or multiple-comparison correction was prespecified.
 
@@ -21,6 +22,8 @@ All reported summary values are arithmetic means and sample standard deviations 
 - The earlier Le2i--CAUCAFall table is retained for auditability and is not the primary GMDCSA-24 result.
 - Le2i is external test data for the primary checkpoints and is not used for their fitting.
 - Robustness conditions are applied to selected checkpoints without refitting.
+- Current comparisons retain frame removal and confidence noise. Archived joint/lower-body removal is excluded because zero filling before per-frame normalization rescaled the other observed joints. Corrected preprocessing is included, but the excluded conditions have not been rerun.
+- Fixed-rule replay describes segmented test exposure, not a continuous-care notification rate. Its confirmation offset is measured from the merged positive-window interval start.
 - Edge and cloud results use separate hardware protocols and sample sizes; they are not inferred from the model cross-validation runs.
 - Small differences between means are not described as statistically significant.
 

@@ -29,3 +29,41 @@ body.deck{height:100vh;height:100dvh;display:grid;grid-template-rows:76px minmax
 @media(min-width:761px){.deck figure{margin-block:16px}.deck #edge>figure img,.deck #cloud>figure img{max-height:270px}.deck #model .formula-row{margin-top:15px}.deck #model details{margin-top:12px}}
 
 @media(min-width:1000px){.deck .model-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:34px;align-items:center}.deck #model .wide-figure img{max-height:none}.deck #model .formula-row{grid-template-columns:1fr;gap:18px}.deck #model .formula-row h3{margin-bottom:8px}.deck #model .formula{margin-block:8px}.deck #model .formula-row p{margin-bottom:0}}
+
+/* Projection mode reserves the screen for the evidence and keeps notes private. */
+[hidden]{display:none!important}
+.chart text{font-size:18px}.chart .tick{font-size:15px}
+.talk-progress{position:fixed;bottom:0;left:0;width:100%;height:3px;z-index:55;background:#42645f;pointer-events:none}
+.talk-progress span{display:block;height:100%;width:8.333%;background:#00b99e;transition:width .2s}
+body.presenting{grid-template-rows:minmax(0,1fr);background:var(--paper)}
+.presenting .toolbar,.presenting .chapter-nav,.presenting .bottom-bar,.presenting .speaker-notes{display:none!important}
+.presenting .slide{max-width:1600px;padding:38px 6vw 32px}
+.presenting .opening h1{font-size:clamp(58px,7vw,100px)}
+.presenting h2{font-size:clamp(36px,3.5vw,54px)}
+.presenting p,.presenting li{font-size:clamp(20px,1.7vw,25px)}
+.presenting .small,.presenting .source,.presenting figcaption{font-size:15px}
+.presenting .chart svg{max-height:350px}
+.presenting #edge>figure img,.presenting #cloud>figure img{max-height:30vh}
+.presenting .controls{margin-block:14px}.presenting .controls label{font-size:14px}
+.presentation-exit{position:fixed;top:10px;right:12px;z-index:80;background:var(--paper);opacity:.35;font-size:12px}
+.presentation-exit:hover,.presentation-exit:focus-visible{opacity:1}
+body.blanked{background:black}
+.blanked main,.blanked .toolbar,.blanked .bottom-bar,.blanked .chapter-nav,.blanked .talk-progress,.blanked .presentation-exit{visibility:hidden}
+#blankScreen{position:fixed;inset:0;z-index:200;background:black;border:0;color:#aaa;font-size:13px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:25px}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 36px}
+.qa-grid details{margin-top:0}.qa-grid summary{font-size:17px}.qa-grid p{font-size:18px;line-height:1.6}
+@media(max-width:760px){.presenting .slide{padding:30px 24px}.presenting h2{font-size:32px}.presenting p,.presenting li{font-size:19px}.qa-grid{grid-template-columns:1fr}.toolbar nav{max-width:310px}.chart text{font-size:18px}}
+@media print{.presentation-exit,.talk-progress,#blankScreen{display:none!important}}
+@media(min-width:761px) and (max-height:800px){
+ .presenting #comparison .chart svg{max-height:280px}
+ .presenting #comparison .two-column p{font-size:20px;line-height:1.5;margin-bottom:12px}
+ .presenting #comparison .small{font-size:14px;line-height:1.5}
+ .presenting #comparison details{margin-top:14px;padding-block:10px}
+ .presenting #ablation .chart svg{max-height:320px}
+ .presenting #ablation .takeaway{font-size:20px;line-height:1.5}
+ .presenting #demo .demo-panel{padding:28px}
+ .presenting #demo .demo-panel p{font-size:20px;line-height:1.45}
+ .presenting #demo .demo-panel .small{font-size:14px}
+ .presenting #demo .demo-panel hr{margin-block:18px}
+}
+@media(min-width:761px) and (max-width:1400px){.toolbar .brand span{display:none}.toolbar{padding-inline:25px}.toolbar nav{gap:6px}}

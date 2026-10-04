@@ -1,6 +1,8 @@
 \subsection{Offline inference and hardware acceleration}
 
-The implementation reuses Ultralytics pose estimation~\cite{ultralyticsPose}, the Hailo inference runtime, and Mamba state-space operators~\cite{gu2023mamba}; TCNTE~\cite{yu2025tcnte} provides a comparison baseline. Our work combines bidirectional temporal processing, attention, masking, and pose-quality pooling, and integrates the classifier with local alert storage, deferred cloud synchronization, and the monitoring interface.
+The implementation reuses Ultralytics pose estimation~\cite{ultralyticsPose}, the Hailo inference runtime, and Mamba state-space operators~\cite{gu2023mamba}; TCNTE~\cite{yu2025tcnte} provides a comparison baseline. The classifier combines bidirectional temporal processing, attention, masking, and pose-quality pooling. FallGuard integrates it with local alert storage, deferred cloud synchronization, and a monitoring interface.
+
+The project repository provides model and metric code, experiment configurations, manuscript sources, and aggregate results. The separate deployment archive contains the edge runtime and cloud synchronization services; credentials and runtime databases are excluded. Training runs retain resolved configurations and environment metadata. Original training manifests and pose caches are absent from the available materials. Rebuilding the pipeline therefore requires reconstructing these inputs before an exact replay of the archived training runs is possible.
 
 The edge runtime reads a USB camera or a local video. FFmpeg decodes AV1 inputs and preserves their presentation timestamps. YOLOv8s-pose on Hailo produces 17 COCO keypoints and a person confidence. HailoRT converts the network outputs to floating-point tensors before bounding-box and keypoint decoding. The highest-confidence person supplies the 12 body joints used by the temporal model. A CPU ONNX pose backend supports operation without the accelerator.
 
@@ -8,7 +10,7 @@ A timestamped buffer forms one-second windows up to five times per second. Each 
 
 \subsection{Record storage and synchronization}
 
-SQLite commits each prediction together with its updated alert state. A separate outbox service exposes pending records through the private network. The cloud importer stores each record once and retains the original observation time; repeated delivery does not create duplicate events. The sender marks records as delivered only after the cloud confirms its database transaction. Polling resumes automatically after connectivity returns, with pending batches drained before returning to the normal polling interval.
+SQLite commits each prediction together with its updated alert state. A separate outbox service exposes pending records through the private network. The cloud importer deduplicates records by identifier and retains the original observation time. The sender marks records as delivered only after the cloud confirms its database transaction. Polling resumes automatically after connectivity returns, with pending batches drained before returning to the normal polling interval.
 
 \subsection{Detection interface}
 

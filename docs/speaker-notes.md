@@ -1,73 +1,55 @@
 # FallGuard speaker manuscript
 
-Twelve sections for a 7–8 minute talk, followed by the live demonstration and questions.
+Twelve slides, approximately seven minutes of prepared speech, leaving room for transitions within the 7–8 minute slot. The demonstration is separate. Speaking roles should be assigned by the team.
 
-## Speaker notes · 30 seconds
+## 01 · Opening (25 seconds)
 
-Our project is FallGuard, a camera-based fall-detection prototype. We study how to classify short pose sequences when observations are incomplete, then deploy the full inference pipeline on a Raspberry Pi. The device extracts poses, classifies motion and stores records without an Internet connection. A Hailo accelerator makes pose extraction faster. When the connection returns, the cloud receives the saved records. I will cover the model, its evaluation, the deployment results and our demonstration.
+Our project is FallGuard, a camera-based fall-detection prototype. MaskedBiMamba classifies one-second pose sequences, while a Raspberry Pi extracts poses, runs the classifier, and stores records locally. Hailo accelerates pose extraction. Detection continues without Internet access, and the cloud receives retained records after reconnection. We will explain the model, the evidence, and the complete data flow.
 
----
+## 02 · Care setting (30 seconds)
 
-## Speaker notes · 35 seconds
+A fall can resemble sitting or bending in one frame. Motion provides context, but estimated poses can be interrupted. Our model addresses incomplete observations within a short sequence. The intended care setting also requires an event history that remains available after a network interruption. Our contribution combines temporal modeling and pose quality with local execution and deferred cloud delivery.
 
-The difficulty is that falls and ordinary activities can share similar postures. Motion before and after a posture change helps distinguish them. Recent studies combine temporal convolutions, attention or state-space models. Other work incorporates skeleton geometry and confidence. We focus on incomplete pose observations and use a short buffered sequence. The care scenario also introduces a system requirement: losing the network should not stop local detection or erase the event history.
+## 03 · System (35 seconds)
 
----
+Follow the four local stages: camera or video, pose extraction, temporal classification, and SQLite storage. Hailo runs the pose network; the Pi CPU runs MaskedBiMamba. A local page displays predictions and pending records without a cloud connection. The cloud stores records before acknowledging them. Retries retain the original capture time and do not duplicate the tested records. Compared with the proposal, classification has moved from the cloud to the device.
 
-## Speaker notes · 40 seconds
+## 04 · Model (45 seconds)
 
-The final system has four local stages. A camera or local video provides frames. Hailo extracts human poses, and the Pi CPU runs MaskedBiMamba on a one-second window. The device updates its alert state and saves records in SQLite. A separate local page lets the operator see this without a network. The cloud is responsible for centralized history and event review. It acknowledges records after storage, which lets the device retry an interrupted transfer without creating duplicates. This extends our original plan, which assigned classification to the cloud.
+The input contains twelve body joints, with normalized coordinates and confidence. Training masks selected frames. Temporal attention connects positions, and independent forward and backward Mamba branches process the buffered window. A learned quality gate weights frame features using mean joint confidence, visible-joint fraction, and person confidence. Both directions use observations already collected within one second. We reuse the Mamba operator; our work is the combined architecture, evaluation, and system integration.
 
----
+## 05 · Evaluation (35 seconds)
 
-## Speaker notes · 50 seconds
+The primary study combines CAUCAFall and GMDCSA-24: 260 videos and fourteen subject groups. Four subject-disjoint folds and three seeds give twelve evaluations per model. Le2i has a separate baseline study and external evaluation. Forty synthetic clips test edge deployment. Window, video, event, and confirmed-alert metrics answer different questions. Error bars are sample standard deviations. Evaluated video-hour rates must not be interpreted as a full day of continuous monitoring.
 
-The input contains twelve body joints. For every joint we retain normalized x and y coordinates and confidence. We first mask some training frames, embed the sequence, and apply temporal attention. Independent forward and backward Mamba branches then process the buffered window. Their outputs are aligned and fused. Finally, a learned quality gate weights each frame before classification. Its inputs are mean joint confidence, the visible-joint fraction and person confidence. We reuse the Mamba operator; our contribution is the combined architecture and its evaluation. The ablations will show which parts actually help.
+## 06 · Baselines (40 seconds)
 
----
+The Transformer encoder leads clean window F1 at 0.6581. MaskedBiMamba leads window precision at 0.6048, with video F1 of 0.7632. Its unmatched predicted-event rate is lowest at the common threshold. Confirmation rules are evaluated separately: replay gives confirmed-event recall of 0.7752 and 66.7 unmatched confirmed alerts per evaluated hour. This illustrates the sensitivity-precision trade-off. These short test segments do not establish an acceptable continuous-care notification rate.
 
-## Speaker notes · 40 seconds
+## 07 · Ablations (35 seconds)
 
-Our primary study combines CAUCAFall and GMDCSA-24, with fourteen subject groups. We use four subject-disjoint folds and three seeds, so each model has twelve evaluations. Le2i has a separate baseline experiment and is also held out for external evaluation. The edge sample contains forty synthetic clips. These protocols should not be pooled. We report window, video and event measures because a strong score at one level can hide problems at another. The false-alarm rate uses the evaluated video intervals, rather than a full day of continuous monitoring.
+We compare ten variants under the same folds and seeds. Removing the backward branch or temporal attention reduces window F1 and increases unmatched predicted events. Other changes have mixed effects. Removing masking improves clean window F1, and removing quality pooling improves clean video F1. The evidence supports the temporal components, while masking and quality processing require calibration for the intended observation conditions. Clean ablations do not isolate the cause of frame-loss tolerance.
 
----
+## 08 · Robustness (35 seconds)
 
-## Speaker notes · 40 seconds
+At thirty percent frame removal, MaskedBiMamba retains window F1 of 0.6276, compared with 0.4361 for TCNTE. A similar trend appears on external Le2i. The current comparison includes frame removal and confidence noise. Earlier joint-removal tests also changed coordinate normalization, so they have been excluded from the model conclusions. They remain clearly marked in the historical archive. These pose perturbations do not evaluate changes in lighting or camera position.
 
-The model ranking depends on the metric. The Transformer encoder leads clean window F1 and event recall. MaskedBiMamba has the highest window precision and the lowest unmatched-event rate, with video F1 close to the Transformer. This is a trade-off, not an across-the-board improvement. The absolute false-alarm rate is still high. For a monitoring system, fewer false notifications only help if the associated loss in sensitivity is acceptable. The metric selector lets us inspect that trade-off directly.
+## 09 · Edge deployment (45 seconds)
 
----
+The full Pi pipeline was tested without external network access. Using the same YOLOv8s-pose model, throughput is 20.56 fps with Hailo and 1.73 fps with CPU ONNX, an 11.9-fold difference. Classification still runs on the Pi CPU. Of forty synthetic clips, thirty-nine produce outputs: twenty true positives, eleven true negatives, eight false positives, and one missing output. Only fourteen positive clips are detected within the annotated fall interval, distinguishing clip recall from timely event detection.
 
-## Speaker notes · 35 seconds
+## 10 · Cloud recovery (40 seconds)
 
-We evaluated ten variants across the same folds and seeds. Removing the backward branch or temporal attention reduces window F1 and increases false alarms. These results support their role in the combined model. The other components are less uniform: removing masking improves clean window F1, and removing quality pooling improves clean video F1. We therefore describe them as controls over the operating point, rather than claiming that every component improves every metric.
+A thirty-second upload-path outage retains seventeen records on the Pi. The queue is first observed empty 2.83 seconds after recovery. All eighty-five tested records match their identifiers and capture times. Replaying thirty-four records after a cloud restart creates no duplicates. Separately, one hundred committed writes survive forced writer termination. A ten-minute offline replay processes 11,016 frames without reported throttling. Receipt latency starts at the final captured frame, not at fall onset.
 
----
+## 11 · Demonstration (25 seconds)
 
-## Speaker notes · 40 seconds
+For the demonstration, connect the Pi directly to a display. Show valid poses and increasing classification counts, disconnect Wi-Fi and Ethernet, then show local records accumulating. Reconnect and show the same records in the cloud. A labeled public or synthetic video is the backup input. This presentation displays evidence; the local dashboard and real cloud backend provide the operational demonstration.
 
-The clearest advantage appears under missing frames. At thirty percent frame removal, MaskedBiMamba retains a window F1 of 0.6276, compared with 0.4361 for TCNTE. The pattern also appears on external Le2i data. Neighboring observations provide temporal information that can compensate for some missing frames. Removing joints is harder because it removes body geometry throughout a sequence. These are controlled perturbations of extracted poses, so they do not establish robustness to every camera or lighting condition.
+## 12 · Conclusions (30 seconds)
 
----
+The project combines temporal modeling, independent edge inference, and persistent cloud delivery. MaskedBiMamba offers higher precision at the common threshold and stronger frame-loss tolerance than TCNTE; TE leads clean F1. The main remaining tasks are alert calibration on continuous recordings and longer camera tests. Our repository provides experiment code, manuscripts, and aggregate evidence. The appendix separates current evidence from excluded historical conditions. Thank you.
 
-## Speaker notes · 45 seconds
+## A · Evidence appendix
 
-The Pi test runs the complete pipeline with no external network interface or route. In the paired timing test, both backends use YOLOv8s-pose. Hailo raises throughput from 1.73 to 20.56 frames per second, about 11.9 times faster. The classifier still runs on the Pi CPU. On forty synthetic clips, thirty-nine produce an output. There are twenty true positives, eleven true negatives and eight false positives. A positive prediction anywhere in a clip is easier than detecting the annotated fall itself, so we also report that only fourteen positive clips are detected within that interval.
-
----
-
-## Speaker notes · 40 seconds
-
-We also tested what happens around interruptions. During a thirty-second upload-path outage, seventeen records remain on the Pi. The queue is observed empty 2.83 seconds after the path is restored. Across the delivery tests, all eighty-five records match their edge identifiers and original capture times. Replaying records after a cloud restart creates no duplicates. Separately, all one hundred committed writes survive forced writer termination. A ten-minute offline replay processes over eleven thousand frames without reported throttling. These are measured recovery results, not simulated network animations.
-
----
-
-## Speaker notes · 35 seconds, before the demonstration
-
-For the demonstration, the Pi connects directly to a display, so the audience can still see its output after all network links are disconnected. We first check that a complete body is visible and that classification windows are being produced. We then disconnect Wi-Fi and Ethernet and show that local processing and record creation continue. After reconnecting, we show pending records reach the cloud. If needed, we use a labeled public or synthetic video stored on the Pi. This website itself is only the presentation, not the live detection backend.
-
----
-
-## Speaker notes · 35 seconds
-
-To conclude, the project connects model research with a functioning edge–cloud prototype. MaskedBiMamba offers stronger precision and missing-frame tolerance, although the Transformer leads clean F1. The Pi can independently extract poses, classify motion and store records, and the cloud recovery tests preserve the event history. The remaining limits concern false alarms, transfer to new recording conditions and longer operation. We do not claim clinical readiness. The evidence appendix provides every exported aggregate value for questions and closer inspection.
+The archive retains 1,853 aggregate rows, with excluded spatial-mask conditions labeled and accessible separately. Confirmed-alert replay is a distinct 12-run analysis. Counts are aggregate rows, not video or participant counts. Use the eligible/current views for conclusions; do not cite excluded spatial-mask rows as missing-joint evidence.

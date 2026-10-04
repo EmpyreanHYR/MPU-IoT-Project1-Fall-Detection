@@ -105,7 +105,7 @@ class PoseWindowDataset(Dataset):
         if source_path is None:
             return None
         signature = {
-            "schema": 1,
+            "schema": 2,
             "manifest_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
             "split": split,
             "timesteps": self.timesteps,
@@ -137,26 +137,31 @@ class PoseWindowDataset(Dataset):
         return len(self.rows)
 
     def _corrupt(self, keypoints: np.ndarray, bbox: np.ndarray,
-                 index: int) -> tuple[np.ndarray, np.ndarray]:
+                 index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
         if not self.corruption or self.severity <= 0:
-            return keypoints, bbox
+            return keypoints, bbox, None
         keypoints = keypoints.copy()
         bbox = bbox.copy()
         rng = np.random.default_rng(self.corruption_seed + index)
+        missing = None
         if self.corruption == "random_joint_drop":
-            keypoints[rng.random(keypoints.shape[:2]) < self.severity] = 0
+            missing = rng.random(keypoints.shape[:2]) < self.severity
+            keypoints[:, :, 2][missing] = 0
         elif self.corruption == "frame_drop":
             mask = rng.random(keypoints.shape[0]) < self.severity
-            keypoints[mask] = 0
+            missing = np.broadcast_to(mask[:, None], keypoints.shape[:2]).copy()
+            keypoints[:, :, 2][missing] = 0
             bbox[mask] = 0
         elif self.corruption == "confidence_noise":
             noise = rng.normal(0, self.severity, keypoints.shape[:2])
             keypoints[:, :, 2] = np.clip(keypoints[:, :, 2] + noise, 0, 1)
         elif self.corruption == "lower_body_missing":
-            keypoints[:, 6:12] = 0
+            missing = np.zeros(keypoints.shape[:2], dtype=bool)
+            missing[:, 6:12] = True
+            keypoints[:, :, 2][missing] = 0
         else:
             raise ValueError(f"Unknown corruption: {self.corruption}")
-        return keypoints, bbox
+        return keypoints, bbox, missing
 
     def _build_item(self, index: int) -> dict[str, torch.Tensor | str | float]:
         row = self.rows.iloc[index]
@@ -166,9 +171,14 @@ class PoseWindowDataset(Dataset):
                              endpoint=False, dtype=np.float64)
         keypoints = interpolate(cache["keypoints"], timestamps, target)[:, self.joints]
         bbox = interpolate(cache["bbox"], timestamps, target)
-        keypoints, bbox = self._corrupt(keypoints, bbox, index)
-        confidence = np.clip(keypoints[:, :, 2], 0, 1).astype(np.float32)
+        # Normalize the observed pose before applying synthetic missingness.
+        # Otherwise zero-filled joints can change the min/max of the remaining
+        # joints and conflate missingness with a coordinate rescaling artifact.
         xy = normalize_xy(keypoints[:, :, :2], self.normalization)
+        keypoints, bbox, missing = self._corrupt(keypoints, bbox, index)
+        if missing is not None:
+            xy[missing] = 0
+        confidence = np.clip(keypoints[:, :, 2], 0, 1).astype(np.float32)
         pose = np.concatenate((xy, confidence[:, :, None]), axis=2) \
             if self.include_confidence else xy
         visible = (confidence >= 0.2).mean(axis=1, keepdims=True).astype(np.float32)
