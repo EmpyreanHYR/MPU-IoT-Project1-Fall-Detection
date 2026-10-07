@@ -1,0 +1,3 @@
+
+# Reviewed PDF reading copies are binary documents.
+*.pdf binary

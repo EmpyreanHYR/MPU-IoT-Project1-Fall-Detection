@@ -1,0 +1,217 @@
+{
+  "release": "2026.10.07",
+  "edge_build": "2026.10.07",
+  "cloud_build": "2026.10.07-cloud",
+  "files": [
+    {
+      "path": "artifacts/models/masked_bimamba.pt",
+      "bytes": 783550,
+      "sha256": "a68df0a347ae12eba9a994891ae11eb0f7e18fd5caa5a27186530587ff77b485"
+    },
+    {
+      "path": "artifacts/models/masked_bimamba_quality.onnx",
+      "bytes": 1323111,
+      "sha256": "3a5143a7da61be834bfa2252f776b2c24909cc7944f5585559a413ddcbe0adeb"
+    },
+    {
+      "path": "deployment/cloud/pull_edge_records.py",
+      "bytes": 1938,
+      "sha256": "11d483af878e0f73c1d572c13d674ae61fc6d2d9dcba16cde298a8461f752da3"
+    },
+    {
+      "path": "deployment/cloud/update_cloud_workspace.py",
+      "bytes": 3608,
+      "sha256": "82627e09d2a1a1580429691a6f2b6e0ebf8c776d35c2a94ba7b59d1dda8ac652"
+    },
+    {
+      "path": "deployment/config/cloud.env.example",
+      "bytes": 658,
+      "sha256": "d4c86735d28ac90b7c5146fb78d0b1882454b6d9a2706c5f1528e69da77f7019"
+    },
+    {
+      "path": "deployment/config/edge.env.example",
+      "bytes": 293,
+      "sha256": "f7593ef3a9ffdeab2b16ce2a1b24876ba899155e0bf1be8ecd781c98f75e30cb"
+    },
+    {
+      "path": "deployment/edge/edge_runtime.py",
+      "bytes": 15025,
+      "sha256": "a9b2e80141100a1c004826ee18195dc3ae761c8881e8df07869b04036a72c87e"
+    },
+    {
+      "path": "deployment/edge/local_dashboard.html",
+      "bytes": 38567,
+      "sha256": "4265bb529e754dae25b8fcec937579b360f03b826ea0c652adfef738240859c6"
+    },
+    {
+      "path": "deployment/edge/local_dashboard.py",
+      "bytes": 13037,
+      "sha256": "970a7df6f2855759b912f77514e07bb64ba7a2e2f2ff11e2b5779b174d59ab70"
+    },
+    {
+      "path": "deployment/edge/outbox_server.py",
+      "bytes": 3894,
+      "sha256": "d990f04f2de587863ee976e094450d2041cba0051f4b6d552629f7654459feb1"
+    },
+    {
+      "path": "deployment/edge/pose_backend.py",
+      "bytes": 7090,
+      "sha256": "c881e6b415d985871fbaf28793fe2d6f912a521a04e04ae1e058b985519e0f42"
+    },
+    {
+      "path": "deployment/edge/video_input.py",
+      "bytes": 3005,
+      "sha256": "46505ff6b1e0ce3772a661a0062c43e5db5b8b0ab9cc5ee14980aa830208f123"
+    },
+    {
+      "path": "deployment/systemd/fallguard-cloud-sync.service",
+      "bytes": 540,
+      "sha256": "4ad09ebff963c0e490439d688fe2d6d30b8902295c1d6c4be7b3b6520b4cda00"
+    },
+    {
+      "path": "deployment/systemd/fallguard-cloud.service",
+      "bytes": 513,
+      "sha256": "88427e7a7ac08cfd3502a5cd807f9b76f891dabf63e37cb79e02b1e42ae8e171"
+    },
+    {
+      "path": "deployment/systemd/fallguard-edge-dashboard.service",
+      "bytes": 669,
+      "sha256": "a7f31aae9666553cd59b9709fa8257801a4468b4e2ba5922deb8f6311b471dcd"
+    },
+    {
+      "path": "deployment/systemd/fallguard-edge-inference.service",
+      "bytes": 907,
+      "sha256": "d417a8ec4549369ef68de7422c67c0431323eff200d830ff7ad39f2933193991"
+    },
+    {
+      "path": "deployment/systemd/fallguard-edge-outbox.service",
+      "bytes": 577,
+      "sha256": "3178c5afd4ab41ffc1fc0f943c8ca5bec5162672a0a8a306df39a388c2762231"
+    },
+    {
+      "path": "docs/downloads/fallguard-final-report.pdf",
+      "bytes": 1661311,
+      "sha256": "72d58719b1f0d5904152379a58e20c70645f49bf1fd357fe6e49c3101f1ae2e4"
+    },
+    {
+      "path": "docs/downloads/fallguard-project-brief-zh.pdf",
+      "bytes": 397241,
+      "sha256": "c617c7ce417a278f82a4961fa7dd8ca9d43cb0d0da119203368b6fee0cfcd3d9"
+    },
+    {
+      "path": "docs/downloads/fallguard-workflow-guide-zh.pdf",
+      "bytes": 1398526,
+      "sha256": "4d20d380ed7727f01b529fa28f9f30d1e8c5670a5420b885419e55ffadb1b382"
+    },
+    {
+      "path": "docs/downloads/maskedbimamba-technical-guide-zh.pdf",
+      "bytes": 623573,
+      "sha256": "4a28344db11c100ebc5bb3e2bdc4781324dfa13cbb283261490be411d1708bec"
+    },
+    {
+      "path": "documentation/zh/README.md",
+      "bytes": 923,
+      "sha256": "bd60ce60e67d8f38e7bd972f311dfb1491a383a049dd681f8018151a701c8690"
+    },
+    {
+      "path": "documentation/zh/model-guide.md",
+      "bytes": 67860,
+      "sha256": "6aaa477a44cc05ca028a7c1872bc6b0a77aa86df754ee659856649b80245959a"
+    },
+    {
+      "path": "documentation/zh/project-brief.md",
+      "bytes": 4980,
+      "sha256": "a0a618eaf0f2dbaa8119090213bff25437858e6d635568c4a0f9771c2764f731"
+    },
+    {
+      "path": "documentation/zh/workflow-guide.md",
+      "bytes": 43250,
+      "sha256": "7ff7524febf735f8200e470010039c548da6a1bece7555cd271e600281d34b37"
+    },
+    {
+      "path": "manuscripts/final-report/fall_detection_final_report.tex",
+      "bytes": 7897,
+      "sha256": "fc3bd49a521f26a91598a52666acbdde42049002a648746ed14139b08a78df6a"
+    },
+    {
+      "path": "manuscripts/final-report/personal_contributions.tex",
+      "bytes": 5050,
+      "sha256": "6708a600773723f1060745d4ab9837834be6cf2e90c01710c1bf288d57a19a75"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/1.Abstract.tex",
+      "bytes": 1594,
+      "sha256": "2ade1902163b9ba52448c9eaf2da10911f8e8c5b171c3a20a961781370828db4"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/2.Introduction.tex",
+      "bytes": 2731,
+      "sha256": "e2eeb5408044b23aa0c0dd5db36337226219deb938fcf45f281c6c396c65a579"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/3.Methodology.tex",
+      "bytes": 8116,
+      "sha256": "6073d90711267cf0134c4056605bf6929b3adf5f2e835f916776c5a6cb255ea9"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/3.System_Overview.tex",
+      "bytes": 3779,
+      "sha256": "c908d7c5bbe1de884b0a86c55c70b89b8fd7bf19385f01a343d8bcaac4138594"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/4.Experiments_and_Analysis.tex",
+      "bytes": 18698,
+      "sha256": "9910c780eaf7fd54bfe3dc8ef830e0c0b9622e680e9a620f50858194bf814f1a"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/4.Implementation.tex",
+      "bytes": 3153,
+      "sha256": "e801fc7422e13521789611ee50441fdfb4143c4af30a2293020d31b5f5ed7755"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/5.Conclusion.tex",
+      "bytes": 687,
+      "sha256": "96552333594ee54ba323c4a2be63c27fa6b83a3d38b9571cb91079c944cb4f5a"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/5.Discussion.tex",
+      "bytes": 2106,
+      "sha256": "6da2754f34d93900ad91c296b02f0abe3cd4108edc36f3976303c2d868e71e6a"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/6.Limitations.tex",
+      "bytes": 1398,
+      "sha256": "06f607b2271562aba4712b8702438cad6aeb100b9ad545591365bc9c8aa11c57"
+    },
+    {
+      "path": "manuscripts/final-report/texfiles/6.References.tex",
+      "bytes": 1114,
+      "sha256": "4e9737b71dfb08e7dfafc252331e75fb4584b1d9fdb68e152f97a4ecffccac90"
+    },
+    {
+      "path": "scripts/run_deployment.py",
+      "bytes": 6588,
+      "sha256": "acdd4b2419673e669cdc4f0dd9b14fe51d5068efb3ca8592719f5c872a824a03"
+    },
+    {
+      "path": "webui/cloud_workspace.py",
+      "bytes": 9212,
+      "sha256": "d9b267900c48946d528664453ce377c11c0e9b31b109c4ed1eb3bda9d97b455c"
+    },
+    {
+      "path": "webui/edge_ingest.py",
+      "bytes": 3767,
+      "sha256": "c4aee3b52d3403437af2fe14feb79196124def83ab1edce0b22c31fe37b2f128"
+    },
+    {
+      "path": "webui/index.html",
+      "bytes": 38699,
+      "sha256": "08abc38c32d624ed9511c36079319e3ab7038cc2e707e97f1bb3d39003485101"
+    },
+    {
+      "path": "webui/server.py",
+      "bytes": 31353,
+      "sha256": "d848ae0c9eb9857fb1f292395660f5206c1836f522c20d6755b25b5d70c09736"
+    }
+  ]
+}

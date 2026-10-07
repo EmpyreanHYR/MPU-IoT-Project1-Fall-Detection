@@ -55,6 +55,14 @@ class LauncherTests(unittest.TestCase):
                     self.assertEqual(events[0]["timestamp"],record["timestamp"])
                     with urlopen(f"http://127.0.0.1:{cloud}/",timeout=2) as response:
                         self.assertIn(b"FallGuard",response.read())
+                    with urlopen(f"http://127.0.0.1:{cloud}/api/workspace/status",timeout=5) as response:
+                        workspace=json.load(response)
+                    self.assertTrue(workspace["edge_connected"])
+                    self.assertEqual(workspace["total_records"],1)
+                    self.assertEqual(workspace["pending_records"],0)
+                    with urlopen(f"http://127.0.0.1:{cloud}/api/workspace/records",timeout=2) as response:
+                        archive=json.load(response)
+                    self.assertEqual(archive["records"][0]["record_id"],record["record_id"])
                 finally:
                     process.terminate();process.wait(timeout=15)
                 self.assertEqual(process.returncode,0)

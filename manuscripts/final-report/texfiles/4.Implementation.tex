@@ -1,24 +1,28 @@
 \subsection{Offline inference and hardware acceleration}
 
-The implementation reuses Ultralytics pose estimation~\cite{ultralyticsPose}, the Hailo inference runtime, and Mamba state-space operators~\cite{gu2023mamba}; TCNTE~\cite{yu2025tcnte} provides a comparison baseline. The classifier combines bidirectional temporal processing, attention, masking, and pose-quality pooling. FallGuard integrates it with local alert storage, deferred cloud synchronization, and a monitoring interface.
+The implementation reuses Ultralytics pose estimation~\cite{ultralyticsPose}, HailoRT, and Mamba operators~\cite{gu2023mamba}; TCNTE~\cite{yu2025tcnte} is a comparison baseline. FallGuard integrates quality-aware bidirectional classification with local alert storage and deferred cloud synchronization.
 
-The project repository provides model and metric code, experiment configurations, manuscript sources, and aggregate results. The separate deployment archive contains the edge runtime and cloud synchronization services; credentials and runtime databases are excluded. Training runs retain resolved configurations and environment metadata. Original training manifests and pose caches are absent from the available materials. Rebuilding the pipeline therefore requires reconstructing these inputs before an exact replay of the archived training runs is possible.
+The repository includes model/metric code, configurations, manuscripts, aggregate results, selected temporal weights, and deployment source with generic service templates. Credentials, raw videos, and runtime databases are excluded. Exact training replay requires reconstructing the absent original training manifests and pose caches.
 
-The edge runtime reads a USB camera or a local video. FFmpeg decodes AV1 inputs and preserves their presentation timestamps. YOLOv8s-pose on Hailo produces 17 COCO keypoints and a person confidence. HailoRT converts the network outputs to floating-point tensors before bounding-box and keypoint decoding. The highest-confidence person supplies the 12 body joints used by the temporal model. A CPU ONNX pose backend supports operation without the accelerator.
+The runtime reads a USB camera or local video. FFmpeg preserves video timestamps. Hailo runs YOLOv8s-pose, decodes 17 COCO keypoints, and selects the highest-confidence person; 12 body joints feed the temporal model. CPU ONNX provides a pose fallback.
 
-A timestamped buffer forms one-second windows up to five times per second. Each window is interpolated to 30 samples and normalized as in training. The three quality features of Eq.~\eqref{eq:quality_features} form the quality input. ONNX Runtime executes MaskedBiMamba locally on the Pi CPU. Camera acquisition runs in a separate thread so that a slow inference call does not accumulate old images.
+A timestamped buffer forms one-second windows up to five times per second, interpolates to 30 samples, and applies training normalization. The quality input uses Eq.~\eqref{eq:quality_features}. ONNX Runtime executes MaskedBiMamba on the Pi CPU. Separate camera acquisition avoids accumulating stale frames.
 
 \subsection{Record storage and synchronization}
 
-SQLite commits each prediction together with its updated alert state. A separate outbox service exposes pending records through the private network. The cloud importer deduplicates records by identifier and retains the original observation time. The sender marks records as delivered only after the cloud confirms its database transaction. Polling resumes automatically after connectivity returns, with pending batches drained before returning to the normal polling interval.
+SQLite commits each prediction and alert state together. The independent private outbox exposes pending records. Cloud import deduplicates identifiers and preserves observation times. Delivery is acknowledged only after the cloud transaction commits; retry drains pending batches after reconnection.
 
 \subsection{Detection interface}
 
-Figure~\ref{fig:dashboard} shows the monitoring interface. The operator selects an input source, views the pose and fall probability, and reviews the current alert state. Event history supports acknowledgement with notes. Camera start and stop controls are available for the Pi input. A separate local page displays annotated camera frames, current classification, and pending-record counts directly on the Pi during network outages. Local integration tests cover alert transitions, record persistence across restarts, retry handling, and acknowledgement.
+The local and cloud workspaces provide overview, history, and diagnostics. The Pi page reads existing preview/status/SQLite without a second inference pipeline. It includes a 120-window chart, state/time/delivery filters, pagination, CSV, and temperature/memory/disk/load readings, all accessible locally without networking.
+
+The cloud queries its durable archive and reads current Pi status/preview through a token-protected private bridge. Invalid poses, expired predictions, or edge loss clear current probability; unavailable pending counts are unknown. Same-origin JSON and a page token protect controls. Pausing preserves history and the outbox.
+
+The 7 October 2026 deployment check verified edge version 2026.10.07 and cloud version 2026.10.07-cloud. The update retained 3,304 windows and 306 event rows, with zero pending records: operational counts, not evaluation samples. Twenty-one temporary-fixture backend/integration tests and both actual page-script checks passed. They establish interface and delivery behavior, not accuracy. Figure~\ref{fig:dashboard} shows the deployed workspace.
 
 \begin{figure}[tbp]
     \centering
-    \includegraphics[width=\columnwidth]{figs/detection_system_edge_records.png}
-    \caption{FallGuard event interface displaying actual Raspberry Pi predictions on OmniFall-Synthetic videos. The local review instance shows the event timeline, model score, original recording time, and acknowledgement controls.}
+    \includegraphics[width=\columnwidth,trim=0 620bp 0 0,clip]{figs/cloud_workspace_overview.png}
+    \caption{Deployed cloud workspace, 7 October 2026. Retained history and an authenticated Pi preview are visible; no complete person is present, so current probability is blank. This is operational evidence, not an accuracy result.}
     \label{fig:dashboard}
 \end{figure}

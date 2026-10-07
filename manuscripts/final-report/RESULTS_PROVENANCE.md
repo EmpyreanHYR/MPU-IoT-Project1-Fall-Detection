@@ -52,3 +52,7 @@ The old full Le2i--CAUCAFall result table and the superseded report snapshot rem
 ## Current edge deployment evidence
 
 The current source includes the completed Raspberry Pi and cloud results. Public values and protocol definitions are available in [`results/edge/`](../../results/edge/). There are 39 classified clips out of 40, with 20 TP, 11 TN, 8 FP and one no-output clip. The paired Hailo/CPU throughput comparison, 603.8-second replay, writer recovery and deployed cloud retry/outage observations are summarized separately from the model cross-validation experiments. Source figures use PNG for this repository's source-only distribution.
+
+## 7 October 2026 operational workspace verification
+
+`results/deployment/` records actual service/browser checks and the separate synthetic software tests. Retained production archive counts (3,304 windows, 306 event rows) are a dated operational snapshot. The workspace figure is an actual deployed screenshot with no complete visible person and current probability blank. These changes do not add model-accuracy or all-day reliability measurements.

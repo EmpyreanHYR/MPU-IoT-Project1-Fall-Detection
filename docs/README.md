@@ -54,3 +54,7 @@ python3 scripts/build_presentation_notes.py
 ## Current content
 
 The main robustness plot includes only frame removal and confidence noise. Fixed-rule confirmed-alert replay is a separate table on slide 6, using 12 primary test sequences. Raw predicted-event rates and confirmed-alert rates are labeled separately. English, Chinese and embedded speaker notes use the same claims and reserve a total of 420 seconds.
+
+## 7 October 2026 update
+
+Slide 11 and both speaker guides now describe the three-page edge/cloud workspaces: fresh-result overview, filtered history/CSV, and diagnostics. The deployed screenshot and dated operational snapshot are separate from the September model/hardware benchmarks. Twelve main slides and the 420-second preparation budget remain unchanged. The live services still require their own runtime and authentication.

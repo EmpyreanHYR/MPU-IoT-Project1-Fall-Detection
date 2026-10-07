@@ -84,8 +84,8 @@ window.FALLGUARD_NOTES = [
     "label": "Live demonstration",
     "title": "Show the device working independently",
     "seconds": 25,
-    "en": "For the demonstration, connect the Pi directly to a display. Show valid poses and increasing classification counts, disconnect Wi-Fi and Ethernet, then show local records accumulating. Reconnect and show the same records in the cloud. A labeled public or synthetic video is the backup input. This presentation displays evidence; the local dashboard and real cloud backend provide the operational demonstration.",
-    "zh": "树莓派直接连接显示器。先展示有效骨架与增长的分类计数，再断开 Wi-Fi 和网线，观察本地记录与积压数；恢复连接后，展示同一批记录进入真实云后端。备用输入使用明确标注来源的公开或合成视频。汇报网页是证据展示，实际演示使用本地检测页和云端监控页。"
+    "en": "Use the three-page Pi workspace on a direct display: preview and fresh results, filtered history with CSV, and diagnostics. Show complete poses and growing records, disconnect the network, then reconnect and match the cloud history by capture time. The cloud workspace was updated on October seventh; its saved-record count is operational evidence, not an accuracy sample. Use a labeled local video if no complete person is available.",
+    "zh": "树莓派直接连接显示器，展示三页工作台：预览与有效判断、可筛选导出的历史、设备诊断。完整人体入镜后观察记录增长，再断网展示本地积压；恢复网络后按采集时间核对云端历史。云端已于十月七日更新，服务记录总量是运行证据，不是准确率样本。无完整人体时使用标明来源的本地视频。"
   },
   {
     "id": "conclusion",

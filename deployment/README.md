@@ -1,7 +1,7 @@
 # Run the offline edge and cloud system
 
 The public code includes the actual offline inference pipeline, SQLite outbox,
-read-only edge dashboard, cloud record receiver and commit-before-ack puller.
+edge dashboard, cloud workspace/record receiver and commit-before-ack puller.
 Machine-specific configurations are replaced by templates. GitHub Pages hosts
 the presentation; the services below run on your computer or devices.
 
@@ -100,10 +100,16 @@ second listener. Systemd creates `/var/lib/fallguard-edge`,
 `/var/lib/fallguard-cloud` and `/run/fallguard-edge` with the service ownership.
 Check status with `systemctl status` and `journalctl -u SERVICE_NAME`.
 
-The public cloud runs **edge-classified record ingestion**. Historical
-browser/cloud-model selection and private remote-camera control are not
-configured by these templates; they return unavailable responses. The current
-Pi camera preview/status are provided by the separate local dashboard.
+The cloud workspace runs **edge-classified record ingestion**. Its preview and
+diagnostics read the private outbox's token-protected `/dashboard/status` and
+`/dashboard/preview`, which proxy the local edge dashboard. The cloud service
+must load the same record URL/token as the puller. The outbox's default local
+dashboard URL is `http://127.0.0.1:18300`; use `--dashboard-url` for another port.
+The cloud archive stays available while the edge is disconnected, and current
+probability is cleared for expired or incomplete poses. Historical
+browser/cloud-model selection is unavailable. Remote camera controls remain
+disabled in the templates; existing private relay installations can set
+`FALLGUARD_PI_RELAY_URL` and the exact HTTPS `FALLGUARD_PUBLIC_ORIGIN`.
 
 ## Verify the deployment
 
@@ -124,3 +130,44 @@ interfaces; they do not produce new accuracy or clinical validation results.
 Upstream interfaces: [Ultralytics pose/export documentation](https://docs.ultralytics.com/tasks/pose/),
 [official YOLOv8 assets](https://github.com/ultralytics/assets/releases/tag/v8.3.0),
 and [Hailo pose example](https://github.com/hailo-ai/Hailo-Application-Code-Examples/tree/main/runtime/python/pose_estimation).
+
+## Local dashboard workspace
+
+The edge dashboard includes live preview, fresh-prediction states, a historical
+120-window probability chart, filtered/paginated records, CSV export (latest
+10,000 matching records), and local temperature/memory/disk/load diagnostics.
+It keeps all assets on the device. Pending counts and acknowledgement timestamps
+are delivery evidence, not a live network probe. Lost connections, expired
+predictions and insufficient pose quality clear the current probability.
+
+On the existing Pi user-service installation, optionally pass
+`--camera-service fallguard-camera.service` to the dashboard to enable local
+start/pause buttons. Control uses an exact localhost Host/Origin check and a
+per-process token; generic system-service deployments keep control disabled.
+Pausing inference preserves the database and leaves the independent outbox
+running. JPEG previews use a cached display-size image when OpenCV is available;
+JSON/CSV responses support gzip. To verify these changes:
+
+```sh
+python3 -m unittest discover -s tests -p test_dashboard.py -v
+node tests/check_dashboard_ui.cjs
+```
+
+The cloud workspace uses the same three-page layout, with cloud SQLite history,
+received timestamps, CSV export, and current edge telemetry. Verify its backend
+and actual UI script with:
+
+```sh
+python3 -m unittest discover -s tests -p test_cloud_workspace.py -v
+node tests/check_dashboard_ui.cjs ../webui/index.html
+```
+
+`deployment/cloud/update_cloud_workspace.py` is the updater for the existing
+Tencent VM installation at `/root/跌倒检测/webui`. It expects a sibling verified
+`manifest.json` and packaged source files, backs up source/systemd overrides and
+SQLite, restarts the existing services, and rolls source/configuration back on
+failure while retaining the live database. It is not the generic installer.
+
+## Release consistency
+
+`release-manifest.json` identifies the edge/cloud source, selected weights, manuscript source, Chinese guides and reviewed PDFs in this release. After updating them, run `python3 scripts/build_release_manifest.py`; verify with `--check`. CI checks this manifest and both actual page scripts in addition to the existing model/delivery tests. Production installations can save the published Git revision alongside their private configuration; credentials remain outside Git.

@@ -63,3 +63,9 @@ checkpoints/
 !artifacts/models/masked_bimamba_quality.onnx
 !artifacts/models/masked_bimamba.pt
 !deployment/config/*.env.example
+
+# Reviewed user-facing document downloads (other build outputs remain ignored)
+!docs/downloads/fallguard-final-report.pdf
+!docs/downloads/fallguard-project-brief-zh.pdf
+!docs/downloads/maskedbimamba-technical-guide-zh.pdf
+!docs/downloads/fallguard-workflow-guide-zh.pdf

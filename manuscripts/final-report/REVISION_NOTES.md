@@ -7,3 +7,7 @@ Yaorong Huang is first author. All five names share one unmarked affiliation; fa
 Numbered mathematics and all 1,853 aggregate archive values remain unchanged. Current robustness conclusions exclude the spatial-mask normalization confound. TE's better clean F1, mixed ablations, low external specificity and limited fall-interval detection remain visible. No new training or performance experiment was run for this revision.
 
 The final presentation is GitHub Pages with twelve timed slides, two appendices, bilingual notes, a projection view and a synchronized presenter console. Its prepared speech budget is 420 seconds.
+
+## 7 October 2026 workspace and publication synchronization
+
+Updated implementation to the deployed three-page edge/cloud workspaces and private status bridge. Added actual dated workspace screenshot and operational validation, separated from historical model/hardware results. Expanded Yaorong Huang’s contribution and reflection with offline integration, durable delivery, workspace controls, deployment verification and publication. Other members’ TBD entries are intentionally retained. Selected weights and generic deployment source are now described as included in the public release.

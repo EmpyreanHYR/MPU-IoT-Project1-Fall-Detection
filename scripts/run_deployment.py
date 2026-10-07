@@ -64,6 +64,9 @@ def main() -> None:
         if args.mode in ("local", "cloud"):
             cloud_env = {**common, "FALLGUARD_HOST":"127.0.0.1",
                          "FALLGUARD_PORT":str(args.cloud_port), "FALLGUARD_DATA_DIR":str(data/"cloud")}
+            if args.mode == "local":
+                cloud_env.update(FALLGUARD_EDGE_RECORDS_URL=f"http://127.0.0.1:{args.edge_port}",
+                                 FALLGUARD_EDGE_RECORDS_TOKEN=common["FALLGUARD_INGEST_TOKEN"])
             start(ROOT/"webui/server.py", env=cloud_env)
             ready = False
             for _ in range(100):
@@ -80,7 +83,7 @@ def main() -> None:
         if args.mode in ("local", "edge"):
             db = data/"edge.sqlite3"
             start(edge/"outbox_server.py", "--database", db, "--bind", common.get("FALLGUARD_RELAY_HOST","127.0.0.1"),
-                  "--port", args.edge_port)
+                  "--port", args.edge_port, "--dashboard-url", f"http://127.0.0.1:{args.dashboard_port}")
             if args.source is not None:
                 options = ["--source",args.source,"--backend",args.backend,"--hef",args.hef,
                     "--classifier",ROOT/"artifacts/models/masked_bimamba_quality.onnx",

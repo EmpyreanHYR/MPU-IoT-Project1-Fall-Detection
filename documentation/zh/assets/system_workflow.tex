@@ -1,0 +1,43 @@
+\documentclass[tikz,border=7pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont[BoldFont=texgyreheros-bold.otf]{texgyreheros-regular.otf}
+\setCJKmainfont{FandolHei-Regular.otf}
+\usetikzlibrary{arrows.meta,positioning,backgrounds}
+\definecolor{ink}{HTML}{213F5B}
+\definecolor{edge}{HTML}{EDF5FA}
+\definecolor{cloud}{HTML}{F6F1E7}
+\definecolor{green}{HTML}{EAF4EE}
+\begin{document}
+\begin{tikzpicture}[font=\fontsize{10}{13}\selectfont,>=Latex,
+box/.style={draw=ink!55,fill=white,rounded corners=3pt,align=center,text width=5.3cm,minimum height=1.15cm,inner sep=5pt},
+arr/.style={->,draw=ink,line width=1pt},
+ack/.style={->,draw=ink!65,line width=.9pt,dashed}]
+\begin{scope}[on background layer]
+\filldraw[fill=edge,draw=ink!30,rounded corners=6pt](-.1,4.4)rectangle(6.5,16.5);
+\filldraw[fill=cloud,draw=ink!30,rounded corners=6pt](7.7,.7)rectangle(14.3,6.45);
+\end{scope}
+\node[font=\bfseries\large,text=ink] at(3.2,16.1){树莓派：本地识别与保存};
+\node[box] (input) at(3.2,15){USB 摄像头 / 本地视频\\图像与时间戳};
+\node[box,minimum height=1.3cm] (pose) at(3.2,13.15){姿态模型（二选一）\\Hailo：YOLOv8s-pose\\CPU 回退：YOLOv8n-pose};
+\node[box] (window) at(3.2,11.3){一秒姿态缓存\\12 个身体关节，插值至 30 步};
+\node[box,fill=green] (model) at(3.2,9.5){MaskedBiMamba（树莓派 CPU）\\姿态与质量输入 → 跌倒概率};
+\node[box] (state) at(3.2,7.7){边端规则状态机\\正常 → 疑似 → 确认 → 解除};
+\node[box,minimum height=1.45cm] (db) at(3.2,5.55){本地 SQLite\\同事务保存分类与状态\\独立 outbox 提供待传记录};
+\foreach \a/\b in {input/pose,pose/window,window/model,model/state,state/db}{\draw[arr](\a)--(\b);}
+\node[box,fill=green,minimum height=1.5cm] (local) at(11,10.1){树莓派本地页面\\读取预览 / 状态 / 历史\\打开页面不会再运行一套模型};
+\draw[arr](db.east)--(7.0,5.55)--(7.0,10.1)--(local.west);
+\node[text=ink,align=center,text width=5.4cm] at(11,13.7){\textbf{两个模型串联配合}\\[4pt]姿态模型识别人体结构\\时序模型理解动作变化\\[6pt]断网时左侧主链继续运行};
+\node[font=\bfseries\large,text=ink] at(11,6.13){云端：同步、存储与查看};
+\node[box,text width=5.1cm,minimum height=.95cm] (sync) at(11,5.2){同步器主动拉取记录\\提交云端，成功后回写 ACK};
+\draw[arr](db.east)--(6.85,5.55)--(sync.west |- 6.85,5.55);
+\node[font=\fontsize{8}{10}\selectfont,text=ink,fill=white,inner sep=2pt] at(7.05,5.92){记录批次};
+\draw[ack](sync.west |- 8.15,4.9)--(db.east |- 5.95,4.9);
+\node[font=\fontsize{8}{10}\selectfont,text=ink,fill=white,inner sep=2pt] at(7.05,4.64){传输确认};
+\node[box,text width=5.1cm,minimum height=.95cm] (cloudstore) at(11,3.4){云端 SQLite：按 UUID 去重\\保存原记录及告警转换};
+\node[box,text width=5.1cm,minimum height=.95cm] (web) at(11,1.55){云端三页工作台\\历史 / CSV、私网状态与预览};
+\draw[arr](sync)--(cloudstore);
+\draw[arr](cloudstore)--(web);
+\node[align=left,text width=6cm,text=ink,font=\fontsize{9}{12}\selectfont] at(3.2,2.8){常规记录携带骨架与概率，\textbf{不含原始图像}。\\[4pt]授权 JPEG 预览是单独通道。\\[4pt]当前云端接收结果，\textbf{不再次分类}。};
+\end{tikzpicture}
+\end{document}

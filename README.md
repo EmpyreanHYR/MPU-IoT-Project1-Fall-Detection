@@ -4,6 +4,9 @@ Camera-based fall detection with quality-aware temporal modeling, independent Ra
 
 **[Open the English project presentation](https://yaoronghuang.top/MPU-IoT-Project1-Fall-Detection/)**
 
+**[Download the updated report and Chinese reading PDFs](docs/downloads/)** ·
+[Chinese source guides](documentation/zh/)
+
 The presentation includes 12 paged slides, approximately seven minutes of prepared English speaker notes, a [Chinese speaker guide](docs/speaker-notes-zh.html), a [two-screen presenter console](https://yaoronghuang.top/MPU-IoT-Project1-Fall-Detection/presenter.html) with a timer and synchronized controls, evidence and Q&A appendices, mouse-line highlighting, interactive model/ablation/robustness charts, and a searchable archive of 1,853 aggregate rows with excluded spatial-mask conditions clearly labeled. It also includes the Raspberry Pi and cloud recovery evidence. Download or clone the repository and open [`docs/index.html`](docs/index.html) to use it locally without a CDN or backend.
 
 ## Repository layout
@@ -16,6 +19,7 @@ The presentation includes 12 paged slides, approximately seven minutes of prepar
 | [`artifacts/models/`](artifacts/models/) | Selected temporal classifier weights, ONNX, model card and checksums. |
 | [`code/`](code/) | Model code, experiment configurations and evaluation instructions. |
 | [`manuscripts/`](manuscripts/) | LaTeX sources for the proposal and final report. |
+| [`documentation/zh/`](documentation/zh/) | Updated Chinese mathematical, workflow and project guides. |
 | [`results/`](results/) | Aggregate model CSV evidence and a public, compact edge/system summary. |
 | [`datasets/`](datasets/) | Dataset provenance and usage documentation; no raw videos. |
 | [`webui/`](webui/) | Dashboard frontend, cloud record receiver and browser-side MediaPipe assets. |
@@ -40,9 +44,15 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080/docs/`, or open `docs/index.html` directly. See [`docs/README.md`](docs/README.md) for keyboard controls and Pages configuration.
 
-The final manuscript source is synchronized with the current report, including an independent repository block after the keywords, a single shared IEEE affiliation, fixed-rule alert replay, and valid robustness conditions. PNG figures are included; compiled PDFs and LaTeX build outputs remain excluded from Git. Build using the manuscript's Makefile. The included [`personal_contributions.tex`](manuscripts/final-report/personal_contributions.tex) is inserted after the bibliography in the same PDF and records Yaorong Huang's reported work in code, writing and the presentation; the other four members retain name-and-TBD entries for their own completion.
+The final manuscript source is synchronized with the current report, including an independent repository block after the keywords, a single shared IEEE affiliation, fixed-rule alert replay, and valid robustness conditions. PNG figures are included; LaTeX build outputs remain excluded from Git; reviewed reading PDFs are published under `docs/downloads/`. Build using the manuscript's Makefile. The included [`personal_contributions.tex`](manuscripts/final-report/personal_contributions.tex) is inserted after the bibliography in the same PDF and records Yaorong Huang's reported work in code, writing and the presentation; the other four members retain name-and-TBD entries for their own completion.
 
 Sanitized deployment source and generic templates are included. Production credentials, raw camera footage, databases and private device addresses remain excluded. GitHub Pages serves the static presentation; it does not host the live detection or cloud services.
+
+## Current operational workspaces — 7 October 2026
+
+The Pi workspace `2026.10.07` and cloud workspace `2026.10.07-cloud` include live preview, fresh-result states, historical probability charts, filtered/paginated records, CSV export and device diagnostics. Local inference and storage work without the cloud. The cloud keeps its own archive and reads current Pi status through a token-protected private bridge; expired or invalid results clear the current probability. Camera controls validate same-origin JSON and a page token.
+
+The production update retained 3,304 classified windows and 306 event rows, with zero pending records at the check. These are operational counts, not accuracy samples. The [dated deployment verification](results/deployment/) separates actual service checks from synthetic integration fixtures and the earlier hardware experiments. Your own installation uses the [deployment guide](deployment/README.md).
 
 ## Evidence status
 

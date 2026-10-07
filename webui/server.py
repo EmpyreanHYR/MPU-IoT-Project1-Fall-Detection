@@ -28,6 +28,7 @@ from urllib.parse import parse_qs, urlparse
 from urllib.request import ProxyHandler, Request, build_opener
 from urllib.error import HTTPError, URLError
 from edge_ingest import import_records, SCHEMA, READING_FIELDS
+from cloud_workspace import Workspace, BUILD
 
 # The public deployment classifies on the edge. Historical cloud inference
 # endpoints return an explicit unavailable response.
@@ -389,6 +390,7 @@ class State:
 
 
 STATE = State()
+WORKSPACE = Workspace(DB_PATH, ROOT / "index.html", pi_camera_request)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -458,9 +460,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path == "/api/health":
-            self.reply(200, {"status": "ok", "service": "fallguard-dashboard", "storage": "ok", "time": utc_now(), "live_ingest_configured": bool(INGEST_TOKEN), "cloud_model": "unavailable"})
+            self.reply(200, {"status": "ok", "service": "fallguard-dashboard", "storage": "ok", "time": utc_now(), "live_ingest_configured": bool(INGEST_TOKEN), "cloud_model": "edge_offline", "build": BUILD})
             return
         if not self.authorize_dashboard():
+            return
+        if WORKSPACE.get(self):
             return
         if path == "/api/camera/pi/frame":
             status, payload = pi_camera_frame()
@@ -594,6 +598,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(202, STATE.ingest(validate_reading(self.read_json())))
                 return
             if not self.authorize_dashboard():
+                return
+            if WORKSPACE.post(self):
                 return
             if path in ("/api/camera/pi/start", "/api/camera/pi/stop"):
                 raw = self.read_json()

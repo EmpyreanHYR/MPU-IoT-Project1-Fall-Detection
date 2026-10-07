@@ -28,4 +28,19 @@ for i, match in enumerate(re.finditer(
 assert len(notes) == 14 and sum(n['seconds'] for n in notes) == 420
 (ROOT / 'docs/assets/presentation-notes.js').write_text(
     'window.FALLGUARD_NOTES = ' + json.dumps(notes, ensure_ascii=False, indent=2) + ';\n')
+# Keep the separate reading guides synchronized with the embedded/presenter text.
+(ROOT / 'docs/speaker-notes.md').write_text(
+    '# FallGuard English speaker notes\n\n'
+    'Twelve timed slides, 420 seconds in total; evidence and Q&A appendices are untimed.\n\n'
+    + '\n\n'.join(f"## {i+1:02d} · {n['label']} ({n['seconds']} seconds)\n\n{n['en']}"
+                    for i,n in enumerate(notes)) + '\n')
+blocks=[]
+for paragraph in chinese.strip().split('\n\n'):
+    if paragraph.startswith('## '):blocks.append('<h2>'+html.escape(paragraph[3:])+'</h2>')
+    elif paragraph.startswith('# '):blocks.append('<h1>'+html.escape(paragraph[2:])+'</h1>')
+    else:blocks.append('<p>'+html.escape(paragraph)+'</p>')
+guide=ROOT/'docs/speaker-notes-zh.html'
+template=guide.read_text()
+guide.write_text(re.sub(r'<main>[\s\S]*?</main>',
+                       lambda _: '<main>'+''.join(blocks)+'</main>',template,count=1))
 print('Built 12 timed slides and 2 untimed appendices; total speech budget: 420 seconds')

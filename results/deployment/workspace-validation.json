@@ -1,0 +1,14 @@
+{
+  "checked_date": "2026-10-07",
+  "edge_build": "2026.10.07",
+  "cloud_build": "2026.10.07-cloud",
+  "evidence": "Authenticated production HTTP and browser checks; local synthetic integration fixtures",
+  "cloud_before": {"classified_windows": 3304, "event_rows": 306},
+  "cloud_after": {"classified_windows": 3304, "event_rows": 306},
+  "pending_records_at_check": 0,
+  "services_active": {"edge": 3, "cloud": 3},
+  "public_without_login": {"dashboard": 401, "status": 401, "preview": 401, "device_write": 404},
+  "tests": {"cloud_workspace": 5, "edge_dashboard": 9, "offline_delivery": 6, "real_process_integration": 1},
+  "actual_ui_script_checks": ["edge", "cloud"],
+  "scope": "Deployment/interface checks, not a new accuracy or continuous-monitoring study"
+}

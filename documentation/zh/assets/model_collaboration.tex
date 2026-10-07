@@ -1,0 +1,35 @@
+\documentclass[tikz,border=7pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont[BoldFont=texgyreheros-bold.otf]{texgyreheros-regular.otf}
+\setCJKmainfont{FandolHei-Regular.otf}
+\usetikzlibrary{arrows.meta,positioning,backgrounds}
+\definecolor{ink}{HTML}{213F5B}
+\definecolor{edge}{HTML}{EDF5FA}
+\definecolor{green}{HTML}{EAF4EE}
+\begin{document}
+\begin{tikzpicture}[font=\fontsize{11}{14}\selectfont,>=Latex,
+box/.style={draw=ink!55,fill=white,rounded corners=3pt,align=center,text width=5.9cm,minimum height=1.05cm,inner sep=5pt},
+arr/.style={->,draw=ink,line width=1pt}]
+\begin{scope}[on background layer]
+\filldraw[fill=edge,draw=ink!35,dashed,rounded corners=6pt](.2,-.25)rectangle(14.8,5.65);
+\end{scope}
+\node[box] (image) at(7.5,10.9){单帧图像};
+\node[box,fill=green] (pose) at(7.5,9.1){模型一：YOLOv8-pose\\输出 17 个关键点及人体置信度};
+\node[box] (prep) at(7.5,7.25){时间缓存、插值与归一化\\一秒数据 → 12 个关节 × 30 步};
+\draw[arr](image)--(pose);\draw[arr](pose)--(prep);
+\node[font=\bfseries,text=ink,text width=6.2cm,align=center] at(7.5,5.12){模型二：MaskedBiMamba\\树莓派 CPU};
+\node[box,text width=5.55cm,minimum height=1.5cm] (feature) at(3.65,3.85){姿态支路\\线性嵌入与位置编码\\时间注意力 → 双向 Mamba};
+\node[box,text width=5.55cm,minimum height=1.5cm] (quality) at(11.3,3.85){质量支路\\平均置信度 / 可见率 / 人体分数\\小型网络 → 每帧池化权重};
+\draw[arr](prep.south)--(7.5,6.25)--(3.65,6.25)--(feature.north);
+\draw[arr](7.5,6.25)--(11.3,6.25)--(quality.north);
+\node[fill=white,text=ink,inner sep=2pt,font=\fontsize{9}{11}\selectfont] at(3.65,5.65){pose：1 × 30 × 36};
+\node[fill=white,text=ink,inner sep=2pt,font=\fontsize{9}{11}\selectfont] at(11.3,5.65){quality：1 × 30 × 3};
+\node[box,text width=5.8cm,fill=green] (pool) at(7.5,1.95){质量加权池化\\把 30 帧融合成一个窗口表示};
+\draw[arr](feature.south)--(3.65,1.95)--(pool.west);
+\draw[arr](quality.south)--(11.3,1.95)--(pool.east);
+\node[box,text width=5.8cm,minimum height=.8cm] (head) at(7.5,.45){一个分类头 → 跌倒概率};
+\draw[arr](pool)--(head);
+\node[text=ink,align=center,font=\fontsize{10}{13}\selectfont] at(7.5,-.9){注意力、两个扫描方向和质量网络均是模型二的内部模块；它们不独立投票。};
+\end{tikzpicture}
+\end{document}
