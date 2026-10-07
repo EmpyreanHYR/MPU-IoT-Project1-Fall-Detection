@@ -1,7 +1,7 @@
 {
-  "release": "2026.10.07",
+  "release": "2026.10.07-demo1",
   "edge_build": "2026.10.07",
-  "cloud_build": "2026.10.07-cloud",
+  "cloud_build": "2026.10.07-cloud-demo1",
   "files": [
     {
       "path": "artifacts/models/masked_bimamba.pt",
@@ -20,8 +20,8 @@
     },
     {
       "path": "deployment/cloud/update_cloud_workspace.py",
-      "bytes": 3608,
-      "sha256": "82627e09d2a1a1580429691a6f2b6e0ebf8c776d35c2a94ba7b59d1dda8ac652"
+      "bytes": 3614,
+      "sha256": "10c4a0c312707e4c8743c5610722402a6fdb4a08a5e8a73d914176ec5e6ad6a3"
     },
     {
       "path": "deployment/config/cloud.env.example",
@@ -100,8 +100,8 @@
     },
     {
       "path": "docs/downloads/fallguard-workflow-guide-zh.pdf",
-      "bytes": 1398526,
-      "sha256": "4d20d380ed7727f01b529fa28f9f30d1e8c5670a5420b885419e55ffadb1b382"
+      "bytes": 1398425,
+      "sha256": "950cbb0f4a1bae2cd5769fe08195ff54540ab2e2ce1ff7d504064b1ba46fc556"
     },
     {
       "path": "docs/downloads/maskedbimamba-technical-guide-zh.pdf",
@@ -125,8 +125,8 @@
     },
     {
       "path": "documentation/zh/workflow-guide.md",
-      "bytes": 43250,
-      "sha256": "7ff7524febf735f8200e470010039c548da6a1bece7555cd271e600281d34b37"
+      "bytes": 43487,
+      "sha256": "c5e1accb9c97797ab2bde7ef7bcbf4e0aa75e96ca810249709a58a609265e1b2"
     },
     {
       "path": "manuscripts/final-report/fall_detection_final_report.tex",
@@ -194,9 +194,24 @@
       "sha256": "acdd4b2419673e669cdc4f0dd9b14fe51d5068efb3ca8592719f5c872a824a03"
     },
     {
+      "path": "webui/app.js",
+      "bytes": 36354,
+      "sha256": "3e78b765e2d4ef50bf2a279260f8e3aad679b53f9ea1f097eaf6c99edc732df7"
+    },
+    {
+      "path": "webui/browser-demo.html",
+      "bytes": 23030,
+      "sha256": "1b4049a6a6de1744f8dc4741a38b6232857f90c47efc559a2fa097bc60d6dd22"
+    },
+    {
+      "path": "webui/cloud_model.py",
+      "bytes": 18416,
+      "sha256": "2b326ff07cc64fb05b963cc29f442325f9c8c2413ebacf561fadcb492cd81908"
+    },
+    {
       "path": "webui/cloud_workspace.py",
-      "bytes": 9212,
-      "sha256": "d9b267900c48946d528664453ce377c11c0e9b31b109c4ed1eb3bda9d97b455c"
+      "bytes": 9218,
+      "sha256": "68467b3c825a613a3e877c251c756076c24fe448edfcc6a18a94f4fb8b8af27b"
     },
     {
       "path": "webui/edge_ingest.py",
@@ -205,13 +220,33 @@
     },
     {
       "path": "webui/index.html",
-      "bytes": 38699,
-      "sha256": "08abc38c32d624ed9511c36079319e3ab7038cc2e707e97f1bb3d39003485101"
+      "bytes": 38851,
+      "sha256": "4c191168255385298056e32a750fd880f6f3bd744d4185f9a11d01e9d0e48193"
     },
     {
       "path": "webui/server.py",
-      "bytes": 31353,
-      "sha256": "d848ae0c9eb9857fb1f292395660f5206c1836f522c20d6755b25b5d70c09736"
+      "bytes": 34691,
+      "sha256": "d390ae4014f05b94f336c0c23c96dab6b9e697d22e6d5afb43cbb97aac1b9edd"
+    },
+    {
+      "path": "webui/styles.css",
+      "bytes": 31871,
+      "sha256": "ecea483d41adff32c46411db2b1bef73f9dddad9dd9c5740c299946a3caf1232"
+    },
+    {
+      "path": "webui/vendor/mediapipe/wasm/vision_wasm_internal.js",
+      "bytes": 323377,
+      "sha256": "e170ee67dd4e16c1a6fcd8840a206687e5a59b22c20e4a902bc445b095454d73"
+    },
+    {
+      "path": "webui/vendor/mediapipe/wasm/vision_wasm_module_internal.js",
+      "bytes": 323415,
+      "sha256": "da8934057f147b622e82cfb4c0dbd85461c598e268588b5a8ba9ca963a8ff82d"
+    },
+    {
+      "path": "webui/vendor/mediapipe/wasm/vision_wasm_nosimd_internal.js",
+      "bytes": 323180,
+      "sha256": "e81d715a3d42cc3373602eb2f7aff795d164934db680e32496b65dab537f9658"
     }
   ]
 }

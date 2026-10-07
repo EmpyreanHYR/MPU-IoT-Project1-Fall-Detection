@@ -43,7 +43,7 @@ try:
     for _ in range(20):
         try:
             with urlopen('http://127.0.0.1:18080/api/health',timeout=2) as response:health=json.load(response)
-            if health.get('build')=='2026.10.07-cloud':ready=True;break
+            if health.get('build')=='2026.10.07-cloud-demo1':ready=True;break
         except OSError:pass
         time.sleep(.5)
     if not ready:raise RuntimeError('Updated application did not become ready')

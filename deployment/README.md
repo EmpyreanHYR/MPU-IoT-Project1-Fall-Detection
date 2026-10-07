@@ -107,7 +107,7 @@ must load the same record URL/token as the puller. The outbox's default local
 dashboard URL is `http://127.0.0.1:18300`; use `--dashboard-url` for another port.
 The cloud archive stays available while the edge is disconnected, and current
 probability is cleared for expired or incomplete poses. Historical
-browser/cloud-model selection is unavailable. Remote camera controls remain
+browser-camera inference and model selection are restored at `/browser-demo.html#live`. Remote camera controls remain
 disabled in the templates; existing private relay installations can set
 `FALLGUARD_PI_RELAY_URL` and the exact HTTPS `FALLGUARD_PUBLIC_ORIGIN`.
 
@@ -171,3 +171,7 @@ failure while retaining the live database. It is not the generic installer.
 ## Release consistency
 
 `release-manifest.json` identifies the edge/cloud source, selected weights, manuscript source, Chinese guides and reviewed PDFs in this release. After updating them, run `python3 scripts/build_release_manifest.py`; verify with `--check`. CI checks this manifest and both actual page scripts in addition to the existing model/delivery tests. Production installations can save the published Git revision alongside their private configuration; credentials remain outside Git.
+
+## Browser demonstration restored (7 October)
+
+Open “本机在线演示” in the cloud sidebar. Camera landmarks are extracted by the bundled MediaPipe assets; the current two-input MaskedBiMamba runs on the server. This camera demonstration uses MediaPipe visibility as the quality box proxy, so it is a separate path from the evaluated YOLO edge pipeline. Existing server-side reference models remain selectable when their weights/runtime are installed. Synthetic Demo Studio and alert history are available in the restored page. The edge workspace and offline services remain in place.

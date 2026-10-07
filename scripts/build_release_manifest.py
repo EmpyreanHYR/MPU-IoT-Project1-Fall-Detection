@@ -13,13 +13,13 @@ args=parser.parse_args()
 paths=[]
 for folder,extensions in [('deployment/edge',{'.py','.html'}),('deployment/cloud',{'.py'}),
                           ('deployment/systemd',{'.service'}),('deployment/config',{'.example'}),
-                          ('webui',{'.py','.html'}),
+                          ('webui',{'.py','.html','.js','.css'}),
                           ('docs/downloads',{'.pdf'}),('manuscripts/final-report',{'.tex'}),
                           ('documentation/zh',{'.md'})]:
     paths.extend(p for p in (ROOT/folder).rglob('*') if p.is_file() and p.suffix in extensions)
 paths.extend([ROOT/'deployment/cloud/pull_edge_records.py',ROOT/'scripts/run_deployment.py',
               ROOT/'artifacts/models/masked_bimamba_quality.onnx',ROOT/'artifacts/models/masked_bimamba.pt'])
-manifest={'release':'2026.10.07','edge_build':'2026.10.07','cloud_build':'2026.10.07-cloud',
+manifest={'release':'2026.10.07-demo1','edge_build':'2026.10.07','cloud_build':'2026.10.07-cloud-demo1',
           'files':[{ 'path':str(p.relative_to(ROOT)), 'bytes':p.stat().st_size,
                      'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
                    for p in sorted(set(paths))]}

@@ -30,8 +30,7 @@ from urllib.error import HTTPError, URLError
 from edge_ingest import import_records, SCHEMA, READING_FIELDS
 from cloud_workspace import Workspace, BUILD
 
-# The public deployment classifies on the edge. Historical cloud inference
-# endpoints return an explicit unavailable response.
+from cloud_model import CloudFallModel, validate_landmarks, coco_points
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = Path(os.environ.get("FALLGUARD_DATA_DIR", ROOT / "data"))
@@ -56,7 +55,15 @@ PI_FRAME_CACHE: tuple[float, bytes] | None = None
 PI_FRAME_LOCK = threading.Lock()
 DEMO_DEVICE = "demo-pi5-01"
 
-CLOUD_MODEL_ERROR = "Offline edge mode: classification runs on the device."
+MODEL_PATH=Path(os.environ.get('FALLGUARD_MODEL_PATH',ROOT.parent / 'model/punpayut_transformer_tflite/fall_detection_transformer.tflite'))
+COURSE_MODEL_ROOT=Path(os.environ.get('FALLGUARD_COURSE_MODEL_ROOT',ROOT.parent / 'model/course_trained_2026_09_16'))
+QUALITY_MODEL_PATH=Path(os.environ.get('FALLGUARD_BROWSER_MODEL', ROOT/'models/masked_bimamba_quality.onnx'))
+if not QUALITY_MODEL_PATH.is_file():QUALITY_MODEL_PATH=ROOT.parent/'artifacts/models/masked_bimamba_quality.onnx'
+try:
+    CLOUD_MODEL=CloudFallModel(MODEL_PATH,COURSE_MODEL_ROOT,QUALITY_MODEL_PATH)
+    CLOUD_MODEL_ERROR=''
+except Exception as exc:
+    CLOUD_MODEL=None;CLOUD_MODEL_ERROR=f'{type(exc).__name__}: {exc}'
 
 
 def utc_now() -> str:
@@ -460,7 +467,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path == "/api/health":
-            self.reply(200, {"status": "ok", "service": "fallguard-dashboard", "storage": "ok", "time": utc_now(), "live_ingest_configured": bool(INGEST_TOKEN), "cloud_model": "edge_offline", "build": BUILD})
+            self.reply(200, {"status": "ok", "service": "fallguard-dashboard", "storage": "ok", "time": utc_now(), "live_ingest_configured": bool(INGEST_TOKEN), "cloud_model": "ready" if CLOUD_MODEL else "unavailable", "edge_mode": "offline", "build": BUILD})
             return
         if not self.authorize_dashboard():
             return
@@ -490,7 +497,7 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(status, payload)
             return
         if path == "/api/model/browser/info":
-            self.reply(503, {"available": False, "error": CLOUD_MODEL_ERROR})
+            self.reply(200, CLOUD_MODEL.info()) if CLOUD_MODEL else self.reply(503, {"available":False,"error":CLOUD_MODEL_ERROR})
             return
         if path == "/api/snapshot":
             self.reply(200, STATE.snapshot())
@@ -537,7 +544,7 @@ class Handler(BaseHTTPRequestHandler):
                 while chunk := source.read(64 * 1024):
                     self.wfile.write(chunk)
             return
-        files = {"/": ("index.html", "text/html; charset=utf-8"), "/index.html": ("index.html", "text/html; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
+        files = {"/browser-demo.html": ("browser-demo.html", "text/html; charset=utf-8"), "/": ("index.html", "text/html; charset=utf-8"), "/index.html": ("index.html", "text/html; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
         if path not in files:
             self.reply(404, {"error": "not found"})
             return
@@ -608,8 +615,52 @@ class Handler(BaseHTTPRequestHandler):
                 status, payload = pi_camera_request(path.rsplit("/", 1)[1], raw["client_id"])
                 self.reply(status, payload)
                 return
-            if path in ("/api/model/browser/frame", "/api/model/browser/reset", "/api/model/select"):
-                self.reply(503, {"error": CLOUD_MODEL_ERROR})
+            if path == "/api/model/browser/frame":
+                if CLOUD_MODEL is None:
+                    self.reply(503, {"error": CLOUD_MODEL_ERROR})
+                    return
+                raw = self.read_json()
+                if not isinstance(raw, dict) or set(raw) - {"session_id", "frame_seq", "landmarks", "model_id"}:
+                    raise ValueError("session_id, frame_seq, landmarks and optional model_id are required")
+                session_id = raw.get("session_id")
+                frame_seq = raw.get("frame_seq")
+                if not isinstance(session_id, str):
+                    raise ValueError("session_id must be a string")
+                points = validate_landmarks(raw.get("landmarks"))
+                model_id = raw.get("model_id")
+                if model_id is not None and not isinstance(model_id, str):
+                    raise ValueError("model_id must be a string")
+                result = CLOUD_MODEL.add_frame(session_id, frame_seq, points, model_id)
+                if result["ready"]:
+                    confidences = [point[2] for point in points]
+                    pose_quality = sum(confidences) / len(confidences) if confidences else 0.0
+                    reading = validate_reading({
+                        "device_id": f"browser-cloud-{session_id[:12]}", "timestamp": utc_now(),
+                        "frame_seq": frame_seq, "edge_fps": 4.0, "network_rtt_ms": 0,
+                        "fall_probability": result["fall_probability"], "pose_quality": pose_quality,
+                        "keypoints": coco_points(points), "model": result["state_model"],
+                    }, source="browser_demo")
+                    result.update(STATE.ingest(reading))
+                self.reply(200, result)
+                return
+            if path == "/api/model/browser/reset":
+                if CLOUD_MODEL is None:
+                    self.reply(503, {"error": CLOUD_MODEL_ERROR})
+                    return
+                raw = self.read_json()
+                if not isinstance(raw, dict) or not isinstance(raw.get("session_id"), str):
+                    raise ValueError("session_id must be a string")
+                CLOUD_MODEL.reset(raw["session_id"])
+                self.reply(200, {"reset": True})
+                return
+            if path == "/api/model/select":
+                if CLOUD_MODEL is None:
+                    self.reply(503, {"error": CLOUD_MODEL_ERROR})
+                    return
+                raw = self.read_json()
+                if not isinstance(raw, dict) or set(raw) != {"model_id"} or not isinstance(raw.get("model_id"), str):
+                    raise ValueError("model_id is required")
+                self.reply(200, CLOUD_MODEL.select_model(raw["model_id"]))
                 return
             if path == "/api/demo/start":
                 self.reply(200, {"started": STATE.start_demo()})

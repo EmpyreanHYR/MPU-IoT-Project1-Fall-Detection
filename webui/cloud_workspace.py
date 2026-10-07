@@ -14,7 +14,7 @@ import time
 from urllib.parse import parse_qs,urlsplit
 from urllib.request import Request,ProxyHandler,build_opener
 
-BUILD='2026.10.07-cloud'
+BUILD='2026.10.07-cloud-demo1'
 HTTP=build_opener(ProxyHandler({}))
 
 

@@ -330,7 +330,7 @@ async function sendPoseToCloud(landmarks, generation) {
     const result = await api('/api/model/browser/frame', {method:'POST',body:JSON.stringify({session_id:localCloudSession,frame_seq:++localCloudFrameSeq,landmarks:points,model_id:selectedCloudModelId})});
     if (generation !== localCameraGeneration) return;
     if (!result.ready) {
-      setLocalCloudResult(`CLOUD COLLECTING ${result.frames_collected}/${result.frames_required} / 云端采集中`);
+      setLocalCloudResult(result.reason === 'no_valid_pose' ? '等待完整人体 / WAITING FOR PERSON' : `CLOUD COLLECTING ${result.frames_collected}/${result.frames_required} / 云端采集中`);
     } else {
       const probability = Math.round(result.fall_probability * 100);
       const fall = result.label === 'fall';
@@ -436,7 +436,7 @@ let piStatusPending = false;
 let piControlBusy = false;
 let piFrameUrl = null;
 let piFrameLoading = false;
-let selectedCameraSource = 'pi';
+let selectedCameraSource = 'local';
 const piCameraClientId = (() => {
   try {
     let value = sessionStorage.getItem('fallguardPiCameraClient');

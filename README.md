@@ -63,3 +63,5 @@ Current robustness plots use frame removal and confidence noise. Archived joint-
 See [deployment instructions](deployment/README.md) for the one-command local launcher, camera/CPU/Hailo modes, cloud synchronization and Linux service templates. The selected [temporal model](artifacts/models/README.md) is included; separately licensed pose weights can be obtained and exported with `scripts/prepare_pose_model.py`.
 
 [Reproducibility status and full rebuild commands](REPRODUCIBILITY.md) distinguish the recovered 260-video test assignment from newly generated validation folds. Original validation assignments and pose caches are not available in this release. CI verifies the model interface, numerical parity and delivery behavior on every push.
+
+Browser-camera demonstration is restored alongside the edge workspace at `/browser-demo.html#live`, including current-model inference, available server reference models, synthetic scenarios and event history.
