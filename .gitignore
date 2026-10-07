@@ -36,7 +36,6 @@ __pycache__/
 # Private production configurations remain excluded
 webui/cloud/
 webui/edge/
-webui/cloud_model.py
 webui/Dockerfile
 webui/compose.yaml
 
