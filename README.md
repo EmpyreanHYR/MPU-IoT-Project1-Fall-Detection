@@ -4,7 +4,7 @@ Camera-based fall detection with quality-aware temporal modeling, independent Ra
 
 **[Open the English project presentation](https://yaoronghuang.top/MPU-IoT-Project1-Fall-Detection/)**
 
-**[Download the updated report and Chinese reading PDFs](docs/downloads/)** ·
+**[Final submission files and fixed version](SUBMISSION.md)** · **[Report, contribution appendix and presentation PDFs](docs/downloads/)** ·
 [Chinese source guides](documentation/zh/)
 
 The presentation includes 12 paged slides, approximately seven minutes of prepared English speaker notes, a [Chinese speaker guide](docs/speaker-notes-zh.html), a [two-screen presenter console](https://yaoronghuang.top/MPU-IoT-Project1-Fall-Detection/presenter.html) with a timer and synchronized controls, evidence and Q&A appendices, mouse-line highlighting, interactive model/ablation/robustness charts, and a searchable archive of 1,853 aggregate rows with excluded spatial-mask conditions clearly labeled. It also includes the Raspberry Pi and cloud recovery evidence. Download or clone the repository and open [`docs/index.html`](docs/index.html) to use it locally without a CDN or backend.
@@ -33,7 +33,7 @@ The presentation includes 12 paged slides, approximately seven minutes of prepar
 - Fixed-rule replay gives confirmed-event recall 0.7752 and 66.7 unmatched confirmed alerts per evaluated video hour. These are segmented-test rates, not continuous-care notification rates.
 - The cloud delivery tests match all 85 edge records. Following a 30-second upload-path outage, the queue of 17 records is first observed empty 2.83 seconds after recovery.
 
-See the presentation and manuscript for protocols, sample variation and limitations. This is a research prototype, not a clinically validated alarm system.
+The manuscript gives the shared evaluation protocols and a concise section on the next improvements: alert calibration, cross-dataset specificity and longer camera trials.
 
 ## Local presentation
 
@@ -44,7 +44,12 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080/docs/`, or open `docs/index.html` directly. See [`docs/README.md`](docs/README.md) for keyboard controls and Pages configuration.
 
-The final manuscript source is synchronized with the current report, including an independent repository block after the keywords, a single shared IEEE affiliation, fixed-rule alert replay, and valid robustness conditions. PNG figures are included; LaTeX build outputs remain excluded from Git; reviewed reading PDFs are published under `docs/downloads/`. Build using the manuscript's Makefile. The included [`personal_contributions.tex`](manuscripts/final-report/personal_contributions.tex) is inserted after the bibliography in the same PDF and records Yaorong Huang's reported work in code, writing and the presentation; the other four members retain name-and-TBD entries for their own completion.
+The report and Appendix A are independent A4 IEEE two-column documents. The
+main report and references fit the ten-page course limit. Appendix A consolidates
+all five members' work, problems, solutions and reflection from the supplied
+team records. Build both with the manuscript Makefile. The [submission
+entry](SUBMISSION.md) links the PDFs, environment, run instructions and fixed
+repository tag. A twelve-slide PDF accompanies the interactive presentation.
 
 Sanitized deployment source and generic templates are included. Production credentials, raw camera footage, databases and private device addresses remain excluded. GitHub Pages serves the static presentation; it does not host the live detection or cloud services.
 

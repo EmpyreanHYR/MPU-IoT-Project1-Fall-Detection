@@ -3,6 +3,17 @@
 Status recorded on 2026-09-17 (Asia/Shanghai). This file records the frozen
 execution contract and artifact locations; it is not a result table.
 
+## Final handover status — 9 October 2026
+
+The dated contract below records the initial execution plan. The completed
+public results contain 60 primary runs, **120 ablation runs** (four folds and
+three seeds), nine independent TCNTE reproduction runs, and 24 checkpoint
+evaluations each for primary robustness and external Le2i. Current robustness
+conclusions use frame removal and confidence noise. Archived joint/lower-body
+conditions are excluded because of the documented normalization confound.
+See [REPRODUCIBILITY.md](../../REPRODUCIBILITY.md) for data reconstruction and
+CUDA extension installation, and [results](../../results/) for the records.
+
 ## Frozen inputs
 
 - Primary data: 100 CAUCAFall videos plus 160 GMDCSA-24 videos.

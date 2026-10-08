@@ -51,7 +51,7 @@ where $\Vert$ denotes feature concatenation, $\mathbf W^O\in\mathbb R^{d\times d
 
 \subsection{Selective state space and bidirectional fusion}
 
-Mamba's selective state-space update makes its step size and input/output coefficients depend on the current feature~\cite{gu2023mamba}. We retain the standard Mamba input projection, causal depthwise convolution, SiLU gate, selective scan, and output projection. Each block uses state size 16, convolution width 4, and expansion factor 2, giving 128 internal channels. Our architectural change consists of independent forward and backward processing. The underlying Mamba operator is retained without a change to its selective update.
+Mamba's selective state-space update makes its step size and input/output coefficients depend on the current feature~\cite{gu2023mamba}. Each standard Mamba block uses input projection, causal depthwise convolution, a SiLU gate, selective scan, and output projection, with state size 16, convolution width 4, and expansion factor 2 (128 internal channels). MaskedBiMamba extends this operator through independent forward and backward processing and quality-aware aggregation.
 
 To use both temporal directions, independent forward and backward stacks process the same attended window. Let $\mathcal R$ reverse the time axis, and let $\mathcal M_f^{(\ell)}$ and $\mathcal M_b^{(\ell)}$ denote the Mamba blocks at layer $\ell$. Starting with $\mathbf F^{(0)}=\mathbf H$ and $\mathbf B^{(0)}=\mathcal R(\mathbf H)$, the two residual stacks compute
 \begin{equation}
@@ -70,11 +70,11 @@ The reverse output is restored to the original time order before fusion:
     \right),
     \label{eq:direction_fusion}
 \end{equation}
-where $\mathbf W_f\in\mathbb R^{128\times64}$ and $\mathbf b_f\in\mathbb R^{64}$. Its row $\mathbf h_t^\top$ describes time $t$ using preceding and subsequent observations in the buffered window. The aligned representation relates a descent to its subsequent posture within the buffered window. Bidirectional processing produces one classification after that window has been collected.
+where $\mathbf W_f\in\mathbb R^{128\times64}$ and $\mathbf b_f\in\mathbb R^{64}$. Its row $\mathbf h_t^\top$ describes time $t$ using preceding and subsequent observations. The aligned representation connects descent and subsequent posture, producing one classification after the one-second window is collected.
 
 \begin{figure*}[tp]
     \centering
-    \includegraphics[width=\textwidth]{figs/masked_bimamba_architecture_reviewed.png}
+    \includegraphics[width=\textwidth]{figs/masked_bimamba_architecture_reviewed.pdf}
     \caption{MaskedBiMamba architecture. Pose features pass through training-time frame masking, temporal attention and two independent Mamba stacks. The reverse stream is aligned before fusion. A separate quality network supplies the temporal pooling weights. Tensor dimensions omit the batch axis.}
     \label{fig:masked_bimamba}
 \end{figure*}

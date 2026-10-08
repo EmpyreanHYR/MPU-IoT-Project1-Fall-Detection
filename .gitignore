@@ -68,3 +68,10 @@ checkpoints/
 !docs/downloads/fallguard-project-brief-zh.pdf
 !docs/downloads/maskedbimamba-technical-guide-zh.pdf
 !docs/downloads/fallguard-workflow-guide-zh.pdf
+
+# Independent submission appendix and presentation
+!docs/downloads/fallguard-personal-contributions.pdf
+!docs/downloads/fallguard-presentation.pdf
+
+# Vector figures used by the submitted LaTeX report
+!manuscripts/final-report/figs/*.pdf

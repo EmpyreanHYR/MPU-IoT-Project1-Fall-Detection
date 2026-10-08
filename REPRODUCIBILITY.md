@@ -49,7 +49,17 @@ the Le2i mirror or other third-party videos.
 
 Install the experiment package in a separate environment; GPU Mamba training
 requires the validated CUDA environment described in `code/docs/GMDCSA24_GPU_RUN.md`.
-The portable CPU deployment environment alone does not provide the CUDA scan.
+The portable CPU deployment environment alone does not provide the CUDA scan. The recorded training environment used Python 3.10.8,
+PyTorch 2.1.2+cu121 and an RTX 3090. In a compatible CUDA training environment,
+install the extension pins listed in `code/requirements.txt` before running the
+Mamba suites:
+
+```sh
+python -m pip install transformers==4.44.2
+python -m pip install causal-conv1d==1.4.0 mamba-ssm==2.2.2 --no-build-isolation
+```
+
+These extensions are unnecessary for the included portable inference model.
 Use an absolute `FALLGUARD_WORK_DIR` for your authorized data and outputs.
 
 ```sh
@@ -108,9 +118,16 @@ Verification details are recorded in [`verification.json`](artifacts/models/veri
 Physical Hailo and multi-host production behavior remain the historical tests
 documented in [`results/edge/`](results/edge/).
 
-To freeze a final submission, recover the original training/validation and pose
-artifacts if still available on the training server, obtain the four members'
-actual appendix contributions, obtain the school's similarity report, and check
-the course page limit. The current combined report has 11 pages including the
-contribution appendix; if the 10-page maximum includes it, the manuscript must
-be reduced before submission. These outstanding items are not marked complete.
+## Course submission version
+
+The report and individual contributions are separate IEEE two-column documents.
+All five contributions are consolidated from the team's supplied Word records;
+[SUBMISSION.md](SUBMISSION.md) lists the report, appendix, presentation and fixed
+repository version. The main demonstration can be run with the included selected
+model and the deployment instructions above.
+
+For exact repetition of the historical training scores, retain or recover the
+original training/validation manifests and pose caches. The rebuilt-validation
+commands provide a clearly named new protocol when those artifacts are unavailable.
+The course submission package contains the meeting record document; the student
+adds the school's similarity report separately.

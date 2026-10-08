@@ -110,6 +110,7 @@
 \newcommand{\creflastconjunction}{, and }% 多个引用最后连接符
 
 % ==================== 其他实用工具 ====================
+\usepackage{balance}                    % Balance the final IEEE page
 \usepackage{calc}                       % 计算功能
 \usepackage{orcidlink}                  % ORCID链接
 \usepackage{enumitem}                   % 列表环境定制
@@ -184,16 +185,13 @@ and Jiayun Song}
 
 \input{texfiles/5.Discussion}
 
-\input{texfiles/6.Limitations}
-
 \input{texfiles/5.Conclusion}
 
 % \input{texfiles/6.References}
+\balance
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
-% Personal contributions follow the bibliography in the same report.
-\clearpage
-\input{personal_contributions}
+% Individual contributions are submitted as a standalone IEEE-format appendix.
 
 \end{document}

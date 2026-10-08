@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "software_tests": {
+    "command": "python -m unittest discover -s tests -v",
+    "passed": 30,
+    "failed": 0,
+    "elapsed_seconds": 16.306,
+    "scope": "software fixtures; not additional model accuracy or hardware experiments"
+  },
+  "model_assets": {
+    "verified_files": 9,
+    "sha256_and_size_match": true
+  },
+  "onnx_export": {
+    "two_inputs": true,
+    "max_absolute_logit_difference": 3.6e-07
+  },
+  "dashboard_js": {
+    "edge": "passed",
+    "cloud": "passed"
+  },
+  "result_summary_reaggregation": {
+    "summary_rows_checked": 1718,
+    "scalar_values_checked": 3436,
+    "mismatches": 0,
+    "maximum_absolute_difference": 4.55e-13
+  },
+  "annotations": {
+    "fixed_revision": "83572a37b9e3081df8c06a56874b1d1f2a19386c",
+    "files_checked": 3,
+    "source_sha256_match": true
+  },
+  "documents": {
+    "main_report_a4_pages": 10,
+    "individual_contributions": "independent IEEE A4 two-column Appendix A; all five members",
+    "presentation_slides": 12
+  },
+  "local_verification_environment": "verification-environment.txt records the existing local environment; clean Linux CI installs the declared deployment requirements",
+  "environment_note": "The existing local environment includes both opencv-python 5.0.0.93 and opencv-python-headless 4.14.0.94. Runtime requirements remain opencv-python-headless>=4.10,<5. The new commit CI is the validation of the declared clean environment."
+}

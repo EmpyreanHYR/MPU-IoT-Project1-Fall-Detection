@@ -2,7 +2,7 @@
 
 The implementation reuses Ultralytics pose estimation~\cite{ultralyticsPose}, HailoRT, and Mamba operators~\cite{gu2023mamba}; TCNTE~\cite{yu2025tcnte} is a comparison baseline. FallGuard integrates quality-aware bidirectional classification with local alert storage and deferred cloud synchronization.
 
-The repository includes model/metric code, configurations, manuscripts, aggregate results, selected temporal weights, and deployment source with generic service templates. Credentials, raw videos, and runtime databases are excluded. Exact training replay requires reconstructing the absent original training manifests and pose caches.
+The repository includes model and metric code, configurations, manuscripts, aggregate results, selected temporal weights, and deployment source with generic service templates. These materials support demonstration replay and result inspection. Training from the original videos additionally requires reconstruction of the original split manifests and pose caches; credentials and runtime databases are supplied locally.
 
 The runtime reads a USB camera or local video. FFmpeg preserves video timestamps. Hailo runs YOLOv8s-pose, decodes 17 COCO keypoints, and selects the highest-confidence person; 12 body joints feed the temporal model. CPU ONNX provides a pose fallback.
 
@@ -18,11 +18,11 @@ The local and cloud workspaces provide overview, history, and diagnostics. The P
 
 The cloud queries its durable archive and reads current Pi status/preview through a token-protected private bridge. Invalid poses, expired predictions, or edge loss clear current probability; unavailable pending counts are unknown. Same-origin JSON and a page token protect controls. Pausing preserves history and the outbox.
 
-The 7 October 2026 deployment check verified edge version 2026.10.07 and cloud version 2026.10.07-cloud. The update retained 3,304 windows and 306 event rows, with zero pending records: operational counts, not evaluation samples. Twenty-one temporary-fixture backend/integration tests and both actual page-script checks passed. They establish interface and delivery behavior, not accuracy. Figure~\ref{fig:dashboard} shows the deployed workspace.
+The 7 October 2026 deployment check verified edge version 2026.10.07 and cloud version 2026.10.07-cloud. The update retained an operational history of 3,304 windows and 306 event rows, with zero pending records. Twenty-one temporary-fixture backend/integration tests and both actual page-script checks passed, verifying interface and delivery behavior. Figure~\ref{fig:dashboard} shows the deployed workspace.
 
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=\columnwidth,trim=0 620bp 0 0,clip]{figs/cloud_workspace_overview.png}
-    \caption{Deployed cloud workspace, 7 October 2026. Retained history and an authenticated Pi preview are visible; no complete person is present, so current probability is blank. This is operational evidence, not an accuracy result.}
+    \caption{Deployed cloud workspace, 7 October 2026, with retained event history and an authenticated Pi preview. The interface leaves current probability blank when no complete person is visible.}
     \label{fig:dashboard}
 \end{figure}

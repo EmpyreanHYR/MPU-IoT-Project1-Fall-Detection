@@ -1,3 +1,21 @@
+# Current submission revision — 9 October 2026
+
+The main report is ten A4 IEEE two-column pages including references. Appendix A
+is a separate IEEE two-column contribution document covering all five members,
+merged from supplied individual Word statements and team records. It builds
+independently and is no longer inserted into the main report.
+
+The revision emphasizes measured precision, frame-loss tolerance, edge
+throughput and persistent cloud delivery. Necessary scope and future work are
+consolidated. Results, source citations, experiment protocols and failure data
+remain traceable through RESULTS_PROVENANCE.md. Vector PDF figures are included.
+
+See [SUBMISSION.md](../../SUBMISSION.md) for the fixed version and handover files.
+
+---
+
+## Historical revision notes
+
 # Editorial revision — 5 October 2026
 
 The IEEE report was polished using Nature-inspired scientific-writing principles. The abstract now follows the problem, design, central comparison, system result and bounded implication. The discussion interprets operating trade-offs without attributing frame-loss tolerance to a clean-data ablation.

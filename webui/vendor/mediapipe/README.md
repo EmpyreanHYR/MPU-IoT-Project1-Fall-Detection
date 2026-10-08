@@ -4,4 +4,13 @@
 
 `pose_landmarker_lite.task` is the versioned [MediaPipe Pose Landmarker Lite model](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task) recommended by the [official browser guide](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js).
 
-The browser loads these assets from the authenticated FallGuard VM. Precompressed `.wasm.gz` files reduce first-load bandwidth; the server sends them only when the browser advertises gzip support. Inference runs on the viewer's device, with no camera frame or local landmarks sent to the VM. This is a pose visualization reference and is separate from the cloud fall-score baseline and research classifier.
+The browser loads these assets from the authenticated FallGuard service.
+Precompressed `.wasm.gz` files reduce first-load bandwidth when the browser
+advertises gzip support. Pose extraction runs on the viewer's device. In the
+browser demonstration, the extracted landmarks are sent to the backend for
+fall classification; camera image frames remain in the browser. The server
+adapter maps MediaPipe landmarks to the research classifier's joint order.
+
+This optional browser path is separate from the evaluated Raspberry Pi
+YOLOv8s-pose pipeline. The browser demonstration does not contribute to the
+reported YOLO-based benchmark or hardware throughput results.

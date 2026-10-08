@@ -1,60 +1,43 @@
-# Makefile for IEEE Conference LaTeX Template
-# 使用方法：
-#   make        - 编译PDF
-#   make clean  - 清理辅助文件
-#   make view   - 编译并打开PDF
-
-# 主文档文件名（不含.tex扩展名）
+# Build the report and standalone IEEE contribution appendix.
+# make / make all: both documents and submission-named PDF copies.
+# make report: main report only; make contributions: standalone appendix only.
 MAIN = fall_detection_final_report
-SOURCES = $(MAIN).tex personal_contributions.tex $(wildcard texfiles/*.tex) references.bib $(wildcard figs/*.png)
-
-# LaTeX编译器选择
-# 可选: pdflatex, xelatex, lualatex
-LATEX = pdflatex
-
-# 编译选项
-LATEX_FLAGS = -interaction=nonstopmode -file-line-error
-
-# PDF阅读器（根据操作系统调整）
-# macOS: open
-# Linux: xdg-open 或 evince
-# Windows: start
+CONTRIBUTIONS = personal_contributions
+REPORT_SOURCES = $(MAIN).tex $(wildcard texfiles/*.tex) references.bib $(wildcard figs/*.pdf figs/*.png)
+LATEXMK = latexmk
+LATEX_FLAGS = -pdf -interaction=nonstopmode -halt-on-error -file-line-error
 VIEWER = open
 
-# 默认目标：编译PDF
-all: $(MAIN).pdf
+all: report contributions
 
-# 编译PDF（包含BibTeX参考文献和交叉引用）
-$(MAIN).pdf: $(SOURCES)
-	$(LATEX) $(LATEX_FLAGS) $(MAIN).tex
-	bibtex $(MAIN)
-	$(LATEX) $(LATEX_FLAGS) $(MAIN).tex
-	$(LATEX) $(LATEX_FLAGS) $(MAIN).tex
+report: G7_Final_Report.pdf
 
-# 使用BibTeX编译（如果使用.bib文件）
-bib: $(MAIN).tex
-	$(LATEX) $(LATEX_FLAGS) $(MAIN).tex
-	bibtex $(MAIN)
-	$(LATEX) $(LATEX_FLAGS) $(MAIN).tex
-	$(LATEX) $(LATEX_FLAGS) $(MAIN).tex
+contributions: G7_Personal_Contributions.pdf
 
-# 清理辅助文件
+$(MAIN).pdf: $(REPORT_SOURCES)
+	$(LATEXMK) $(LATEX_FLAGS) $(MAIN).tex
+
+$(CONTRIBUTIONS).pdf: $(CONTRIBUTIONS).tex
+	$(LATEXMK) $(LATEX_FLAGS) $(CONTRIBUTIONS).tex
+
+G7_Final_Report.pdf: $(MAIN).pdf
+	cp $(MAIN).pdf $@
+
+G7_Personal_Contributions.pdf: $(CONTRIBUTIONS).pdf
+	cp $(CONTRIBUTIONS).pdf $@
+
+bib: report
+
 clean:
-	rm -f *.aux *.log *.out *.toc *.lof *.lot
-	rm -f *.bbl *.blg *.bcf *.run.xml
-	rm -f *.fls *.fdb_latexmk *.synctex.gz
-	rm -f texfiles/*.aux
+	$(LATEXMK) -c $(MAIN).tex $(CONTRIBUTIONS).tex
 
-# 深度清理（包括PDF）
 cleanall: clean
-	rm -f $(MAIN).pdf
+	rm -f $(MAIN).pdf $(CONTRIBUTIONS).pdf G7_Final_Report.pdf G7_Personal_Contributions.pdf
 
-# 编译并打开PDF
-view: $(MAIN).pdf
-	$(VIEWER) $(MAIN).pdf
+view: report
+	$(VIEWER) G7_Final_Report.pdf
 
-# 持续编译模式（使用latexmk）
 watch:
-	latexmk -pdf -pvc -interaction=nonstopmode $(MAIN).tex
+	$(LATEXMK) -pdf -pvc -interaction=nonstopmode $(MAIN).tex
 
-.PHONY: all bib clean cleanall view watch
+.PHONY: all report contributions bib clean cleanall view watch

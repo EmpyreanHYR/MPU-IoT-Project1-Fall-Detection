@@ -1,39 +1,160 @@
-% Included after the bibliography by the main report; do not compile independently.
-\appendix[Individual Contributions and Reflections]
-\label{app:personal-contributions}
+% !TEX program = pdflatex
+% !TEX encoding = UTF-8
+% Standalone submission document; compile this file directly.
+\documentclass[conference,a4paper]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage{xurl}
+\usepackage{balance}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={FallGuard: Individual Contributions and Reflections},
+  pdfauthor={Yaorong Huang, Jiahao Zhao, Chengyi Xu, Zhonglin Chang, Jiayun Song},
+  pdfsubject={COMP6131 Fundamentals of the Internet of Things, Group 7}
+}
+\urlstyle{tt}
+\newenvironment{evidence}{\par\smallskip\begingroup\footnotesize\raggedright\noindent}{\par\endgroup}
+\begin{document}
 
-This appendix records individual contributions to FallGuard. Yaorong Huang's entry describes his code, writing, and web-presentation responsibilities. The other entries remain TBD and must be completed by the corresponding members before submission. Author order does not imply a verified division of work.
+\title{FallGuard: Individual Contributions and Reflections}
+\author{
+\IEEEauthorblockN{Yaorong Huang, Jiahao Zhao, Chengyi Xu, Zhonglin Chang, and Jiayun Song}
+\IEEEauthorblockA{Group 7, COMP6131 Fundamentals of the Internet of Things\\
+Faculty of Applied Sciences, Macao Polytechnic University, Macao SAR, China}
+}
+\maketitle
 
-\subsection{Yaorong Huang}
-\subsubsection*{Code implementation and integration}
-I carried out most of the project's code implementation and organization, covering temporal modeling, pose preprocessing, training/evaluation tools, model export, and edge--cloud integration. MaskedBiMamba combines established Mamba operators and pose estimation with temporal attention, bidirectional processing, frame masking, and quality weighting. My contribution concerns their composition, implementation, evaluation tools, and integration; the underlying operators and pose extractor originate from the cited work.
+\begin{abstract}
+This document consolidates the five members' contribution statements and team task records for FallGuard, an edge--cloud fall-detection project using quality-aware bidirectional temporal modeling. It records individual work, collaboration, corresponding project deliverables, and learning outcomes. The contributions cover model development and deployment, data preparation, training, cloud delivery, interface development, testing, literature review, and project communication.
+\end{abstract}
 
-Public evidence includes \path{code/src/fallbench/} and \path{code/scripts/export_mamba_onnx.py}. The released \path{deployment/} directory contains the offline runtime, independent outbox, cloud puller, dashboards, and generic service templates. Selected temporal weights and checksums are provided in \path{artifacts/models/}.
+\section{Project and team organization}
 
-\subsubsection*{Offline deployment and workspaces}
-I integrated USB-camera/video acquisition, Hailo pose extraction with a CPU fallback, and the two-input MaskedBiMamba ONNX classifier on the Pi. Separating inference from the SQLite outbox preserves committed records during disconnection or camera stoppage. Cloud synchronization commits records before acknowledging UUIDs and retains original capture times during retry.
+The final system extracts poses on a Raspberry Pi, classifies one-second skeleton windows with MaskedBiMamba, stores records locally, and synchronizes them to a persistent cloud archive. The descriptions below use the final system terminology; repository paths identify corresponding deliverables.
 
-I completed the three-page local and cloud workspaces: live preview and fresh results, historical charts with filters/pagination/CSV, and device diagnostics. The earlier minimal local page provided insufficient independent observation and troubleshooting. The updated interface clears current probability for missing poses, expired results, or lost connections. The cloud retains its archive while current Pi status uses a protected private bridge; controls validate same-origin JSON and a page token.
+\section{Yaorong Huang}
+\subsection{Model development and system integration}
 
-Deployment verification preserved existing databases, checked service health and source hashes, and saved rollback backups. Temporary integration tests cover archive queries, restart persistence, authentication, delivery, and actual service startup/shutdown; both actual page scripts were checked for stale and invalid states. Public deployment evidence is in \path{results/deployment/}.
+I served as group leader and carried out most of the project's code implementation and integration. My work covered temporal modeling, pose preprocessing, training and evaluation tools, model export, and the connection between edge and cloud services. I implemented MaskedBiMamba by combining established Mamba operators with temporal attention, two temporal directions, frame masking, and quality-weighted pooling. I organized the baseline and component comparisons so that the model's precision and tolerance to missing frames could be assessed alongside its clean-data performance.
 
-\subsubsection*{Technical issues and evidence boundaries}
-Archived missing-joint tests zero-filled coordinates before normalization, also rescaling observed joints. I corrected the order while excluding the affected results from current conclusions; the fix does not validate those old experiments. I also separated window/video predictions, merged events, and fixed-rule confirmed alerts. Pipeline throughput, detection timing, cloud receipt latency, and operational archive counts describe different quantities and do not establish the same performance guarantee.
+I integrated USB-camera and video acquisition, Hailo-accelerated pose extraction with a CPU fallback, and the two-input ONNX temporal classifier on the Raspberry Pi. I implemented local alert-state transitions and corrected the pose-preprocessing order, updating the experiment archive and report to reflect that correction.
 
-\subsubsection*{Manuscript and evidence organization}
-I took primary responsibility for preparing and revising the LaTeX manuscript, method notation, protocols, results, implementation, and limitations. I maintained consistency across figures, aggregate evidence, technical explanations, deployed services, and repository materials. The interpretation retains TE's higher clean F1, mixed ablations, limited external discrimination, and incomplete fall-interval detection. Evidence is retained in \path{manuscripts/final-report/} and \path{results/}; external algorithms and datasets are credited.
+\subsection{Workspaces, manuscript, and presentation}
 
-\subsubsection*{Presentation and publication}
-I developed the twelve-slide GitHub Pages presentation in \path{docs/}, including interactive charts, bilingual notes, searchable results, projection controls, a presenter console, and rehearsal timing. I synchronized the final report, Chinese guides, presentation, deployment source, and GitHub publication with the October workspace update. The presentation exposes saved evidence; the Pi and cloud provide the separate live demonstration.
+I completed the final local and cloud workspaces, with live preview, current results, historical charts, filters, pagination, CSV export, and diagnostics. I added freshness checks so that the displayed result follows the current input and service state. Deployment verification included preserving existing databases, checking running services and source hashes, and retaining rollback copies.
 
-\subsubsection*{Reflection}
-A working prototype and a supported performance claim need different evidence. High clip recall can coexist with late detection; high video F1 can coexist with low specificity. Preprocessing can invalidate a robustness comparison. Deployment also requires freshness checks, independent storage, recovery, diagnostics, and consistent documentation. Future work should evaluate continuous recordings, calibrate alerts, and test longer camera operation across conditions, while preserving one traceable evidence chain.
+I took primary responsibility for the LaTeX report, including the method notation, experimental protocol, results, system implementation, and final editing. I maintained consistency between the manuscript, figures, result summaries, technical guides, and deployed software. I developed the twelve-slide GitHub Pages presentation and its interactive charts, bilingual notes, presenter tools, and rehearsal timer. This web implementation complemented the group's slide content and module-specific presentation preparation.
 
-\subsection{Jiahao Zhao}
-TBD.
-\subsection{Chengyi Xu}
-TBD.
-\subsection{Zhonglin Chang}
-TBD.
-\subsection{Jiayun Song}
-TBD.
+\subsection{Problem and solution}
+
+The deployment had to keep inference and records available when cloud connectivity was lost. I separated local inference and SQLite storage from an independent outbox, then checked retry and recovery; the recorded delivery tests retained record identifiers and capture timestamps after reconnection.
+
+\subsection{Collaboration, deliverables, and reflection}
+
+I coordinated the model, data, delivery, and manuscript interfaces across the team. \begin{evidence}
+Corresponding deliverables: \path{code/src/fallbench/}, \path{code/scripts/export_mamba_onnx.py}, \path{deployment/}, \path{artifacts/models/}, \path{manuscripts/final-report/}, and \path{docs/}.
+\end{evidence}
+
+The main lesson for me was to develop the model and its operating system together. Local persistence, recoverable delivery, clear status displays, and consistent documentation made the classifier useful as an IoT prototype. Maintaining one traceable chain from configuration to result table also made final integration and presentation more efficient.
+
+\section{Jiahao Zhao}
+\subsection{Cloud interfaces and record delivery}
+
+My responsibilities covered the cloud interface, system testing, and project records. I worked on the interface through which classified edge records become a durable cloud history, including the record structure, storage behavior, and API access used by the detection interface. In the final system, temporal classification runs on the Pi and the cloud receives already classified records. The cloud-side workflow preserves the original observation time and acknowledges an identifier after the record has been stored, supporting safe retry after an interrupted transfer.
+
+I contributed to the archive functions used for historical inspection: querying stored windows and events, filtering, pagination, and exporting records. I coordinated the device, timestamp, prediction, and alert fields with the edge implementation and the interface so that the recorded history and the displayed history describe the same data.
+
+\subsection{Testing and project coordination}
+
+I contributed system and regression tests for the record path, including malformed input handling, duplicate delivery, acknowledgement loss, restart persistence, and recovery after disconnection. The test evidence also covers archive access and the behavior of the actual service launchers. These checks supported the final demonstration by verifying the interaction between components, rather than assessing the classifier in isolation.
+
+I maintained the consolidated meeting records, recording decisions, task owners, deadlines, and module handovers. Eight meetings between 9 September and 3 October documented the team's progress. Meeting note-taking rotated among members, and I organized these records into the final set. I also collected service instructions, environment information, and test outputs as part of the reproducibility materials.
+
+\subsection{Problem and solution}
+
+A cloud write can succeed even when its acknowledgement is lost, leaving the edge to retry a record already stored. I worked with edge integration on commit-before-acknowledgement and UUID-based deduplication, and contributed retry and restart tests that checked for duplicate rows and preserved capture times.
+
+\subsection{Collaboration, deliverables, and reflection}
+
+I coordinated the record schema with Yaorong Huang and the displayed fields with Chengyi Xu, supplying system details for the report review. \begin{evidence}
+Corresponding deliverables: \path{deployment/cloud/}, \path{webui/server.py}, \path{webui/cloud_workspace.py}, \path{tests/}, \path{results/deployment/}, and the group's meeting records.
+\end{evidence}
+
+This work strengthened my understanding of durable delivery and service testing. Keeping storage and acknowledgement in the correct order, and exercising restart and retry behavior, turned recovery into a behavior we could demonstrate. Recording module handovers also helped the team resolve interface changes efficiently.
+
+\section{Chengyi Xu}
+\subsection{Training and experiment management}
+
+My responsibilities covered the training workflow and detection interface. I contributed the workflow that reads prepared skeleton sequences, forms training batches, addresses class imbalance, and manages checkpoints and metric logs. I worked with Yaorong Huang on the connection between the model definition and its training configuration, and with Jiayun Song on the input sequence format and grouped evaluation partitions.
+
+I contributed training augmentation and random-seed management so that the comparison runs followed recorded settings. The final protocol trains for a fixed number of epochs, selects checkpoints by validation F1, and evaluates the same folds and seeds across models. The loss configuration, run commands, checkpoints, and metric outputs form the record of each experiment. I also supported the component comparisons and the organization of their results into the report's tables and figures.
+
+\subsection{Detection interface and demonstration}
+
+I contributed to the detection interface displaying device health, current predictions, and stored alerts, and to connecting those views to the cloud API. I worked on the initial interface panels and demonstration workflow. Yaorong Huang subsequently integrated and completed the final three-page local and cloud workspaces. This division connected my interface preparation with the final deployment and presentation.
+
+I coordinated interface fields with Jiahao Zhao and checked that the displayed data matched stored records. I supported the demonstration material and the explanation of the detection workflow, including how an operator moves from current status to historical inspection. These activities made the project accessible to viewers who were not involved in model development.
+
+\subsection{Problem and solution}
+
+Fall windows were much rarer than daily-activity windows, creating a risk that training would favor the majority class. I used class-aware weighted focal-loss settings and recorded masking augmentation and random seeds in the shared workflow, so the comparison runs followed the same class-balancing and run protocol.
+
+\subsection{Collaboration, deliverables, and reflection}
+
+I coordinated data inputs with Jiayun Song, model settings with Yaorong Huang, and interface fields with Jiahao Zhao. \begin{evidence}
+Corresponding deliverables: \path{code/src/fallbench/engine.py}, \path{code/src/fallbench/losses.py}, \path{code/src/fallbench/reproducibility.py}, \path{code/scripts/train.py}, \path{code/configs/}, and the detection-interface and demonstration materials.
+\end{evidence}
+
+I learned to treat configuration and logging as part of the experiment, rather than as supporting paperwork. Shared inputs, consistent run settings, and saved outputs made model comparisons easier to interpret. Interface work also showed me the value of displaying status, time, and history together when explaining a running system.
+
+\section{Zhonglin Chang}
+\subsection{Problem definition and literature review}
+
+I took responsibility for the problem definition, algorithm survey, and references. I framed the task around distinguishing a fall transition from daily activities with similar individual poses, such as sitting, bending, or kneeling. This motivated the use of temporal skeleton sequences and the explicit consideration of incomplete pose observations. I reviewed wearable, environmental, and camera-based approaches before focusing the comparison on pose-based temporal modeling and edge deployment.
+
+I organized the candidate methods and their uses in the project. The review included TCNTE as a temporal baseline, masked temporal modeling as a motivation for frame masking, and confidence-aware skeleton approaches as context for the quality input. I helped articulate MaskedBiMamba's contribution as the combination of temporal context and pose quality, together with matched evaluation and practical edge--cloud integration.
+
+\subsection{References and report review}
+
+I maintained the shared reference list and checked the sources used in the report. The literature records connect the cited methods and datasets to their source documents and distinguish available implementation resources from papers used as methodological background. I contributed the problem-definition and related-work material and reviewed the alignment between the report's claims and the team's recorded results.
+
+I coordinated the method, dataset, and system descriptions with the team to keep the introduction, method, and results consistent.
+
+\subsection{Problem and solution}
+
+Posture or motion thresholds alone can confuse rapid sitting with a fall, so selecting a model required a clear account of the temporal information it uses. I compared pose-based temporal candidates under the project's camera and compute constraints, checked source papers and implementation resources, and wrote the selection rationale used in the problem definition and related work.
+
+\subsection{Deliverables and reflection}
+
+\begin{evidence}
+Corresponding deliverables: \path{manuscripts/final-report/texfiles/2.Introduction.tex}, \path{manuscripts/final-report/references.bib}, \path{manuscripts/proposal/REFERENCE_VERIFICATION.md}, and the candidate-method and reference notes.
+\end{evidence}
+
+I learned that a useful literature review must connect a research idea to an implementable comparison. Checking datasets, code availability, and the precise purpose of each citation helped the team choose practical baselines and explain its design clearly. Reviewing the report against the result records also improved the consistency of the final argument.
+
+\balance
+\section{Jiayun Song}
+\subsection{Data preparation and evaluation inputs}
+
+My responsibilities covered dataset preparation, edge testing, and presentation materials. I organized dataset access information, labels, usage terms, and the prepared skeleton sequences used by the training workflow. The final primary evaluation uses CAUCAFall and GMDCSA-24, while Le2i provides a separate baseline comparison and an external test. I coordinated the input sequence format and the evaluation partitions with Chengyi Xu and Yaorong Huang.
+
+I contributed to label mapping, subject-grouped partition preparation, and the conversion of videos into reusable pose sequences. Keeping a subject's recordings within one partition supports a fair cross-subject comparison, and preparing the sequence once lets training reuse the same representation. The final materials publish the recovered test assignment for the 260 primary videos together with its provenance information.
+
+\subsection{Edge testing and presentation preparation}
+
+I contributed edge measurements and the organization of robustness and cross-dataset results. The paired hardware measurements compare Hailo and CPU pose processing at the same input resolution while retaining the same local classifier. I supported the collection and presentation of throughput, processing latency, memory, and temperature evidence, as well as the preparation of the synthetic edge-evaluation sample.
+
+I prepared presentation content, figures, and speaker notes, helped maintain a consistent visual style, and supported rehearsal. Yaorong Huang implemented the final interactive web presentation; my work focused on communicating the datasets, system workflow, and evaluation results within that shared presentation. I also supported the preparation of demonstration and non-fall example material described in my individual work statement.
+
+\subsection{Problem and solution}
+
+The CPU pose path provided limited throughput for the intended edge workflow. I helped measure Hailo and CPU processing at the same input resolution using a paired replay; the archived full-pipeline results were 20.56 versus 1.73 frames/s, providing evidence for the accelerated deployment configuration.
+
+\subsection{Collaboration, deliverables, and reflection}
+
+I coordinated training inputs with Chengyi Xu and edge measurements with Yaorong Huang, and supplied timestamps and citations for the report. \begin{evidence}
+Corresponding deliverables: \path{datasets/DATASET_PROVENANCE_AND_USAGE.md}, \path{datasets/annotation_sources.json}, \path{datasets/primary_test_folds.csv}, \path{code/scripts/make_splits.py}, \path{code/scripts/build_windows.py}, \path{results/edge/}, \path{results/robustness/}, and the presentation content and notes.
+\end{evidence}
+
+I learned to inspect data preparation and partitions before interpreting model scores. Clear dataset roles, recorded transformations, and consistent measurements made the comparisons easier to explain. Preparing the presentation also helped me turn technical results into a coherent account of how the data, model, and deployed system work together.
+
+\end{document}

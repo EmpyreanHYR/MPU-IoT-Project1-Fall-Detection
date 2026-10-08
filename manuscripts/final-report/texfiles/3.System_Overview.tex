@@ -22,9 +22,9 @@ FallGuard performs pose extraction and temporal classification on the Raspberry 
 \label{fig:edge_flow}
 \end{figure*}
 
-Routine synchronization transfers pose keypoints, model scores, timestamps, and alert records, but not stored video. An authenticated preview can relay annotated images on demand; these frames remain in memory and are not added to the event archive. Pose records can reveal movement and are treated as protected application data. The absence of routine video transfer does not establish anonymity.
+Routine synchronization transfers compact pose keypoints, model scores, timestamps, and alert records. An authenticated preview relays annotated images on demand from memory; the event archive stores no video. Pose records are protected application data because they describe a person's movement.
 
-The deployed backend runs on a Tencent Cloud Lighthouse VM with OpenCloudOS~9. The Python service is bound to the VM loopback interface behind an Nginx HTTPS gateway. Dashboard access uses HTTP Basic authentication over TLS. Edge records are pulled through a Tailscale private route from a token-protected endpoint; the corresponding public device path is not exposed. Service credentials are loaded from permission-restricted environment files rather than stored in the submitted source. These controls describe the implemented deployment boundary; they do not constitute a formal privacy or security evaluation.
+The deployed backend runs on a Tencent Cloud Lighthouse VM with OpenCloudOS~9. The Python service is bound to the VM loopback interface behind an Nginx HTTPS gateway. Dashboard access uses HTTP Basic authentication over TLS. Edge records are pulled through a Tailscale private route from a token-protected endpoint; the corresponding public device path is not exposed. Service credentials are loaded from permission-restricted environment files rather than stored in the submitted source. These controls protect dashboard access, device communication, and deployment credentials.
 
 \subsection{Alert-state transitions}
 

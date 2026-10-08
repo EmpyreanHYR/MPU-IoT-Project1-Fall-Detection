@@ -1,5 +1,5 @@
 {
-  "release": "2026.10.07-demo1",
+  "release": "2026.10.09-submission",
   "edge_build": "2026.10.07",
   "cloud_build": "2026.10.07-cloud-demo1",
   "files": [
@@ -90,8 +90,18 @@
     },
     {
       "path": "docs/downloads/fallguard-final-report.pdf",
-      "bytes": 1661311,
-      "sha256": "72d58719b1f0d5904152379a58e20c70645f49bf1fd357fe6e49c3101f1ae2e4"
+      "bytes": 864168,
+      "sha256": "d0648c1e335e1f884d917293c401d53323eb78fd799d6b22f5f9cb00991b12cd"
+    },
+    {
+      "path": "docs/downloads/fallguard-personal-contributions.pdf",
+      "bytes": 83225,
+      "sha256": "af86d23f60bdb25f3794f4278377e323a7ea6a546fa88510ce99156ee12e810c"
+    },
+    {
+      "path": "docs/downloads/fallguard-presentation.pdf",
+      "bytes": 1383975,
+      "sha256": "382fe351ea1de1bef59b681ba7c686ebbc56aeda0d347f45082f4b185bc0f316"
     },
     {
       "path": "docs/downloads/fallguard-project-brief-zh.pdf",
@@ -130,58 +140,58 @@
     },
     {
       "path": "manuscripts/final-report/fall_detection_final_report.tex",
-      "bytes": 7897,
-      "sha256": "fc3bd49a521f26a91598a52666acbdde42049002a648746ed14139b08a78df6a"
+      "bytes": 7912,
+      "sha256": "0966f7bdd2529c7bf95d90243d23ad7cf6809578a7106fea5ca65253a8689298"
     },
     {
       "path": "manuscripts/final-report/personal_contributions.tex",
-      "bytes": 5050,
-      "sha256": "6708a600773723f1060745d4ab9837834be6cf2e90c01710c1bf288d57a19a75"
+      "bytes": 16643,
+      "sha256": "8f82c858babfea1b2843c0fccac48f9f99c4f8652780637c1125d07c29ad9769"
     },
     {
       "path": "manuscripts/final-report/texfiles/1.Abstract.tex",
-      "bytes": 1594,
-      "sha256": "2ade1902163b9ba52448c9eaf2da10911f8e8c5b171c3a20a961781370828db4"
+      "bytes": 1558,
+      "sha256": "94b5d9592b1ba42cd3e7faf20528c339a68a29c33fa59a5415f955cca5daff7e"
     },
     {
       "path": "manuscripts/final-report/texfiles/2.Introduction.tex",
-      "bytes": 2731,
-      "sha256": "e2eeb5408044b23aa0c0dd5db36337226219deb938fcf45f281c6c396c65a579"
+      "bytes": 2786,
+      "sha256": "cbb2caf66cc31a784a53ef1bfd31a93d16a0416ec24e67c4bbd00487838ed29b"
     },
     {
       "path": "manuscripts/final-report/texfiles/3.Methodology.tex",
-      "bytes": 8116,
-      "sha256": "6073d90711267cf0134c4056605bf6929b3adf5f2e835f916776c5a6cb255ea9"
+      "bytes": 7982,
+      "sha256": "fc4643dd36cc0609763b2af8293bb9f72c767ba27247e6a95c6e3d1f4446f705"
     },
     {
       "path": "manuscripts/final-report/texfiles/3.System_Overview.tex",
-      "bytes": 3779,
-      "sha256": "c908d7c5bbe1de884b0a86c55c70b89b8fd7bf19385f01a343d8bcaac4138594"
+      "bytes": 3644,
+      "sha256": "6aa325e74ec020f64df8d82518520e51214d8b206569d767526231faed1d800f"
     },
     {
       "path": "manuscripts/final-report/texfiles/4.Experiments_and_Analysis.tex",
-      "bytes": 18698,
-      "sha256": "9910c780eaf7fd54bfe3dc8ef830e0c0b9622e680e9a620f50858194bf814f1a"
+      "bytes": 18484,
+      "sha256": "bae15143c63d1a5db0016edd61ffe20a234e95955f5fa6d6aa3a969366ac97b6"
     },
     {
       "path": "manuscripts/final-report/texfiles/4.Implementation.tex",
-      "bytes": 3153,
-      "sha256": "e801fc7422e13521789611ee50441fdfb4143c4af30a2293020d31b5f5ed7755"
+      "bytes": 3165,
+      "sha256": "33f7ddb0bf703655c00115139a4e69afe04118c556d69435547ec2ecafca961b"
     },
     {
       "path": "manuscripts/final-report/texfiles/5.Conclusion.tex",
-      "bytes": 687,
-      "sha256": "96552333594ee54ba323c4a2be63c27fa6b83a3d38b9571cb91079c944cb4f5a"
+      "bytes": 790,
+      "sha256": "64e61bf26d11d8b06476d1bc1aeed79ed778ebb37544a885f0f91342adf33741"
     },
     {
       "path": "manuscripts/final-report/texfiles/5.Discussion.tex",
-      "bytes": 2106,
-      "sha256": "6da2754f34d93900ad91c296b02f0abe3cd4108edc36f3976303c2d868e71e6a"
+      "bytes": 2251,
+      "sha256": "5caca547d68bcda855526c4faa96b5a67fd7affcff8c7e5f9d1b0b35606905de"
     },
     {
       "path": "manuscripts/final-report/texfiles/6.Limitations.tex",
-      "bytes": 1398,
-      "sha256": "06f607b2271562aba4712b8702438cad6aeb100b9ad545591365bc9c8aa11c57"
+      "bytes": 138,
+      "sha256": "02c6ee786a29cf195039311d3cd5afebcd882a39dff3d43dd46dc202eb49d014"
     },
     {
       "path": "manuscripts/final-report/texfiles/6.References.tex",
