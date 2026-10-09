@@ -10,7 +10,6 @@ instructions and configuration for the main demonstration.
 
 - [Final report PDF](docs/downloads/fallguard-final-report.pdf) and [LaTeX source](manuscripts/final-report/fall_detection_final_report.tex).
 - [Appendix A: individual work and reflection](docs/downloads/fallguard-personal-contributions.pdf) and its independent [IEEE two-column LaTeX source](manuscripts/final-report/personal_contributions.tex).
-- [Yaorong Huang individual contribution PDF](docs/downloads/fallguard-yaorong-huang-contribution.pdf) and [standalone IEEE source](manuscripts/final-report/yaorong_huang_contribution.tex): personal copy of his expanded section in Appendix A.
 - [Presentation PDF](docs/downloads/fallguard-presentation.pdf) and the [interactive deck](docs/index.html), with [English](docs/speaker-notes.md) and [Chinese](docs/speaker-notes-zh.md) speaker notes.
 - Reproducibility: this repository, [environment and run guide](deployment/README.md), [selected model](artifacts/models/README.md), [experiment code](code/README.md), [results](results/README.md) and [experiment rebuild guide](REPRODUCIBILITY.md).
 
@@ -19,12 +18,12 @@ report is added separately by the submitting student.
 
 ## Fixed repository version
 
-Use tag **`submission-2026-10-09-v3`** for this handover. The course package records
+Use tag **`submission-2026-10-09-v4`** for this handover. The course package records
 its full commit ID and includes a source ZIP. The tag identifies the submitted
 materials; the commit ID is the permanent reference for the file contents.
 
 ```sh
-git clone --branch submission-2026-10-09-v3 --depth 1 https://github.com/EmpyreanHYR/MPU-IoT-Project1-Fall-Detection.git
+git clone --branch submission-2026-10-09-v4 --depth 1 https://github.com/EmpyreanHYR/MPU-IoT-Project1-Fall-Detection.git
 cd MPU-IoT-Project1-Fall-Detection
 ```
 

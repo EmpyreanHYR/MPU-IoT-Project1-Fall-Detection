@@ -2,7 +2,6 @@
 
 - [Final report](fallguard-final-report.pdf): A4 IEEE two-column main report, ten pages including references.
 - [Appendix A: individual work and reflection](fallguard-personal-contributions.pdf): independent IEEE two-column document, four pages, all five members consolidated; Yaorong Huang’s implementation, integration and reporting work is expanded.
-- [Yaorong Huang individual contribution](fallguard-yaorong-huang-contribution.pdf): two-page standalone IEEE copy of his section.
 - [Presentation](fallguard-presentation.pdf): twelve 16:9 slides for the 7–8-minute talk. The interactive deck retains the full evidence and Q&A appendices.
 - [Chinese project brief](fallguard-project-brief-zh.pdf): two pages.
 - [MaskedBiMamba mathematical/implementation guide](maskedbimamba-technical-guide-zh.pdf): extended reading.

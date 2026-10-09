@@ -114,11 +114,6 @@
       "sha256": "950cbb0f4a1bae2cd5769fe08195ff54540ab2e2ce1ff7d504064b1ba46fc556"
     },
     {
-      "path": "docs/downloads/fallguard-yaorong-huang-contribution.pdf",
-      "bytes": 72498,
-      "sha256": "7034d3490c84a5c75afba4d01e2f56c4ebcf71cae6c59823a682725e5f230175"
-    },
-    {
       "path": "docs/downloads/maskedbimamba-technical-guide-zh.pdf",
       "bytes": 623573,
       "sha256": "4a28344db11c100ebc5bb3e2bdc4781324dfa13cbb283261490be411d1708bec"
@@ -202,11 +197,6 @@
       "path": "manuscripts/final-report/texfiles/6.References.tex",
       "bytes": 1114,
       "sha256": "4e9737b71dfb08e7dfafc252331e75fb4584b1d9fdb68e152f97a4ecffccac90"
-    },
-    {
-      "path": "manuscripts/final-report/yaorong_huang_contribution.tex",
-      "bytes": 10540,
-      "sha256": "084c79caa99470dadc8bdd39add7bd6c5ae99567c0eb24e3905e17f77a2e3e91"
     },
     {
       "path": "scripts/run_deployment.py",

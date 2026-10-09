@@ -35,8 +35,7 @@
     "main_report_a4_pages": 10,
     "individual_contributions": "independent IEEE A4 two-column Appendix A; all five members",
     "presentation_slides": 12,
-    "contribution_appendix_pages": 4,
-    "yaorong_huang_individual_pages": 2
+    "contribution_appendix_pages": 4
   },
   "local_verification_environment": "verification-environment.txt records the existing local environment; clean Linux CI installs the declared deployment requirements",
   "environment_note": "The existing local environment includes both opencv-python 5.0.0.93 and opencv-python-headless 4.14.0.94. Runtime requirements remain opencv-python-headless>=4.10,<5. The new commit CI is the validation of the declared clean environment."

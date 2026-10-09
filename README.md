@@ -47,9 +47,9 @@ Open `http://localhost:8080/docs/`, or open `docs/index.html` directly. See [`do
 The report and Appendix A are independent A4 IEEE two-column documents. The
 main report and references fit the ten-page course limit. Appendix A consolidates
 all five members' work, problems, solutions and reflection from the supplied
-team records. The manuscript Makefile also builds Yaorong Huang's individual copy. The [submission
+team records. Build both with the manuscript Makefile. The [submission
 entry](SUBMISSION.md) links the PDFs, environment, run instructions and fixed
-repository tag. A twelve-slide PDF accompanies the interactive presentation. Yaorong Huang’s expanded contribution also has an independent two-page IEEE reading/submission copy.
+repository tag. A twelve-slide PDF accompanies the interactive presentation.
 
 Sanitized deployment source and generic templates are included. Production credentials, raw camera footage, databases and private device addresses remain excluded. GitHub Pages serves the static presentation; it does not host the live detection or cloud services.
 
