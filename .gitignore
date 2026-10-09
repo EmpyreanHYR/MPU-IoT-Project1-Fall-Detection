@@ -75,3 +75,5 @@ checkpoints/
 
 # Vector figures used by the submitted LaTeX report
 !manuscripts/final-report/figs/*.pdf
+
+!docs/downloads/fallguard-yaorong-huang-contribution.pdf

@@ -32,29 +32,57 @@ This document consolidates the five members' contribution statements and team ta
 The final system extracts poses on a Raspberry Pi, classifies one-second skeleton windows with MaskedBiMamba, stores records locally, and synchronizes them to a persistent cloud archive. The descriptions below use the final system terminology; repository paths identify corresponding deliverables.
 
 \section{Yaorong Huang}
-\subsection{Model development and system integration}
+\subsection{Role and overall responsibility}
 
-I served as group leader and carried out most of the project's code implementation and integration. My work covered temporal modeling, pose preprocessing, training and evaluation tools, model export, and the connection between edge and cloud services. I implemented MaskedBiMamba by combining established Mamba operators with temporal attention, two temporal directions, frame masking, and quality-weighted pooling. I organized the baseline and component comparisons so that the model's precision and tolerance to missing frames could be assessed alongside its clean-data performance.
+I served as group leader and principal implementation and integration contributor. I carried out most of the project's code implementation and took primary responsibility for the technical manuscript and web presentation. My work connected the research model to a running IoT system: model design and preprocessing, experiment tooling, portable inference, Raspberry Pi deployment, local persistence, cloud synchronization, operator workspaces, and reproducibility materials. I also coordinated the interfaces between the team's data, training, cloud, and reporting tasks and completed the final integration and consistency checks.
 
-I integrated USB-camera and video acquisition, Hailo-accelerated pose extraction with a CPU fallback, and the two-input ONNX temporal classifier on the Raspberry Pi. I implemented local alert-state transitions and corrected the pose-preprocessing order, updating the experiment archive and report to reflect that correction.
+\subsection{Model design, implementation, and experiment tooling}
 
-\subsection{Workspaces, manuscript, and presentation}
+I implemented MaskedBiMamba, combining temporal attention, independent forward and backward Mamba processing, training-time frame masking, and quality-weighted pooling. I defined how normalized skeleton coordinates and joint confidence enter the temporal model and how the separate quality features determine frame weights. This required implementing the input representation, branch alignment, feature fusion, pooling, and classification interface, then connecting those components to the training and evaluation code. The resulting model provides a common input/output contract for research evaluation and deployment.
 
-I completed the final local and cloud workspaces, with live preview, current results, historical charts, filters, pagination, CSV export, and diagnostics. I added freshness checks so that the displayed result follows the current input and service state. Deployment verification included preserving existing databases, checking running services and source hashes, and retaining rollback copies.
+I implemented and organized the model-comparison and component-ablation tooling, including configuration files, random seeds, checkpoint selection, metric calculation, and result aggregation. The completed evaluation contains 60 primary runs across five models, four folds and three seeds; 120 ablation runs across ten variants; and nine runs in the separate TCNTE reproduction track. My work covered the complete comparison pipeline, from recorded configurations and checkpoint selection to aggregated results and figures. I also organized primary robustness evaluation, external Le2i evaluation, and replay of the deployed confirmation rules.
 
-I took primary responsibility for the LaTeX report, including the method notation, experimental protocol, results, system implementation, and final editing. I maintained consistency between the manuscript, figures, result summaries, technical guides, and deployed software. I developed the twelve-slide GitHub Pages presentation and its interactive charts, bilingual notes, presenter tools, and rehearsal timer. This web implementation complemented the group's slide content and module-specific presentation preparation.
+I connected experiment outputs to the manuscript's tables and plots, checking the distinction between window predictions, video predictions, merged events, and confirmed alerts. The evaluated model achieves the highest primary window precision at the common threshold (0.6048). Under 30\% frame removal it retains window F1 of 0.6276, or 98.1\% of its clean score, compared with 0.4361 for TCNTE. These results gave the model-development work a clear evaluation outcome and a concrete rationale for its deployment.
 
-\subsection{Problem and solution}
+\subsection{Model export and independent Raspberry Pi inference}
 
-The deployment had to keep inference and records available when cloud connectivity was lost. I separated local inference and SQLite storage from an independent outbox, then checked retry and recovery; the recorded delivery tests retained record identifiers and capture timestamps after reconnection.
+I converted the selected temporal checkpoint into a portable two-input ONNX model and maintained its input shapes, normalization, class order, model card, and checksums. I implemented the portable inference path so that the Pi classifier does not depend on the CUDA training extensions. The deployment accepts a 30-step skeleton sequence and a separate three-feature quality sequence, matching the model used in the experiment pipeline.
 
-\subsection{Collaboration, deliverables, and reflection}
+I integrated USB-camera and video acquisition, YOLOv8s-pose extraction accelerated by Hailo, a CPU pose fallback, and local ONNX classification. I implemented timestamped one-second windows advanced every 0.2 seconds, interpolation, pose-quality checks, and handling of missing or non-monotonic observations. I also implemented the local alert transitions and connected them to stored records. This work turned the trained classifier into a service that can acquire input, classify windows, maintain state, and preserve results on the Raspberry Pi without an external network.
 
-I coordinated the model, data, delivery, and manuscript interfaces across the team. \begin{evidence}
-Corresponding deliverables: \path{code/src/fallbench/}, \path{code/scripts/export_mamba_onnx.py}, \path{deployment/}, \path{artifacts/models/}, \path{manuscripts/final-report/}, and \path{docs/}.
+I supported the paired hardware evaluation and incorporated its measurements into the deployment and report. The complete local pipeline reached 20.56 frames/s with Hailo versus 1.73 frames/s with CPU pose extraction under the same YOLOv8s-pose comparison. Temporal classification remained on the Pi CPU. The deployed result therefore reflects acceleration of the complete implemented pipeline, together with a usable CPU fallback.
+
+\subsection{Persistent delivery and complete operator workspaces}
+
+I integrated SQLite record storage, an independent outbox, and cloud synchronization. The design preserves record identifiers and original capture times, commits cloud records before acknowledgement, and safely retries pending records after reconnection. I connected these components to the cloud archive and the private device-status bridge. The recorded delivery tests matched all 85 evaluated records; a 30-second upload interruption retained 17 records, with the queue first observed empty 2.83 seconds after recovery.
+
+I completed the final three-page local and cloud workspaces: detection overview, history, and device diagnostics. Beyond a basic prediction display, I implemented live preview, result freshness, historical probability charts, filters, pagination, CSV export, queue status, and resource diagnostics. I added explicit handling for incomplete poses, expired results, paused cameras, and lost device connections, so that the current display follows the operating state while saved history remains available.
+
+I verified service startup and shutdown, archive queries, authentication, delivery, and recovery using the software suite and the actual page scripts. Deployment updates preserved existing SQLite data, checked service health and source hashes, and retained rollback copies. I also restored the browser-camera demonstration alongside the offline workspace, including its landmark-to-classifier adapter and current-model inference. This provided both the deployed Pi workflow and a computer-based demonstration entry.
+
+\subsection{Problems encountered and solutions implemented}
+
+One integration problem was maintaining the same model input in training and deployment. I made the pose normalization and separate quality input explicit, aligned the timestamped buffer with the training window definition, and checked preprocessing and PyTorch/ONNX numerical agreement. The two-input export comparison showed a maximum absolute logit difference of approximately $3.6\times10^{-7}$.
+
+A second problem was keeping inference and recorded results available during network interruption. I separated camera inference, local storage, the outbox, and synchronization, then exercised restart, retry, and lost-acknowledgement behavior. UUID-based deduplication and acknowledgement after durable storage preserved the recorded history during recovery.
+
+A third problem was that the earlier interface did not provide enough information for independent operation and troubleshooting. I replaced it with the full local/cloud workspaces and added freshness checks, history inspection, and diagnostics. I also corrected the preprocessing order in the missing-joint test path and updated the result selection, figures, and manuscript together. Resolving these issues required changes across model code, deployment services, interfaces, and documentation.
+
+\subsection{Manuscript, presentation, and reproducibility publication}
+
+I took primary responsibility for writing and revising the IEEE LaTeX report: method notation and equations, architecture diagrams, experiment protocols, results, system implementation, figures, captions, and references. I revised the argument around the model's precision, frame-loss tolerance, edge throughput, and recoverable cloud delivery, while keeping the numerical statements consistent with the saved results. I also maintained the Chinese mathematical and system-workflow guides and the project brief, providing explanations for both technical review and presentation preparation.
+
+I developed the twelve-slide GitHub Pages presentation, its interactive comparison charts, the searchable archive of 1,853 aggregate result rows, bilingual speaker notes, projection controls, presenter console, and rehearsal timer. I synchronized the data, explanations, source files, and published outputs across the report, guides, presentation, deployed software, and repository.
+
+I organized the public reproducibility release: experiment and deployment source, dependency files, generic configuration and service templates, selected weights, ONNX model, asset hashes, dataset provenance, and run instructions. I used the 30-test software suite, numerical export checks, release manifests, and GitHub verification workflow to check the handover. I prepared the final report source, independent contribution document, presentation PDF, and fixed repository submission version as a coherent set of deliverables.
+
+\subsection{Deliverables and reflection}
+
+\begin{evidence}
+Main deliverables: \path{code/src/fallbench/}, \path{code/configs/}, \path{code/scripts/}, \path{deployment/}, \path{artifacts/models/}, \path{webui/}, \path{tests/}, \path{results/}, \path{manuscripts/final-report/}, \path{documentation/zh/}, \path{docs/}, and the reproducibility/submission guides.
 \end{evidence}
 
-The main lesson for me was to develop the model and its operating system together. Local persistence, recoverable delivery, clear status displays, and consistent documentation made the classifier useful as an IoT prototype. Maintaining one traceable chain from configuration to result table also made final integration and presentation more efficient.
+My contribution extended from algorithm implementation to the final running system and its submitted evidence. The most demanding part was keeping these layers consistent: the model input used by training, the exported classifier, the device buffer, the cloud record, and the value shown to an operator. Working through that chain strengthened my ability to debug across components and to connect a research result to a maintainable IoT implementation. I also learned to treat experiment organization, recovery behavior, technical writing, and reproducibility as substantive engineering work, with concrete outputs that can be inspected and run.
 
 \section{Jiahao Zhao}
 \subsection{Cloud interfaces and record delivery}

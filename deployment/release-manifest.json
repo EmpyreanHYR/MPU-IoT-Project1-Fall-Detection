@@ -95,8 +95,8 @@
     },
     {
       "path": "docs/downloads/fallguard-personal-contributions.pdf",
-      "bytes": 83225,
-      "sha256": "af86d23f60bdb25f3794f4278377e323a7ea6a546fa88510ce99156ee12e810c"
+      "bytes": 131407,
+      "sha256": "c1541a01dd52354bfca8d8f46465c1a963db39d551051d62373172e0e856fd36"
     },
     {
       "path": "docs/downloads/fallguard-presentation.pdf",
@@ -112,6 +112,11 @@
       "path": "docs/downloads/fallguard-workflow-guide-zh.pdf",
       "bytes": 1398425,
       "sha256": "950cbb0f4a1bae2cd5769fe08195ff54540ab2e2ce1ff7d504064b1ba46fc556"
+    },
+    {
+      "path": "docs/downloads/fallguard-yaorong-huang-contribution.pdf",
+      "bytes": 115877,
+      "sha256": "71c554c5a9a052de1b1c782b8c9435e051e78f6f15c06d9884bf7688b40ed234"
     },
     {
       "path": "docs/downloads/maskedbimamba-technical-guide-zh.pdf",
@@ -145,8 +150,8 @@
     },
     {
       "path": "manuscripts/final-report/personal_contributions.tex",
-      "bytes": 16643,
-      "sha256": "8f82c858babfea1b2843c0fccac48f9f99c4f8652780637c1125d07c29ad9769"
+      "bytes": 23220,
+      "sha256": "118968d6cdd44a299c4cbfcf31a003e322c58b69e465855c8445dbdaf3b233b9"
     },
     {
       "path": "manuscripts/final-report/texfiles/1.Abstract.tex",
@@ -197,6 +202,11 @@
       "path": "manuscripts/final-report/texfiles/6.References.tex",
       "bytes": 1114,
       "sha256": "4e9737b71dfb08e7dfafc252331e75fb4584b1d9fdb68e152f97a4ecffccac90"
+    },
+    {
+      "path": "manuscripts/final-report/yaorong_huang_contribution.tex",
+      "bytes": 10932,
+      "sha256": "715af4540b04c3d0e47bf5e5ad220840aa5997fe74319df407ab95b0131a1a2d"
     },
     {
       "path": "scripts/run_deployment.py",
