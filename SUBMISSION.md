@@ -19,12 +19,12 @@ report is added separately by the submitting student.
 
 ## Fixed repository version
 
-Use tag **`submission-2026-10-09-v2`** for this handover. The course package records
+Use tag **`submission-2026-10-09-v3`** for this handover. The course package records
 its full commit ID and includes a source ZIP. The tag identifies the submitted
 materials; the commit ID is the permanent reference for the file contents.
 
 ```sh
-git clone --branch submission-2026-10-09-v2 --depth 1 https://github.com/EmpyreanHYR/MPU-IoT-Project1-Fall-Detection.git
+git clone --branch submission-2026-10-09-v3 --depth 1 https://github.com/EmpyreanHYR/MPU-IoT-Project1-Fall-Detection.git
 cd MPU-IoT-Project1-Fall-Detection
 ```
 
